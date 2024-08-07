@@ -1,0 +1,24 @@
+{
+    "author": {
+        "email": "olevenbaum@gmx.de",
+        "name": "Olevenbaum"
+    },
+    "description": "",
+    "devDependencies": {
+        "typescript": "^5.5.3"
+    },
+    "dependencies": {
+        "discord.js": "^14.15.3",
+        "ts-node": "^10.9.2"
+    },
+    "displayName": "Typescript Discord Bot",
+    "license": "BSD-3-Clause",
+    "main": "application/application.ts",
+    "name": "ts-discord-bot",
+    "readme": "README.md",
+    "scripts": {
+        "start": "ts-node .",
+        "watch": "tsc --watch"
+    },
+    "type": "commonjs"
+}
