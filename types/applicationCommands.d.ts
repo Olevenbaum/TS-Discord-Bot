@@ -6,6 +6,7 @@ import {
     CommandInteraction,
     ContextMenuCommandBuilder,
     MessageContextMenuCommandInteraction,
+    PermissionsBitField,
     SlashCommandBuilder,
     SlashCommandOptionsOnlyBuilder,
     SlashCommandSubcommandBuilder,
@@ -20,6 +21,11 @@ import { CooldownObject } from "./others";
  * Application command imported from local file
  */
 interface SavedApplicationCommand {
+    /**
+     * Whether the application command can only be used by the owner or team members of the bot
+     */
+    owner?: boolean;
+
     /**
      * The time any or a specific user has to wait to use this application command again
      */

@@ -13,7 +13,7 @@ declare global {
      * @param configuration The configuration of the project and bot
      * @param forceReload Whether to reload all files no matter if files were changed, added or removed
      */
-    function updateApplicationCommandTypes(configuration: Configuration, forceReload?: boolean): void;
+    function updateApplicationCommandTypes(configuration: Configuration, forceReload?: boolean): Promise<void>;
 
     /**
      * Updates all changed application command types, adds new ones and deletes removed ones
@@ -21,13 +21,16 @@ declare global {
      * @param include Application command type files to reload, passing an empty array results in the same behavior as
      * not passing this parameter
      */
-    function updateApplicationCommandTypes(configuration: Configuration, include?: ApplicationCommandType[]): void;
+    function updateApplicationCommandTypes(
+        configuration: Configuration,
+        include?: ApplicationCommandType[]
+    ): Promise<void>;
 }
 
 global.updateApplicationCommandTypes = async function (
     configuration: Configuration,
     x: boolean | ApplicationCommandType[] = false
-) {
+): Promise<void> {
     /**
      * Overload parameter
      */
@@ -56,13 +59,13 @@ global.updateApplicationCommandTypes = async function (
     );
 
     // Iterate through application command types
-    for (const applicationCommandType of applicationCommandTypeFiles) {
+    applicationCommandTypeFiles.forEach((applicationCommandTypeFile) => {
         // Check if application command type already exists
-        if (!(applicationCommandType.type in applicationCommandTypes.keys())) {
+        if (!(applicationCommandTypeFile.type in applicationCommandTypes.keys())) {
             // Set application command type
-            applicationCommandTypes.set(applicationCommandType.type, applicationCommandType);
+            applicationCommandTypes.set(applicationCommandTypeFile.type, applicationCommandTypeFile);
         }
-    }
+    });
 };
 
 export {};

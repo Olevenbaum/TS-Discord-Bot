@@ -13,7 +13,7 @@ declare global {
      * @param configuration The configuration of the project and bot
      * @param forceReload Whether to reload all files no matter if files were changed, added or removed
      */
-    function updateInteractionTypes(configuration: Configuration, forceReload?: boolean): void;
+    function updateInteractionTypes(configuration: Configuration, forceReload?: boolean): Promise<void>;
 
     /**
      * Updates all changed interaction types, adds new ones and deletes removed ones
@@ -21,10 +21,13 @@ declare global {
      * @param include Interaction type files to reload, passing an empty array will result in the same behavior as not
      * passing this parameter
      */
-    function updateInteractionTypes(configuration: Configuration, include?: InteractionType[]): void;
+    function updateInteractionTypes(configuration: Configuration, include?: InteractionType[]): Promise<void>;
 }
 
-global.updateInteractionTypes = async function (configuration: Configuration, x: boolean | InteractionType[] = false) {
+global.updateInteractionTypes = async function (
+    configuration: Configuration,
+    x: boolean | InteractionType[] = false
+): Promise<void> {
     /**
      * Overload parameter
      */
@@ -51,13 +54,13 @@ global.updateInteractionTypes = async function (configuration: Configuration, x:
     );
 
     // Iterate through interaction types
-    for (const interactionType of interactionTypeFiles) {
+    interactionTypeFiles.forEach((interactionTypeFile) => {
         // Check if interaction type already exists
-        if (!(interactionType.type in interactionTypes.keys())) {
+        if (!(interactionTypeFile.type in interactionTypes.keys())) {
             // Set interaction type
-            interactionTypes.set(interactionType.type, interactionType);
+            interactionTypes.set(interactionTypeFile.type, interactionTypeFile);
         }
-    }
+    });
 };
 
 export {};

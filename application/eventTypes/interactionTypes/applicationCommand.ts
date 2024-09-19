@@ -20,31 +20,7 @@ const interactionType: SavedInteractionType = {
         const applicationCommandType = applicationCommandTypes.get(interaction.commandType);
 
         // Check if application command type was found
-        if (applicationCommandType) {
-            // Try to forward application command interaction response prompt
-            applicationCommandType.execute(configuration, interaction).catch((error: Error) => {
-                // Interaction response
-                interaction.reply({
-                    content: `I'm sorry, but there was an error handling your interaction with the application command type ${bold(
-                        ApplicationCommandType[interaction.commandType]
-                    )}.`,
-                    ephemeral: true,
-                });
-
-                // Notification
-                notify(
-                    configuration,
-                    "error",
-                    `Failed to execute application command type '${
-                        ApplicationCommandType[interaction.commandType]
-                    }':\n${error.message}`,
-                    interaction.client,
-                    `I failed to execute the application command type ${bold(
-                        ApplicationCommandType[interaction.commandType]
-                    )}:\n${code(error.message)}`
-                );
-            });
-        } else {
+        if (!applicationCommandType) {
             // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it looks like interactions with the application command type ${bold(
@@ -63,7 +39,35 @@ const interactionType: SavedInteractionType = {
                     ApplicationCommandType[interaction.commandType]
                 )}!`
             );
+
+            // Exit function
+            return;
         }
+
+        // Try to forward application command interaction response prompt
+        applicationCommandType.execute(configuration, interaction).catch((error: Error) => {
+            // Interaction response
+            interaction.reply({
+                content: `I'm sorry, but there was an error handling your interaction with the application command type ${bold(
+                    ApplicationCommandType[interaction.commandType]
+                )}.`,
+                ephemeral: true,
+            });
+
+            // Notification
+            notify(
+                configuration,
+                "error",
+                `Failed to execute application command type '${
+                    ApplicationCommandType[interaction.commandType]
+                }':\n${error}`,
+                interaction.client,
+                `I failed to execute the application command type ${bold(
+                    ApplicationCommandType[interaction.commandType]
+                )}:\n${code(error.message)}`
+            );
+        });
+
     },
 };
 

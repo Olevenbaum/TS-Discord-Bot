@@ -12,7 +12,7 @@ declare global {
      * @param configuration The configuration of the project and bot
      * @param forceReload Whether to reload all files no matter if files were changed, added or removed
      */
-    function updateModals(configuration: Configuration, forceReload?: boolean): void;
+    function updateModals(configuration: Configuration, forceReload?: boolean): Promise<void>;
 
     /**
      * Updates all changed modals, adds new ones and deletes removed ones
@@ -20,10 +20,10 @@ declare global {
      * @param include Modal files to reload, passing an empty array results in the same behavior as not passing this
      * parameter
      */
-    function updateModals(configuration: Configuration, include?: string[]): void;
+    function updateModals(configuration: Configuration, include?: string[]): Promise<void>;
 }
 
-global.updateModals = async function (configuration: Configuration, x: boolean | string[] = false) {
+global.updateModals = async function (configuration: Configuration, x: boolean | string[] = false): Promise<void> {
     /**
      * Overload parameter
      */
@@ -48,13 +48,13 @@ global.updateModals = async function (configuration: Configuration, x: boolean |
     );
 
     // Iterate through application command types
-    for (const modal of modalFiles) {
+    modalFiles.forEach((modalFile) => {
         // Check if application command type already exists
-        if (!(modal.name in modals.keys())) {
+        if (!(modalFile.name in modals.keys())) {
             // Set application command type
-            modals.set(modal.name, modal);
+            modals.set(modalFile.name, modalFile);
         }
-    }
+    });
 };
 
 export {};

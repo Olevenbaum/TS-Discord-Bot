@@ -24,41 +24,7 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
             .get(interaction.commandName) as SavedChatInputCommand | undefined;
 
         // Check if chat input command was found
-        if (chatInputCommand && chatInputCommand.autocomplete) {
-            // Try to forward chat input command autocomplete interaction response prompt
-            await chatInputCommand.autocomplete(configuration, interaction).catch((error: Error) => {
-                /**
-                 * Timestamp of the last notification sent
-                 */
-                const lastNotificationTimestamp = timestamps.get(
-                    `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`
-                );
-
-                // Check if timer to send notification has passed
-                if (
-                    !lastNotificationTimestamp ||
-                    interaction.createdAt.getTime() >
-                        lastNotificationTimestamp.getTime() +
-                            configuration.project.applicationCommandAutocompleteErrorCooldown * 1000
-                ) {
-                    // Update last notification timestamp
-                    timestamps.set(
-                        `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,
-                        interaction.createdAt
-                    );
-                }
-                // Notification
-                notify(
-                    configuration,
-                    "error",
-                    error.message,
-                    interaction.client,
-                    `I failed to provide autocomplete for the command ${commandMention(interaction)}:\n${code(
-                        error.message
-                    )}`
-                );
-            });
-        } else {
+        if (!(chatInputCommand && chatInputCommand.autocomplete)) {
             // Interaction response
             interaction.respond([]);
 
@@ -92,7 +58,48 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                     interaction
                 )}!`
             );
+
+            // Exit function
+            return;
         }
+
+        // Try to forward chat input command autocomplete interaction response prompt
+        await chatInputCommand.autocomplete(configuration, interaction).catch((error: Error) => {
+            /**
+             * Timestamp of the last notification sent
+             */
+            const lastNotificationTimestamp = timestamps.get(
+                `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`
+            );
+
+            // Check if timer to send notification has passed
+            if (
+                !lastNotificationTimestamp ||
+                interaction.createdAt.getTime() >
+                    lastNotificationTimestamp.getTime() +
+                        configuration.project.applicationCommandAutocompleteErrorCooldown * 1000
+            ) {
+                // Update last notification timestamp
+                timestamps.set(
+                    `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,
+                    interaction.createdAt
+                );
+
+                // Notification
+                notify(
+                    configuration,
+                    "error",
+                    `Failed to provide autocomplete options for chat input command ${commandMention(
+                        interaction
+                    )}:\n${error}`,
+                    interaction.client,
+                    `I failed to provide autocomplete for the command ${commandMention(interaction)}:\n${code(
+                        error.message
+                    )}`
+                );
+            }
+        });
+
     },
 };
 

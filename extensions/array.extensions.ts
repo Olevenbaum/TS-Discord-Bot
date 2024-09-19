@@ -25,23 +25,23 @@ declare global {
 
 // Check if method is already defined
 if (!Array.prototype.asyncFind) {
-    Array.prototype.asyncFind = async function <T>(
+    Array.prototype.asyncFind = function <T>(
         predicate: (element: T, key: number, array: T[]) => Promise<boolean>,
         thisArg?: T[]
-    ): Promise<T | undefined> {
+    ): T | undefined {
         /**
          * Predicate with replaced "this" object
          */
         const boundPredicate = predicate.bind(thisArg);
 
         // Iterate over keys of array
-        for (const key of this.keys()) {
+        this.forEach(async (_, index) => {
             // Check if callback function returns true for element
-            if (await boundPredicate(this[key], key, this)) {
+            if (await boundPredicate(this[index], index, this)) {
                 // Return element
-                return this[key];
+                return this[index];
             }
-        }
+        });
 
         // Return undefined if no element matches the predicate
         return undefined;

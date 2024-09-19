@@ -8,7 +8,7 @@ import { Configuration } from "../../types/configuration";
 import { ConsoleCommand } from "../../types/others";
 
 /**
- * Template for console command
+ * Console command to terminate the bot and exit the console
  */
 const consoleCommand: ConsoleCommand = {
     aliases: ["EXIT"],

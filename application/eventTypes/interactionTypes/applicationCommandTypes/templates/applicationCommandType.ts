@@ -9,6 +9,8 @@ import {
     ApplicationCommandType,
     ChatInputCommandInteraction,
     MessageContextMenuCommandInteraction,
+    Team,
+    User,
     UserContextMenuCommandInteraction,
 } from "discord.js";
 import { SavedApplicationCommandType } from "../../../../../types/applicationCommands";
@@ -35,47 +37,7 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
             .get(interaction.commandName);
 
         // Check if application command was found
-        if (applicationCommand) {
-            /**
-             * Whether or not the cooldown expired
-             */
-            const cooldownValidation = await validateCooldown(applicationCommand, interaction);
-
-            // Check if cooldown expired
-            if (cooldownValidation === true) {
-                // Try to forward application command interaction response prompt
-                await applicationCommand.execute(configuration, interaction).catch(async (error: Error) => {
-                    // Interaction response
-                    interaction.reply({
-                        content: `I'm sorry, but there was an error handling your interaction with the application command ${bold(
-                            interaction.commandName
-                        )}.`,
-                        ephemeral: true,
-                    });
-
-                    // Notifications
-                    notify(
-                        configuration,
-                        "error",
-                        `Failed to execute application command '${interaction.commandName}':\n${error.message}`,
-                        interaction.client,
-                        `I failed to execute the application command ${bold(interaction.commandName)}:\n${code(
-                            error.message
-                        )}`
-                    );
-                });
-            } else {
-                // Interaction response
-                interaction.reply({
-                    content: `You need to wait ${underlined(
-                        cooldownValidation
-                    )} more seconds before using the application command ${bold(
-                        interaction.commandName
-                    )} again. Please be patient.`,
-                    ephemeral: true,
-                });
-            }
-        } else {
+        if (!applicationCommand) {
             // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it looks like interactions with the application command ${bold(
@@ -92,7 +54,76 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                 interaction.client,
                 `I didn't find any file handling the application command ${bold(interaction.commandName)}!`
             );
+
+            // Exit function
+            return;
         }
+
+        // Check if chat input command is for owners only
+        if (applicationCommand.owner) {
+            // Fetch bot owner
+            await interaction.client.application.fetch();
+
+            // Check if user is bot owner
+            if (
+                (interaction.client.application.owner instanceof User &&
+                    interaction.user.id !== interaction.client.application.owner.id) ||
+                (interaction.client.application.owner instanceof Team &&
+                    !(interaction.user.id in interaction.client.application.owner.members.keys()))
+            ) {
+                // Interaction response
+                interaction.reply({
+                    content: `I'm sorry, but you don't have permission to use the application command ${bold(
+                        interaction.commandName
+                    )}.`,
+                    ephemeral: true,
+                });
+
+                // Exit function
+                return;
+            }
+        }
+
+        /**
+         * Whether or not the cooldown expired
+         */
+        const cooldownValidation = await validateCooldown(applicationCommand, interaction);
+
+        // Check if cooldown expired
+        if (typeof cooldownValidation === "number") {
+            // Interaction response
+            interaction.reply({
+                content: `You need to wait ${underlined(
+                    cooldownValidation
+                )} more seconds before using the application command ${bold(
+                    interaction.commandName
+                )} again. Please be patient.`,
+                ephemeral: true,
+            });
+
+            // Exit function
+            return;
+        }
+
+        // Try to forward application command interaction response prompt
+        await applicationCommand.execute(configuration, interaction).catch(async (error: Error) => {
+            // Interaction response
+            interaction.reply({
+                content: `I'm sorry, but there was an error handling your interaction with the application command ${bold(
+                    interaction.commandName
+                )}.`,
+                ephemeral: true,
+            });
+
+            // Notifications
+            notify(
+                configuration,
+                "error",
+                `Failed to execute application command '${interaction.commandName}':\n${error}`,
+                interaction.client,
+                `I failed to execute the application command ${bold(interaction.commandName)}:\n${code(error.message)}`
+            );
+        });
     },
 };
 

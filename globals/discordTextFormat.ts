@@ -27,6 +27,14 @@ declare global {
     ): `</${string}:${Snowflake}>`;
 
     /**
+     * Builds a string to mention a chat input command on Discord
+     * @param name The name of the chat input command
+     * @param id The ID of the chat input command
+     * @returns The chat input command mention
+     */
+    function commandMention(name: string, id: Snowflake): `</${string}:${Snowflake}>`;
+
+    /**
      * Builds a string that prints as a inline code block on Discord
      * @param text The text to print
      * @returns The inline code block
@@ -96,18 +104,25 @@ global.code = function (text: string): `\`\`\`${string}\`\`\`` {
 };
 
 global.commandMention = function (
-    interaction: AutocompleteInteraction | ChatInputCommandInteraction
+    x: string | AutocompleteInteraction | ChatInputCommandInteraction,
+    id?: Snowflake
 ): `</${string}:${Snowflake}>` {
-    // Check if chat input command has subcommands
-    if (interaction.options.getSubcommand()) {
-        // Return chat input command mention with subcommand
-        return `</${interaction.commandName} ${
-            interaction.options.getSubcommandGroup() ?? ""
-        }${interaction.options.getSubcommand()}:${interaction.commandId}>`;
-    }
+    // Check wich overload was called
+    if (x instanceof AutocompleteInteraction || x instanceof ChatInputCommandInteraction) {
+        // Check if chat input command has subcommands
+        if (x.options.getSubcommand()) {
+            // Return chat input command mention with subcommand
+            return `</${x.commandName} ${x.options.getSubcommandGroup() ?? ""}${x.options.getSubcommand()}:${
+                x.commandId
+            }>`;
+        }
 
-    // Return chat input command mention
-    return `</${interaction.commandName}:${interaction.commandId}>`;
+        // Return chat input command mention
+        return `</${x.commandName}:${x.commandId}>`;
+    } else {
+        // Return chat input command mention
+        return `</${x}:${id}>`;
+    }
 };
 
 global.inlineCode = function (text: boolean | number | string): `\`${string}\`` {

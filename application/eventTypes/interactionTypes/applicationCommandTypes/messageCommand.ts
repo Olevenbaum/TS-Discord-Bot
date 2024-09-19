@@ -5,7 +5,7 @@ import "../../../../globals/notifications";
 import { applicationCommands } from "../../../../globals/variables";
 
 // Type imports
-import { ApplicationCommandType, MessageContextMenuCommandInteraction } from "discord.js";
+import { ApplicationCommandType, MessageContextMenuCommandInteraction, Team, User } from "discord.js";
 import { SavedApplicationCommandType, SavedMessageCommand } from "../../../../types/applicationCommands";
 import { Configuration } from "../../../../types/configuration";
 
@@ -24,53 +24,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
             .get(interaction.commandName) as SavedMessageCommand | undefined;
 
         // Check if message command was found and cooldown expired
-        if (messageCommand) {
-            /**
-             * Whether or not the cooldown expired
-             */
-            const cooldownValidation = await validateCooldown(messageCommand, interaction);
-
-            // Check if cooldown expired
-            if (cooldownValidation === true) {
-                // Try to forward message application command interaction response prompt
-                await messageCommand
-                    .execute(configuration, interaction)
-                    .then(() =>
-                        // Update cooldown
-                        updateCooldown("ApplicationCommand", messageCommand, interaction)
-                    )
-                    .catch(async (error: Error) => {
-                        // Interaction response
-                        interaction.reply({
-                            content: `I'm sorry, but there was an error handling your interaction with the message command ${bold(
-                                interaction.commandName
-                            )}.`,
-                            ephemeral: true,
-                        });
-
-                        // Notifications
-                        notify(
-                            configuration,
-                            "error",
-                            `Failed to execute message command '${interaction.commandName}':\n${error.message}`,
-                            interaction.client,
-                            `I failed to execute the message command ${bold(interaction.commandName)}:\n${code(
-                                error.message
-                            )}`
-                        );
-                    });
-            } else {
-                // Interaction response
-                interaction.reply({
-                    content: `You need to wait ${underlined(
-                        cooldownValidation
-                    )} more seconds before using the message command ${bold(
-                        interaction.commandName
-                    )} again. Please be patient.`,
-                    ephemeral: true,
-                });
-            }
-        } else {
+        if (!messageCommand) {
             // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it looks like interactions with the message command ${bold(
@@ -87,7 +41,82 @@ const userCommandInteraction: SavedApplicationCommandType = {
                 interaction.client,
                 `I didn't find any file handling the message command ${bold(interaction.commandName)}!`
             );
+
+            // Exit function
+            return;
         }
+
+        // Check if chat input command is for owners only
+        if (messageCommand.owner) {
+            // Fetch bot owner
+            await interaction.client.application.fetch();
+
+            // Check if user is bot owner
+            if (
+                (interaction.client.application.owner instanceof User &&
+                    interaction.user.id !== interaction.client.application.owner.id) ||
+                (interaction.client.application.owner instanceof Team &&
+                    !(interaction.user.id in interaction.client.application.owner.members.keys()))
+            ) {
+                // Interaction response
+                interaction.reply({
+                    content: `I'm sorry, but you don't have permission to use the message command ${bold(
+                        interaction.commandName
+                    )}.`,
+                    ephemeral: true,
+                });
+
+                // Exit function
+                return;
+            }
+        }
+
+        /**
+         * Whether or not the cooldown expired
+         */
+        const cooldownValidation = await validateCooldown(messageCommand, interaction);
+
+        // Check if cooldown expired
+        if (typeof cooldownValidation === "number") {
+            // Interaction response
+            interaction.reply({
+                content: `You need to wait ${underlined(
+                    cooldownValidation
+                )} more seconds before using the message command ${bold(
+                    interaction.commandName
+                )} again. Please be patient.`,
+                ephemeral: true,
+            });
+
+            // Exit function
+            return;
+        }
+
+        // Try to forward message application command interaction response prompt
+        await messageCommand
+            .execute(configuration, interaction)
+            .then(() =>
+                // Update cooldown
+                updateCooldown("ApplicationCommand", messageCommand, interaction)
+            )
+            .catch(async (error: Error) => {
+                // Interaction response
+                interaction.reply({
+                    content: `I'm sorry, but there was an error handling your interaction with the message command ${bold(
+                        interaction.commandName
+                    )}.`,
+                    ephemeral: true,
+                });
+
+                // Notifications
+                notify(
+                    configuration,
+                    "error",
+                    `Failed to execute message command '${interaction.commandName}':\n${error}`,
+                    interaction.client,
+                    `I failed to execute the message command ${bold(interaction.commandName)}:\n${code(error.message)}`
+                );
+            });
     },
 };
 

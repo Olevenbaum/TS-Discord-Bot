@@ -1,11 +1,8 @@
-// Data imports
-import newBlockedUsers from "../resources/blockedUsers.json";
-
 // Global imports
 import "./applicationCommandUpdate";
 import "./applicationCommandTypeUpdate";
+import "./blockedUsersUpdate";
 import "./interactionTypeUpdate";
-import { blockedUsers } from "./variables";
 
 // Type imports
 import { Client } from "discord.js";
@@ -19,7 +16,7 @@ declare global {
      * @param forceReload Whether to reload all files no matter if files were changed, added or removed
      * @param client The Discord bot client
      */
-    function updateFiles(configuration: Configuration, forceReload?: boolean, client?: Client<true>): void;
+    function updateFiles(configuration: Configuration, forceReload?: boolean, client?: Client<true>): Promise<void>;
 
     /**
      * Updates all changed files, adds new ones and deletes removed ones
@@ -28,14 +25,14 @@ declare global {
      * passing this parameter
      * @param client The Discord bot client
      */
-    function updateFiles(configuration: Configuration, include?: FileInclude, client?: Client<true>): void;
+    function updateFiles(configuration: Configuration, include?: FileInclude, client?: Client<true>): Promise<void>;
 }
 
 global.updateFiles = async function (
     configuration: Configuration,
     x: boolean | FileInclude = false,
     client?: Client<true>
-) {
+): Promise<void> {
     /**
      * Overload parameter
      */
@@ -84,19 +81,7 @@ global.updateFiles = async function (
 
     // Check if blocked users should be updated
     if (!include || include.blockedUsers) {
-        // Remove old blocked users
-        blockedUsers.forEach((blockedUser, index) => {
-            if (!(blockedUser in newBlockedUsers)) {
-                blockedUsers.splice(index, 1);
-            }
-        });
-
-        // Add new blocked users
-        newBlockedUsers.forEach((blockedUser) => {
-            if (!(blockedUser in blockedUsers)) {
-                blockedUsers.push(blockedUser);
-            }
-        });
+        updateBlockedUsers(configuration);
     }
 };
 

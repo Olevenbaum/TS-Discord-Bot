@@ -17,7 +17,8 @@
     "name": "ts-discord-bot",
     "readme": "README.md",
     "scripts": {
-        "start": "ts-node ."
+        "start": "ts-node .",
+        "test": "ts-node temp/test.ts"
     },
     "type": "commonjs"
 }

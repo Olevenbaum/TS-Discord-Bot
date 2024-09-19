@@ -23,7 +23,7 @@ declare global {
         configuration: Configuration,
         client?: Client<true>,
         forceReload?: boolean
-    ): void;
+    ): Promise<void>;
 
     /**
      * Updates all changed application commands, adds new ones and deletes removed ones and updates the registered
@@ -33,14 +33,18 @@ declare global {
      * @param include Application commands that should be reloaded, passing an empty array results in the same
      * behavior as not passing this parameter
      */
-    function updateApplicationCommands(configuration: Configuration, client?: Client<true>, include?: string[]): void;
+    function updateApplicationCommands(
+        configuration: Configuration,
+        client?: Client<true>,
+        include?: string[]
+    ): Promise<void>;
 }
 
 global.updateApplicationCommands = async function (
     configuration: Configuration,
     client?: Client<true>,
     x: boolean | string[] = false
-) {
+): Promise<void> {
     /**
      * Overload parameter
      */
@@ -69,13 +73,13 @@ global.updateApplicationCommands = async function (
     );
 
     // Iterate through application commands
-    for (const applicationCommand of applicationCommandFiles) {
+    applicationCommandFiles.forEach((applicationCommandFile) => {
         // Check if application command already exists
-        if (!(applicationCommand.data.name in applicationCommands.keys())) {
+        if (!(applicationCommandFile.data.name in applicationCommands.keys())) {
             // Set application command
-            applicationCommands.set(applicationCommand.data.name, applicationCommand);
+            applicationCommands.set(applicationCommandFile.data.name, applicationCommandFile);
         }
-    }
+    });
 
     // Check whether to update registered application commands
     if (client) {
@@ -126,7 +130,7 @@ global.updateApplicationCommands = async function (
                                 "error",
                                 `Failed to reload application command '${savedApplicationCommandName}':\n${error.message}`,
                                 client,
-                                `I tried to learn the new trick, but failed! The application command ${bold(
+                                `I tried to learn a new trick, but failed! The application command ${bold(
                                     savedApplicationCommandName
                                 )} could not be loaded:\n${code(error.message)}!`
                             );
@@ -165,7 +169,7 @@ global.updateApplicationCommands = async function (
                                 "error",
                                 `Failed to update application command '${savedApplicationCommandName}':\n${error.message}`,
                                 client,
-                                `I tried to update the trick, but failed! The application command ${bold(
+                                `I tried to update a trick, but failed! The application command ${bold(
                                     savedApplicationCommandName
                                 )} could not be reloaded:\n${code(error.message)}!`
                             );
@@ -201,7 +205,7 @@ global.updateApplicationCommands = async function (
                                 "error",
                                 `Failed to remove deprecated application command '${registeredApplicationCommandName}':\n${error.message}`,
                                 client,
-                                `I tried to forget the trick, but failed! The application command ${bold(
+                                `I tried to forget a trick, but failed! The application command ${bold(
                                     registeredApplicationCommandName
                                 )} could not be removed:\n${code(error.message)}!`
                             );

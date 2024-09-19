@@ -54,7 +54,7 @@ const main = async (configuration: Configuration, applicationIndex: number = 0):
                     })
                     .catch((error: DiscordAPIError) => {
                         // Notification
-                        notify(configuration, "error", error.message);
+                        notify(configuration, "error", String(error));
 
                         // Return boolean based on configuration
                         return Boolean(configuration.bot.enableBotIteration);
@@ -81,7 +81,7 @@ const main = async (configuration: Configuration, applicationIndex: number = 0):
         // Try to log in bot at Discord
         await client.login(configuration.bot.applications.token).catch((error: DiscordAPIError) => {
             // Notification
-            notify(configuration, "error", error.message);
+            notify(configuration, "error", String(error));
         });
     }
 
