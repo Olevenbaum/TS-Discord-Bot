@@ -13,12 +13,11 @@
     },
     "displayName": "Typescript Discord Bot",
     "license": "BSD-3-Clause",
-    "main": "application/application.ts",
+    "main": "start.ts",
     "name": "ts-discord-bot",
     "readme": "README.md",
     "scripts": {
-        "start": "ts-node .",
-        "watch": "tsc --watch"
+        "start": "ts-node ."
     },
     "type": "commonjs"
 }
