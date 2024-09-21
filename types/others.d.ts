@@ -28,7 +28,12 @@ interface ConsoleCommand {
      * @param rlInterface The readline interface to communicate with the user
      * @param values The values that were passed to the command
      */
-    execute(configuration: Configuration, client: Client, rlInterface: Interface, values?: string | string[]): void;
+    execute(
+        configuration: Configuration,
+        client: Client,
+        rlInterface: Interface,
+        ...values: NestedArray<boolean | number | string>
+    ): void;
 }
 
 /**

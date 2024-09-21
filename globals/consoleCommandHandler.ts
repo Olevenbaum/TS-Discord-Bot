@@ -10,7 +10,7 @@ import * as rl from "readline";
 // Type imports
 import { Client } from "discord.js";
 import { Configuration } from "../types/configuration";
-import { ConsoleCommand } from "../types/others";
+import { ConsoleCommand, NestedArray } from "../types/others";
 
 declare global {
     /**
@@ -48,8 +48,7 @@ global.consoleCommandHandler = async function (configuration: Configuration, cli
          */
         const commandName = consoleInput
             .trim()
-            .slice(0, consoleInput.includes(" ") ? consoleInput.indexOf(" ") : consoleInput.length)
-            .trim();
+            .slice(0, consoleInput.includes(" ") ? consoleInput.indexOf(" ") : consoleInput.length);
 
         /**
          * Command that was called
@@ -72,15 +71,11 @@ global.consoleCommandHandler = async function (configuration: Configuration, cli
         /**
          * Values that were passed to the command
          */
-        const values = consoleInput
-            .trim()
-            .slice(0, commandName.length + 1)
-            .split(" ")
-            .map((value) => value.trim());
+        const values = transformParameters(consoleInput.trim().slice(commandName.length).trim());
 
         // Try to execute command
         try {
-            command.execute(configuration, client, rlInterface, values);
+            command.execute(configuration, client, rlInterface, ...values);
         } catch (error) {
             // Check if error was thrown because of a false parameter
             if (error instanceof TypeError) {
@@ -96,4 +91,29 @@ global.consoleCommandHandler = async function (configuration: Configuration, cli
             }
         }
     });
+
+    const transformParameters = function (parameters: string): NestedArray<boolean | number | string> {
+        // Return transformed parameters
+        return parameters
+            .trim()
+            .split(" ")
+            .map((value) => {
+                value.trim();
+
+                // Check type of value
+                if (value === "true" || value === "false") {
+                    // Return boolean
+                    return Boolean(value);
+                } else if (!isNaN(Number(value))) {
+                    // Return number
+                    return Number(value);
+                } else if (value.startsWith("[") && value.endsWith("]")) {
+                    // Return array
+                    return transformParameters(value.slice(1, value.length - 1));
+                } else {
+                    // Return string
+                    return value;
+                }
+            });
+    };
 };

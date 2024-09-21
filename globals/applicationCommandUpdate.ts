@@ -58,16 +58,15 @@ global.updateApplicationCommands = async function (
     /**
      * List of application command files
      */
-    const applicationCommandFiles = (
-        await readFiles<SavedApplicationCommand>(configuration, configuration.project.applicationCommandsPath)
-    ).filter((applicationCommandFile) => include?.includes(applicationCommandFile.data.name) ?? true);
+    const applicationCommandFiles = await readFiles<SavedApplicationCommand>(
+        configuration,
+        configuration.project.applicationCommandsPath
+    );
 
     // Remove outdated application commands
     applicationCommands.sweep(
         (_, applicationCommandName) =>
-            forceReload ||
-            (include && include.includes(applicationCommandName)) ||
-            !applicationCommandFiles.find(
+            !applicationCommandFiles.some(
                 (applicationCommandFile) => applicationCommandFile.data.name === applicationCommandName
             )
     );
@@ -75,7 +74,11 @@ global.updateApplicationCommands = async function (
     // Iterate through application commands
     applicationCommandFiles.forEach((applicationCommandFile) => {
         // Check if application command already exists
-        if (!(applicationCommandFile.data.name in applicationCommands.keys())) {
+        if (
+            forceReload ||
+            (include && include.includes(applicationCommandFile.data.name)) ||
+            !(applicationCommandFile.data.name in applicationCommands.keys())
+        ) {
             // Set application command
             applicationCommands.set(applicationCommandFile.data.name, applicationCommandFile);
         }
@@ -98,85 +101,87 @@ global.updateApplicationCommands = async function (
         const promises: Promise<unknown>[] = [];
 
         // Iterate over application commands
-        applicationCommands.forEach((savedApplicationCommand, savedApplicationCommandName) => {
-            /**
-             * Registered application command matching the saved application command
-             */
-            const registeredApplicationCommand = registeredApplicationCommands.get(savedApplicationCommandName);
+        applicationCommands
+            .filter((applicationCommand) => include?.includes(applicationCommand.data.name) ?? true)
+            .forEach((savedApplicationCommand, savedApplicationCommandName) => {
+                /**
+                 * Registered application command matching the saved application command
+                 */
+                const registeredApplicationCommand = registeredApplicationCommands.get(savedApplicationCommandName);
 
-            if (!registeredApplicationCommand) {
-                // Add create request to promises
-                promises.push(
-                    client.rest
-                        .post(Routes.applicationCommands(client.application.id), {
-                            body: savedApplicationCommand.data.toJSON(),
-                        })
-                        .then(() => {
-                            // Notification
-                            notify(
-                                configuration,
-                                "success",
-                                `Added new application command '${savedApplicationCommandName}'`,
-                                client,
-                                `I learned a new trick! You can now use the application command '${bold(
-                                    savedApplicationCommandName
-                                )}'!`
-                            );
-                        })
-                        .catch((error: Error) => {
-                            // Notification
-                            notify(
-                                configuration,
-                                "error",
-                                `Failed to reload application command '${savedApplicationCommandName}':\n${error.message}`,
-                                client,
-                                `I tried to learn a new trick, but failed! The application command ${bold(
-                                    savedApplicationCommandName
-                                )} could not be loaded:\n${code(error.message)}!`
-                            );
-                        })
-                );
-            } else if (
-                forceReload ||
-                true // TODO
-                //!compareApplicationCommands(
-                //    registeredApplicationCommand,
-                //    savedApplicationCommand
-                //)
-            ) {
-                // Add update request to promises
-                promises.push(
-                    client.rest
-                        .patch(Routes.applicationCommand(client.application.id, registeredApplicationCommand.id), {
-                            body: savedApplicationCommand.data.toJSON(),
-                        })
-                        .then(() => {
-                            // Notification
-                            notify(
-                                configuration,
-                                "success",
-                                `Updated application command '${savedApplicationCommandName}'`,
-                                client,
-                                `I've spent some time training my tricks! The command ${bold(
-                                    savedApplicationCommandName
-                                )} just got an update!`
-                            );
-                        })
-                        .catch((error: Error) => {
-                            // Notification
-                            notify(
-                                configuration,
-                                "error",
-                                `Failed to update application command '${savedApplicationCommandName}':\n${error.message}`,
-                                client,
-                                `I tried to update a trick, but failed! The application command ${bold(
-                                    savedApplicationCommandName
-                                )} could not be reloaded:\n${code(error.message)}!`
-                            );
-                        })
-                );
-            }
-        });
+                if (!registeredApplicationCommand) {
+                    // Add create request to promises
+                    promises.push(
+                        client.rest
+                            .post(Routes.applicationCommands(client.application.id), {
+                                body: savedApplicationCommand.data.toJSON(),
+                            })
+                            .then(() => {
+                                // Notification
+                                notify(
+                                    configuration,
+                                    "success",
+                                    `Added new application command '${savedApplicationCommandName}'`,
+                                    client,
+                                    `I learned a new trick! You can now use the application command '${bold(
+                                        savedApplicationCommandName
+                                    )}'!`
+                                );
+                            })
+                            .catch((error: Error) => {
+                                // Notification
+                                notify(
+                                    configuration,
+                                    "error",
+                                    `Failed to reload application command '${savedApplicationCommandName}':\n${error.message}`,
+                                    client,
+                                    `I tried to learn a new trick, but failed! The application command ${bold(
+                                        savedApplicationCommandName
+                                    )} could not be loaded:\n${code(error.message)}!`
+                                );
+                            })
+                    );
+                } else if (
+                    forceReload ||
+                    true // TODO
+                    //!compareApplicationCommands(
+                    //    registeredApplicationCommand,
+                    //    savedApplicationCommand
+                    //)
+                ) {
+                    // Add update request to promises
+                    promises.push(
+                        client.rest
+                            .patch(Routes.applicationCommand(client.application.id, registeredApplicationCommand.id), {
+                                body: savedApplicationCommand.data.toJSON(),
+                            })
+                            .then(() => {
+                                // Notification
+                                notify(
+                                    configuration,
+                                    "success",
+                                    `Updated application command '${savedApplicationCommandName}'`,
+                                    client,
+                                    `I've spent some time training my tricks! The command ${bold(
+                                        savedApplicationCommandName
+                                    )} just got an update!`
+                                );
+                            })
+                            .catch((error: Error) => {
+                                // Notification
+                                notify(
+                                    configuration,
+                                    "error",
+                                    `Failed to update application command '${savedApplicationCommandName}':\n${error.message}`,
+                                    client,
+                                    `I tried to update a trick, but failed! The application command ${bold(
+                                        savedApplicationCommandName
+                                    )} could not be reloaded:\n${code(error.message)}!`
+                                );
+                            })
+                    );
+                }
+            });
 
         // Iterate over registered application commands
         registeredApplicationCommands.forEach((registeredApplicationCommand, registeredApplicationCommandName) => {
