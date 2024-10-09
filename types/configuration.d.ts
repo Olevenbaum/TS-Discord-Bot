@@ -102,14 +102,19 @@ interface ProjectConfiguration {
     applicationCommandAutocompleteErrorCooldown: number;
 
     /**
-     * Path to the directory where the application commands are stored
-     */
-    applicationCommandsPath: string;
-
-    /**
      * Path to the directory where the application command types are stored
      */
     applicationCommandTypesPath: string;
+
+    /**
+     * Path to the file where the blocked users are stored
+     */
+    blockedUsersPath: string;
+
+    /**
+     * Path to the directory where the chat input commands are stored
+     */
+    chatInputCommandsPath: string;
 
     /**
      * Path to the directory where the (message) components are stored
@@ -117,9 +122,19 @@ interface ProjectConfiguration {
     componentsPath: string;
 
     /**
+     * Path to the file where the configuration data is stored
+     */
+    configurationPath: string;
+
+    /**
      * Path to the directory where the console commands are stored
      */
     consoleCommandsPath: string;
+
+    /**
+     * Path to the directory where the event types are stored
+     */
+    eventTypesPath: string;
 
     /**
      * Path to the directory where the interactions types are stored
@@ -127,9 +142,9 @@ interface ProjectConfiguration {
     interactionTypesPath: string;
 
     /**
-     * Path to the directory where the event types are stored
+     * Path to the directory where the message commands are stored
      */
-    eventTypesPath: string;
+    messageCommandsPath: string;
 
     /**
      * Path to the directory where the modals are stored
@@ -140,4 +155,9 @@ interface ProjectConfiguration {
      * Regular expression to test the token against
      */
     tokenRegex: RegExp;
+
+    /**
+     * Path to the directory where the user commands are stored
+     */
+    userCommandsPath: string;
 }

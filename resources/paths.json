@@ -1,9 +1,0 @@
-{
-    "applicationCommandsPath": "./resources/applicationCommands",
-    "applicationCommandTypesPath": "./application/eventTypes/interactionTypes/applicationCommandTypes",
-    "componentsPath": "./resources/components",
-    "consoleCommandsPath": "./resources/consoleCommands",
-    "eventTypesPath": "./application/eventTypes",
-    "interactionTypesPath": "./application/eventTypes/interactionTypes",
-    "modalsPath": "./resources/modals"
-}

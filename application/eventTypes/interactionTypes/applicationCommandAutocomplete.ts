@@ -7,7 +7,7 @@ import { applicationCommands, timestamps } from "../../../globals/variables";
 import { ApplicationCommandType, AutocompleteInteraction, InteractionType } from "discord.js";
 import { SavedChatInputCommand } from "../../../types/applicationCommands";
 import { Configuration } from "../../../types/configuration";
-import { SavedInteractionType } from "../../../types/interfaces";
+import { SavedInteractionType } from "../../../types/others";
 
 /**
  * Chat input command autocomplete interaction handler
@@ -19,9 +19,9 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
         /**
          * Chat input command that the autocomplete was requested for
          */
-        const chatInputCommand = applicationCommands
-            .filter((applicationCommand) => applicationCommand.type === ApplicationCommandType.ChatInput)
-            .get(interaction.commandName) as SavedChatInputCommand | undefined;
+        const chatInputCommand = applicationCommands[
+            ApplicationCommandType[ApplicationCommandType.ChatInput] as keyof typeof ApplicationCommandType
+        ].get(interaction.commandName) as SavedChatInputCommand | undefined;
 
         // Check if chat input command was found
         if (!(chatInputCommand && chatInputCommand.autocomplete)) {
@@ -47,17 +47,18 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                     `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,
                     interaction.createdAt
                 );
+
+                // Notification
+                notify(
+                    configuration,
+                    "error",
+                    `Found no file handling autocomplete for chat input command '${interaction.commandName}'`,
+                    interaction.client,
+                    `I couldn't find any file handling the autocomplete for the chat input command ${commandMention(
+                        interaction
+                    )}.`
+                );
             }
-            // Notification
-            notify(
-                configuration,
-                "error",
-                `Found no file handling autocomplete for chat input command '${interaction.commandName}'`,
-                interaction.client,
-                `I didn't find any file handling the autocomplete for the chat input command ${commandMention(
-                    interaction
-                )}!`
-            );
 
             // Exit function
             return;
@@ -95,11 +96,10 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                     interaction.client,
                     `I failed to provide autocomplete for the command ${commandMention(interaction)}:\n${code(
                         error.message
-                    )}`
+                    )}\nHave a look at the logs for more information.`
                 );
             }
         });
-
     },
 };
 

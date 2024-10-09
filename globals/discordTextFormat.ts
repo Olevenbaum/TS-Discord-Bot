@@ -52,6 +52,7 @@ declare global {
      * Builds a string that prints a list on Discord
      * @param items The items to list
      * @param ordered Whether or not the list should be ordered
+     * @param indent The starting indentation of the list (used for recursion)
      * @returns The list
      */
     function list(items: NestedArray<boolean | number | string>, ordered?: boolean, indent?: number): string;

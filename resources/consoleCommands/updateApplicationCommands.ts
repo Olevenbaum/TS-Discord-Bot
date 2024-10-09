@@ -3,7 +3,7 @@ import "../../globals/applicationCommandUpdate";
 import "../../globals/notifications";
 
 // Type imports
-import { Client } from "discord.js";
+import { ApplicationCommandType, Client } from "discord.js";
 import { Interface } from "readline";
 import { Configuration } from "../../types/configuration";
 import { ConsoleCommand, NestedArray } from "../../types/others";
@@ -13,8 +13,16 @@ import { ConsoleCommand, NestedArray } from "../../types/others";
  */
 const consoleCommand: ConsoleCommand = {
     description: "Updates all or specified application commands",
+
     name: "UPDATEAPPLICATIONCOMMANDS",
-    execute(
+
+    usage: [
+        "updateApplicationCommands",
+        "updateApplicationCommands <application command name 1> <application command name 2> ...",
+        "updateApplicationCommands [<application command name 1> <application command name 2> ...]",
+    ],
+
+    async execute(
         configuration: Configuration,
         client: Client<true>,
         _: Interface,
@@ -28,9 +36,13 @@ const consoleCommand: ConsoleCommand = {
                 updateApplicationCommands(configuration, client, values[0]);
             } else if (values.length === 1 && Array.isArray(values[0])) {
                 // Check if values have the right type
-                if (values[0].every((value) => typeof value === "string")) {
+                if (values[0].every((value) => typeof value === "string" && /^[A-Za-z]*[0-9]$/i.test(value))) {
                     // Update spefified application commands
-                    updateApplicationCommands(configuration, client, values[0]);
+                    updateApplicationCommands(
+                        configuration,
+                        client,
+                        values[0] as `${string}:${ApplicationCommandType}`[]
+                    );
                 } else {
                     // Notification
                     notify(configuration, "error", "Invalid parameters");
@@ -39,7 +51,7 @@ const consoleCommand: ConsoleCommand = {
                 // Check if values have the right type
                 if (values.every((value) => typeof value === "string")) {
                     // Update spefified application commands
-                    updateApplicationCommands(configuration, client, values);
+                    updateApplicationCommands(configuration, client, values as `${string}:${ApplicationCommandType}`[]);
                 } else {
                     // Notification
                     notify(configuration, "error", "Invalid parameters");

@@ -5,7 +5,7 @@ import "../../globals/notifications";
 // Type imports
 import { Client, Events } from "discord.js";
 import { Configuration } from "../../types/configuration";
-import { SavedEventType } from "../../types/interfaces";
+import { SavedEventType } from "../../types/others";
 
 /**
  * Client ready event handler
@@ -25,7 +25,7 @@ const clientReady: SavedEventType = {
         );
 
         // Load all files
-        updateFiles(configuration, false, client);
+        updateFiles(configuration, client, ["configuration", "eventTypes"], true);
     },
 };
 

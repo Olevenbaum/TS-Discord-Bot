@@ -3,7 +3,7 @@ import "../../globals/interactionTypeUpdate";
 import "../../globals/notifications";
 
 // Type imports
-import { InteractionType, Client } from "discord.js";
+import { Client } from "discord.js";
 import { Interface } from "readline";
 import { Configuration } from "../../types/configuration";
 import { ConsoleCommand, NestedArray } from "../../types/others";
@@ -13,8 +13,16 @@ import { ConsoleCommand, NestedArray } from "../../types/others";
  */
 const consoleCommand: ConsoleCommand = {
     description: "Updates all or specified interaction types",
+
     name: "INTERACTIONTYPES",
-    execute(
+
+    usage: [
+        "interactionTypes",
+        "interactionTypes <interaction type 1> <interaction type 2> ...",
+        "interactionTypes [<interaction type 1> <interaction type 2> ...]",
+    ],
+
+    async execute(
         configuration: Configuration,
         _: Client<true>,
         ___: Interface,
@@ -28,24 +36,18 @@ const consoleCommand: ConsoleCommand = {
                 updateInteractionTypes(configuration, values[0]);
             } else if (values.length === 1 && Array.isArray(values[0])) {
                 // Check if values have the right type
-                if (values[0].every((value) => typeof value === "string")) {
+                if (values[0].every((value) => typeof value === "number")) {
                     // Update spefified interaction types
-                    updateInteractionTypes(
-                        configuration,
-                        values[0].map((value) => InteractionType[value])
-                    );
+                    updateInteractionTypes(configuration, values[0]);
                 } else {
                     // Notification
                     notify(configuration, "error", "Invalid parameters");
                 }
             } else {
                 // Check if values have the right type
-                if (values.every((value) => typeof value === "string")) {
+                if (values.every((value) => typeof value === "number")) {
                     // Update spefified interaction types
-                    updateInteractionTypes(
-                        configuration,
-                        values.map((value) => InteractionType[value])
-                    );
+                    updateInteractionTypes(configuration, values);
                 } else {
                     // Notification
                     notify(configuration, "error", "Invalid parameters");

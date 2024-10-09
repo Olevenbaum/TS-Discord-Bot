@@ -1,7 +1,7 @@
 // Type imports
 import { Interaction, InteractionType } from "discord.js";
 import { Configuration } from "../../../../types/configuration";
-import { SavedInteractionType } from "../../../../types/interfaces.d";
+import { SavedInteractionType } from "../../../../types/others";
 
 /**
  * Template for interaction handler

@@ -4,18 +4,21 @@
     "$id": "./configuration.json",
     "properties": {
         "applications": {
-            "description": "",
+            "description": "Bot specific data of a single bot or multiple bots",
             "items": {
                 "description": "",
                 "properties": {
                     "applicationId": {
-                        "description": "",
+                        "description": "The ID of the bot",
                         "pattern": "^([0-9]{18})$",
                         "type": "string"
                     },
-                    "publicKey": { "description": "", "type": "string" },
+                    "publicKey": {
+                        "description": "The public key of the bot",
+                        "type": "string"
+                    },
                     "token": {
-                        "description": "",
+                        "description": "The token to login on Discord",
                         "pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
                         "type": "string"
                     }
@@ -26,13 +29,16 @@
             "minItems": 1,
             "properties": {
                 "applicationId": {
-                    "description": "",
+                    "description": "The ID of the bot",
                     "pattern": "^([0-9]{18})$",
                     "type": "string"
                 },
-                "publicKey": { "description": "", "type": "string" },
+                "publicKey": {
+                    "description": "The public key of the bot",
+                    "type": "string"
+                },
                 "token": {
-                    "description": "",
+                    "description": "The token to login on Discord",
                     "pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
                     "type": "string"
                 }
@@ -41,9 +47,18 @@
             "type": ["array", "object"],
             "uniqueItems": true
         },
-        "enableBlockedUsers": { "description": "", "type": "boolean" },
-        "enableBotInteraction": { "description": "", "type": "boolean" },
-        "enableBotIteration": { "description": "", "type": "boolean" },
+        "enableBlockedUsers": {
+            "description": "Whether all users are allowed to interact with the bot",
+            "type": "boolean"
+        },
+        "enableBotInteraction": {
+            "description": "Whether other bots can unse features of this bot",
+            "type": "boolean"
+        },
+        "enableBotIteration": {
+            "description": "Whether another bot should be used in case of a wrong token",
+            "type": "boolean"
+        },
         "notifications": {
             "description": "",
             "properties": {},

@@ -1,10 +1,15 @@
 // Type imports
 import { ApplicationCommandType, Collection, ComponentType, InteractionType, Snowflake } from "discord.js";
-import { SavedApplicationCommand, SavedApplicationCommandType } from "../types/applicationCommands";
+import {
+    SavedApplicationCommand,
+    SavedApplicationCommandType,
+    SavedChatInputCommand,
+    SavedMessageCommand,
+    SavedUserCommand,
+} from "../types/applicationCommands";
 import { ComponentCollection } from "../types/components";
-import { SavedInteractionType } from "../types/interfaces";
 import { SavedModal } from "../types/modals";
-import { Cooldowns } from "../types/others";
+import { Cooldowns, SavedInteractionType } from "../types/others";
 
 /**
  * Collection of locally saved application command types
@@ -15,12 +20,30 @@ export const applicationCommandTypes: Collection<ApplicationCommandType, SavedAp
 /**
  * Collection of locally saved application commands
  */
-export const applicationCommands: Collection<string, SavedApplicationCommand> = new Collection();
+export const applicationCommands: Record<
+    keyof typeof ApplicationCommandType,
+    Collection<string, SavedApplicationCommand>
+> = {
+    /**
+     * Chat input application commands
+     */
+    ChatInput: new Collection<string, SavedChatInputCommand>(),
+
+    /**
+     * Message application commands
+     */
+    Message: new Collection<string, SavedMessageCommand>(),
+
+    /**
+     * User application commands
+     */
+    User: new Collection<string, SavedUserCommand>(),
+};
 
 /**
  * IDs of users unable to interact with the bot
  */
-export const blockedUsers: Snowflake[] = [];
+export const blockedUsers: { global: Snowflake[]; guilds: Record<Snowflake, Snowflake[]> } = { global: [], guilds: {} };
 
 /**
  * Collection of locally saved (message) components

@@ -23,6 +23,15 @@ declare global {
 
 global.consoleCommandHandler = async function (configuration: Configuration, client: Client) {
     /**
+     * Readline interface
+     */
+    const rlInterface = rl.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        prompt: "\x1b[35m Enter command: \x1b[0m",
+    });
+
+    /**
      * Commands for usage in the console
      */
     const commands = await readFiles<ConsoleCommand>(configuration, configuration.project.consoleCommandsPath);
@@ -33,16 +42,11 @@ global.consoleCommandHandler = async function (configuration: Configuration, cli
         return;
     }
 
-    /**
-     * Readline interface
-     */
-    const rlInterface = rl.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-
     // Ask user for command
-    rlInterface.question("\x1b[35m Enter command: \x1b[0m", (consoleInput: string) => {
+    rlInterface.prompt();
+
+    // Listen for user input
+    rlInterface.on("line", (consoleInput: string) => {
         /**
          * Slice console input to get the command name
          */
@@ -90,30 +94,36 @@ global.consoleCommandHandler = async function (configuration: Configuration, cli
                 throw error;
             }
         }
+
+        // Close readline interface if needed
+        rlInterface.on("close", () => process.exit(0));
+
+        // Ask user for command
+        rlInterface.prompt();
     });
+};
 
-    const transformParameters = function (parameters: string): NestedArray<boolean | number | string> {
-        // Return transformed parameters
-        return parameters
-            .trim()
-            .split(" ")
-            .map((value) => {
-                value.trim();
+const transformParameters = function (parameters: string): NestedArray<boolean | number | string> {
+    // Return transformed parameters
+    return parameters
+        .trim()
+        .split(" ")
+        .map((value) => {
+            value.trim();
 
-                // Check type of value
-                if (value === "true" || value === "false") {
-                    // Return boolean
-                    return Boolean(value);
-                } else if (!isNaN(Number(value))) {
-                    // Return number
-                    return Number(value);
-                } else if (value.startsWith("[") && value.endsWith("]")) {
-                    // Return array
-                    return transformParameters(value.slice(1, value.length - 1));
-                } else {
-                    // Return string
-                    return value;
-                }
-            });
-    };
+            // Check type of value
+            if (value === "true" || value === "false") {
+                // Return boolean
+                return Boolean(value);
+            } else if (!isNaN(Number(value))) {
+                // Return number
+                return Number(value);
+            } else if (value.startsWith("[") && value.endsWith("]")) {
+                // Return array
+                return transformParameters(value.slice(1, value.length - 1));
+            } else {
+                // Return string
+                return value;
+            }
+        });
 };

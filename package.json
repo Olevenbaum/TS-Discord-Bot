@@ -18,7 +18,8 @@
     "readme": "README.md",
     "scripts": {
         "start": "ts-node .",
-        "test": "ts-node temp/test.ts"
+        "test": "ts-node temp/test.ts",
+        "test.js": "ts-node temp/test.js"
     },
     "type": "commonjs"
 }

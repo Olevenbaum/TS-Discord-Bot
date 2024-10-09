@@ -19,17 +19,17 @@ const userCommandInteraction: SavedApplicationCommandType = {
         /**
          * Message application command that was interacted with
          */
-        const messageCommand = applicationCommands
-            .filter((applicationCommand) => applicationCommand.type === this.type)
-            .get(interaction.commandName) as SavedMessageCommand | undefined;
+        const messageCommand = applicationCommands[
+            ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
+        ].get(interaction.commandName) as SavedMessageCommand | undefined;
 
         // Check if message command was found and cooldown expired
         if (!messageCommand) {
             // Interaction response
             interaction.reply({
-                content: `I'm sorry, but it looks like interactions with the message command ${bold(
+                content: `I'm sorry, but it seems that interactions with the message command ${bold(
                     interaction.commandName
-                )} cannot be processed at the moment.`,
+                )} can't be processed at the moment.`,
                 ephemeral: true,
             });
 
@@ -39,7 +39,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
                 "error",
                 `Found no file handling message command '${interaction.commandName}'`,
                 interaction.client,
-                `I didn't find any file handling the message command ${bold(interaction.commandName)}!`
+                `I couldn't find any file handling the message command ${bold(interaction.commandName)}.`
             );
 
             // Exit function
@@ -56,7 +56,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
                 (interaction.client.application.owner instanceof User &&
                     interaction.user.id !== interaction.client.application.owner.id) ||
                 (interaction.client.application.owner instanceof Team &&
-                    !(interaction.user.id in interaction.client.application.owner.members.keys()))
+                    !interaction.client.application.owner.members.has(interaction.user.id))
             ) {
                 // Interaction response
                 interaction.reply({
@@ -114,7 +114,9 @@ const userCommandInteraction: SavedApplicationCommandType = {
                     "error",
                     `Failed to execute message command '${interaction.commandName}':\n${error}`,
                     interaction.client,
-                    `I failed to execute the message command ${bold(interaction.commandName)}:\n${code(error.message)}`
+                    `I failed to execute the message command ${bold(interaction.commandName)}:\n${code(
+                        error.message
+                    )}\nHave a look at the logs for more information.`
                 );
             });
     },

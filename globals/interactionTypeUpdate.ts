@@ -1,32 +1,39 @@
 // Global imports
 import "./fileReader";
+import "./notifications";
 import { interactionTypes } from "./variables";
 
 // Type imports
 import { InteractionType } from "discord.js";
 import { Configuration } from "../types/configuration";
-import { SavedInteractionType } from "../types/interfaces";
+import { SavedInteractionType } from "../types/others";
 
 declare global {
     /**
-     * Updates all changed interaction types, adds new ones and deletes removed ones
+     * Adds new interaction types and removes outdated ones or reloads all interaction types
      * @param configuration The configuration of the project and bot
-     * @param forceReload Whether to reload all files no matter if files were changed, added or removed
+     * @param forceReload Whether to reload all files no matter if files were added or removed
      */
     function updateInteractionTypes(configuration: Configuration, forceReload?: boolean): Promise<void>;
 
     /**
-     * Updates all changed interaction types, adds new ones and deletes removed ones
+     * Reloads the specified interaction types or adds them if not already present
      * @param configuration The configuration of the project and bot
      * @param include Interaction type files to reload, passing an empty array will result in the same behavior as not
      * passing this parameter
+     * @param exclude Whether to include or exclude the specified interaction types
      */
-    function updateInteractionTypes(configuration: Configuration, include?: InteractionType[]): Promise<void>;
+    function updateInteractionTypes(
+        configuration: Configuration,
+        include?: InteractionType[],
+        exclude?: boolean
+    ): Promise<void>;
 }
 
 global.updateInteractionTypes = async function (
     configuration: Configuration,
-    x: boolean | InteractionType[] = false
+    x: boolean | InteractionType[] = false,
+    exclude: boolean = false
 ): Promise<void> {
     /**
      * Overload parameter
@@ -36,31 +43,51 @@ global.updateInteractionTypes = async function (
     /**
      * Overload parameter
      */
-    const include = typeof x === "boolean" ? undefined : x;
+    const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
+
+    // Overwrite exlude parameter if include is empty
+    exclude &&= Boolean(include);
+
+    // Notification
+    notify(
+        configuration,
+        "info",
+        `Updating interaction type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
+            Array.isArray(include)
+                ? ` ${include.map((interactionType) => `'${InteractionType[interactionType]}'`).join(", ")}`
+                : ""
+        }...`
+    );
 
     /**
      * List of interaction type files
      */
-    const interactionTypeFiles = (
-        await readFiles<SavedInteractionType>(configuration, configuration.project.interactionTypesPath)
-    ).filter((interactionTypeFile) => include?.includes(interactionTypeFile.type) ?? true);
+    const interactionTypeFiles = await readFiles<SavedInteractionType>(
+        configuration,
+        configuration.project.interactionTypesPath
+    );
 
     // Remove outdated interaction types
     interactionTypes.sweep(
         (_, interactionType) =>
-            forceReload ||
-            (include && include.includes(interactionType)) ||
             !interactionTypeFiles.find((interactionTypeFile) => interactionTypeFile.type === interactionType)
     );
 
     // Iterate through interaction types
     interactionTypeFiles.forEach((interactionTypeFile) => {
-        // Check if interaction type already exists
-        if (!(interactionTypeFile.type in interactionTypes.keys())) {
+        // Check if interaction type already exists or should be reloaded anyway
+        if (
+            forceReload ||
+            exclude !== (include && include.includes(interactionTypeFile.type)) ||
+            !interactionTypes.has(interactionTypeFile.type)
+        ) {
             // Set interaction type
             interactionTypes.set(interactionTypeFile.type, interactionTypeFile);
         }
     });
+
+    // Notification
+    notify(configuration, "success", `Finished updating interaction types`);
 };
 
 export {};

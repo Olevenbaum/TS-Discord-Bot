@@ -1,6 +1,6 @@
 // Data imports
-import botConfiguration from "./resources/configuration.json";
-import paths from "./resources/paths.json";
+import botConfiguration from "./configuration/configuration.json";
+import paths from "./configuration/paths.json";
 
 // Module imports
 import { main } from "./application/application";

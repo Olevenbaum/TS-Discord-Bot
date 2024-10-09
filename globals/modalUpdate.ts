@@ -1,5 +1,6 @@
 // Global imports
 import "./fileReader";
+import "./notifications";
 import { modals } from "./variables";
 
 // Type imports
@@ -19,11 +20,16 @@ declare global {
      * @param configuration The configuration of the project and bot
      * @param include Modal files to reload, passing an empty array results in the same behavior as not passing this
      * parameter
+     * @param exclude Whether to include or exclude the specified modal files
      */
-    function updateModals(configuration: Configuration, include?: string[]): Promise<void>;
+    function updateModals(configuration: Configuration, include?: string[], exclude?: boolean): Promise<void>;
 }
 
-global.updateModals = async function (configuration: Configuration, x: boolean | string[] = false): Promise<void> {
+global.updateModals = async function (
+    configuration: Configuration,
+    x: boolean | string[] = false,
+    exclude: boolean = false
+): Promise<void> {
     /**
      * Overload parameter
      */
@@ -32,29 +38,41 @@ global.updateModals = async function (configuration: Configuration, x: boolean |
     /**
      * Overload parameter
      */
-    const include = typeof x === "boolean" ? undefined : x;
+    const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
+
+    // Overwrite exlude parameter if include is empty
+    exclude &&= Boolean(include);
+
+    // Notification
+    notify(
+        configuration,
+        "info",
+        `Updating modal${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
+            Array.isArray(include) ? ` ${include.map((modal) => `'${modal}'`).join(", ")}` : ""
+        }...`
+    );
 
     /**
      * List of modal files
      */
     const modalFiles = (await readFiles<SavedModal>(configuration, configuration.project.modalsPath)).filter(
-        (modalFile) => include?.includes(modalFile.name) ?? true
+        (modalFile) => exclude !== (include?.includes(modalFile.name) ?? true)
     );
 
     // Remove outdated application command types
-    modals.sweep(
-        (_, modal) =>
-            forceReload || (include && include.includes(modal)) || !modals.find((modalFile) => modalFile.name === modal)
-    );
+    modals.sweep((_, modal) => !modals.find((modalFile) => modalFile.name === modal));
 
     // Iterate through application command types
     modalFiles.forEach((modalFile) => {
         // Check if application command type already exists
-        if (!(modalFile.name in modals.keys())) {
+        if (forceReload || exclude !== (include && include.includes(modalFile.name)) || !modals.has(modalFile.name)) {
             // Set application command type
             modals.set(modalFile.name, modalFile);
         }
     });
+
+    // Notification
+    notify(configuration, "success", "Finished updating modals");
 };
 
 export {};

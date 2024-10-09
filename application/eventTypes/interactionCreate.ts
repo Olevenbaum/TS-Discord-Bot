@@ -6,7 +6,7 @@ import { blockedUsers, interactionTypes } from "../../globals/variables";
 // Type imports
 import { Events, Interaction, InteractionType } from "discord.js";
 import { Configuration } from "../../types/configuration";
-import { SavedEventType } from "../../types/interfaces";
+import { SavedEventType } from "../../types/others";
 
 /**
  * Interaction event handler
@@ -17,7 +17,11 @@ const interactionCreate: SavedEventType = {
     async execute(configuration: Configuration, interaction: Interaction): Promise<void> {
         // Check if user is allowed to interact with bot
         if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
-            if (configuration.bot.enableBlockedUsers && blockedUsers.includes(interaction.user.id)) {
+            if (
+                (configuration.bot.enableBlockedUsers ?? true) &&
+                (blockedUsers.global.includes(interaction.user.id) ||
+                    (interaction.guildId && blockedUsers.guilds[interaction.guildId]?.includes(interaction.user.id)))
+            ) {
                 // Interaction response
                 interaction.reply({
                     content: "I'm sorry, you are currently not allowed to interact with me.",
@@ -46,9 +50,9 @@ const interactionCreate: SavedEventType = {
             if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
                 // Interaction response
                 interaction.reply({
-                    content: `I'm sorry, but it looks like interactions of the type ${bold(
+                    content: `I'm sorry, but it seems that interactions of the type ${bold(
                         InteractionType[interaction.type]
-                    )} cannot be processed at the moment.`,
+                    )} can't be processed at the moment.`,
                     ephemeral: true,
                 });
             }
@@ -59,7 +63,7 @@ const interactionCreate: SavedEventType = {
                 "error",
                 `Found no file handling interaction type '${InteractionType[interaction.type]}'`,
                 interaction.client,
-                `I didn't find any file handling the interaction type ${bold(InteractionType[interaction.type])}!`
+                `I couldn't find any file handling the interaction type ${bold(InteractionType[interaction.type])}.`
             );
 
             // Exit function
@@ -87,10 +91,9 @@ const interactionCreate: SavedEventType = {
                 interaction.client,
                 `I failed to execute the interaction type ${bold(InteractionType[interaction.type])}:\n${code(
                     error.message
-                )}`
+                )}\nHave a look at the logs for more information.`
             );
         });
-
     },
 };
 

@@ -5,7 +5,7 @@ import { applicationCommandTypes } from "../../../globals/variables";
 // Type imports
 import { ApplicationCommandType, CommandInteraction, InteractionType } from "discord.js";
 import { Configuration } from "types/configuration";
-import { SavedInteractionType } from "../../../types/interfaces";
+import { SavedInteractionType } from "../../../types/others";
 
 /**
  * Application command interaction handler
@@ -23,9 +23,9 @@ const interactionType: SavedInteractionType = {
         if (!applicationCommandType) {
             // Interaction response
             interaction.reply({
-                content: `I'm sorry, but it looks like interactions with the application command type ${bold(
+                content: `I'm sorry, but it seems that interactions with the application command type ${bold(
                     ApplicationCommandType[interaction.commandType]
-                )} cannot be processed at the moment.`,
+                )} can't be processed at the moment.`,
                 ephemeral: true,
             });
 
@@ -35,9 +35,9 @@ const interactionType: SavedInteractionType = {
                 "error",
                 `Found no file handling application command type '${ApplicationCommandType[interaction.commandType]}'`,
                 interaction.client,
-                `I didn't find any file handling the application command type ${bold(
+                `I couldn't find any file handling the application command type ${bold(
                     ApplicationCommandType[interaction.commandType]
-                )}!`
+                )}.`
             );
 
             // Exit function
@@ -64,10 +64,9 @@ const interactionType: SavedInteractionType = {
                 interaction.client,
                 `I failed to execute the application command type ${bold(
                     ApplicationCommandType[interaction.commandType]
-                )}:\n${code(error.message)}`
+                )}:\n${code(error.message)}\nHave a look at the logs for more information.`
             );
         });
-
     },
 };
 

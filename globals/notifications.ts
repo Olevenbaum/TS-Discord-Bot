@@ -19,7 +19,7 @@ declare global {
         consoleMessage: string,
         client: Client<true>,
         message: string
-    ): void;
+    ): Promise<void>;
 
     /**
      * Prints console output
@@ -31,7 +31,7 @@ declare global {
         configuration: Configuration,
         type: "error" | "info" | "success" | "test" | "warning",
         consoleMessage: string
-    ): void;
+    ): Promise<void>;
 
     /**
      * Sends a message to the bot owner(s)
@@ -47,7 +47,7 @@ declare global {
         type: "error" | "info" | "success" | "test" | "warning",
         client: Client<true>,
         message: string
-    ): void;
+    ): Promise<void>;
 }
 
 global.notify = async function (
@@ -192,7 +192,7 @@ global.notify = async function (
         }
 
         // Send message to receivers
-        Promise.all(receiver.map((user) => user.send(newMessage.replace("@member", userMention(user.id)))));
+        await Promise.all(receiver.map((user) => user.send(newMessage.replace("@member", userMention(user.id)))));
     }
 };
 

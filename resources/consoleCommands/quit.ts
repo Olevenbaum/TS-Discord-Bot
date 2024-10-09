@@ -11,15 +11,26 @@ import { ConsoleCommand } from "../../types/others";
  * Console command to terminate the bot and exit the console
  */
 const consoleCommand: ConsoleCommand = {
-    aliases: ["EXIT"],
+    aliases: ["END", "EXIT"],
+
     description: "Terminates the bot and exits the console",
+
     name: "QUIT",
-    execute(configuration: Configuration, client: Client<true>, rlInterface: Interface) {
+
+    usage: "quit",
+
+    async execute(configuration: Configuration, client: Client<true>, rlInterface: Interface) {
         // Notification
-        notify(configuration, "info", "Shutting down...", client, `I'm tired and need to rest... See you! ZzZzZz...`);
+        await notify(
+            configuration,
+            "info",
+            "Shutting down...",
+            client,
+            `I'm tired and need to rest... See you! ZzZzZz...`
+        );
 
         // Destroy the client and terminate the connection
-        client.destroy();
+        await client.destroy();
 
         // Close the readline interface
         rlInterface.close();

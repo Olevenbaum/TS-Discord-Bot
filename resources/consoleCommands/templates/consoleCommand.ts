@@ -9,8 +9,12 @@ import { ConsoleCommand, NestedArray } from "../../../types/others";
  */
 const consoleCommand: ConsoleCommand = {
     description: "",
+
     name: "",
-    execute(
+
+    usage: "",
+
+    async execute(
         configuration: Configuration,
         client: Client<true>,
         rlInterface: Interface,

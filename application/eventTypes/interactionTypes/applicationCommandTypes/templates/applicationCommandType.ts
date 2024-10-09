@@ -32,17 +32,17 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
         /**
          * Application command that was interacted with
          */
-        const applicationCommand = applicationCommands
-            .filter((applicationCommand) => applicationCommand.type === this.type)
-            .get(interaction.commandName);
+        const applicationCommand = applicationCommands[
+            ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
+        ].get(interaction.commandName);
 
         // Check if application command was found
         if (!applicationCommand) {
             // Interaction response
             interaction.reply({
-                content: `I'm sorry, but it looks like interactions with the application command ${bold(
+                content: `I'm sorry, but it seems that interactions with the application command ${bold(
                     interaction.commandName
-                )} cannot be processed at the moment.`,
+                )} can't be processed at the moment.`,
                 ephemeral: true,
             });
 
@@ -52,7 +52,7 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                 "error",
                 `Found no file handling application command '${interaction.commandName}'`,
                 interaction.client,
-                `I didn't find any file handling the application command ${bold(interaction.commandName)}!`
+                `I couldn't find any file handling the application command ${bold(interaction.commandName)}.`
             );
 
             // Exit function
@@ -69,7 +69,7 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                 (interaction.client.application.owner instanceof User &&
                     interaction.user.id !== interaction.client.application.owner.id) ||
                 (interaction.client.application.owner instanceof Team &&
-                    !(interaction.user.id in interaction.client.application.owner.members.keys()))
+                    !interaction.client.application.owner.members.has(interaction.user.id))
             ) {
                 // Interaction response
                 interaction.reply({
@@ -106,24 +106,32 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
         }
 
         // Try to forward application command interaction response prompt
-        await applicationCommand.execute(configuration, interaction).catch(async (error: Error) => {
-            // Interaction response
-            interaction.reply({
-                content: `I'm sorry, but there was an error handling your interaction with the application command ${bold(
-                    interaction.commandName
-                )}.`,
-                ephemeral: true,
-            });
+        await applicationCommand
+            .execute(configuration, interaction)
+            .then(() =>
+                // Update cooldown
+                updateCooldown("ApplicationCommand", applicationCommand, interaction)
+            )
+            .catch(async (error: Error) => {
+                // Interaction response
+                interaction.reply({
+                    content: `I'm sorry, but there was an error handling your interaction with the application command ${bold(
+                        interaction.commandName
+                    )}.`,
+                    ephemeral: true,
+                });
 
-            // Notifications
-            notify(
-                configuration,
-                "error",
-                `Failed to execute application command '${interaction.commandName}':\n${error}`,
-                interaction.client,
-                `I failed to execute the application command ${bold(interaction.commandName)}:\n${code(error.message)}`
-            );
-        });
+                // Notifications
+                notify(
+                    configuration,
+                    "error",
+                    `Failed to execute application command '${interaction.commandName}':\n${error}`,
+                    interaction.client,
+                    `I failed to execute the application command ${bold(interaction.commandName)}:\n${code(
+                        error.message
+                    )}\nHave a look at the logs for more information.`
+                );
+            });
     },
 };
 

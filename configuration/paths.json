@@ -1,0 +1,13 @@
+{
+    "applicationCommandTypesPath": "./application/eventTypes/interactionTypes/applicationCommandTypes",
+    "blockedUsersPath": "./resources/blockedUsers.json",
+    "chatInputCommandsPath": "./resources/applicationCommands/chatInputCommands",
+    "componentsPath": "./resources/components",
+    "configurationPath": "./configuration/configuration.json",
+    "consoleCommandsPath": "./resources/consoleCommands",
+    "eventTypesPath": "./application/eventTypes",
+    "interactionTypesPath": "./application/eventTypes/interactionTypes",
+    "messageCommandsPath": "./resources/applicationCommands/messageCommands",
+    "modalsPath": "./resources/modals",
+    "userCommandsPath": "./resources/applicationCommands/userCommands"
+}

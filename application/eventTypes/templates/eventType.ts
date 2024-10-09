@@ -1,7 +1,7 @@
 // Type imports
 import { Events } from "discord.js";
 import { Configuration } from "../../../types/configuration";
-import { SavedEventType } from "../../../types/interfaces";
+import { SavedEventType } from "../../../types/others";
 
 /**
  * Template for event handler
