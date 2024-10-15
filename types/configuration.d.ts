@@ -147,6 +147,11 @@ interface ProjectConfiguration {
     messageCommandsPath: string;
 
     /**
+     * Path to the directory where the message component types are stored
+     */
+    messageComponentTypesPath: string;
+
+    /**
      * Path to the directory where the modals are stored
      */
     modalsPath: string;

@@ -59,15 +59,12 @@ global.notify = async function (
 ): Promise<void> {
     // Check type of overload parameter
     if (typeof x === "string") {
-        // Check type of overload parameter
         if (typeof y === "string") {
-            // Throw type error
             throw new TypeError("Parameter 'client' must be of type 'Client'");
         }
     } else {
         // Check type of overload parameter
         if (typeof y !== "string") {
-            // Throw type error
             throw new TypeError("Parameter 'message' must be of type 'string'");
         }
     }
@@ -89,47 +86,35 @@ global.notify = async function (
 
     // Check if client is provided
     if (client) {
-        // Fetch application data
         await client.application.fetch();
     }
 
     // Check if console message is provided
     if (consoleMessage) {
-        // Check message type
         switch (type) {
             case "error":
-                // Print error message
                 console.error(`\x1b[31m ${consoleMessage} \x1b[0m`);
 
-                // Break switch
                 break;
 
             case "info":
-                // Print info message
                 console.info(`\x1b[34m ${consoleMessage} \x1b[0m`);
 
-                // Break switch
                 break;
 
             case "success":
-                // Print success message
                 console.log(`\x1b[32m ${consoleMessage} \x1b[0m`);
 
-                // Break switch
                 break;
 
             case "test":
-                // Print test message
                 console.log(consoleMessage);
 
-                // Break switch
                 break;
 
             case "warning":
-                // Print warning message
                 console.warn(`\x1b[33m ${consoleMessage} \x1b[0m`);
 
-                // Break switch
                 break;
         }
     }
@@ -143,11 +128,9 @@ global.notify = async function (
     if (message && client && notifications) {
         // Check if notifications are enabled for the type
         if (typeof notifications !== "boolean" && !notifications.types?.includes(type)) {
-            // Exit function
             return;
         }
 
-        // Replace placeholders in message
         const newMessage = message
             .replace("@bot", userMention(client.user.id))
             .replace(
@@ -165,10 +148,8 @@ global.notify = async function (
 
         // Check type of owner
         if (client.application.owner instanceof User) {
-            // Add owner to receivers
             receiver.push(client.application.owner);
         } else if (client.application.owner instanceof Team) {
-            // Iterate through team members
             client.application.owner.members.forEach((teamMember) => {
                 // Check if member is excluded
                 if (
@@ -179,19 +160,15 @@ global.notify = async function (
                                 notifications.excludedRoles?.includes(teamMember.role)))) ||
                     teamMember.membershipState === TeamMemberMembershipState.Invited
                 ) {
-                    // Continue to next member
                     return;
                 }
 
-                // Add member to receivers
                 receiver.push(teamMember.user);
             });
         } else {
-            // Exit function
             return;
         }
 
-        // Send message to receivers
         await Promise.all(receiver.map((user) => user.send(newMessage.replace("@member", userMention(user.id)))));
     }
 };

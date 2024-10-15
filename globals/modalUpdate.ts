@@ -40,10 +40,8 @@ global.updateModals = async function (
      */
     const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    // Overwrite exlude parameter if include is empty
     exclude &&= Boolean(include);
 
-    // Notification
     notify(
         configuration,
         "info",
@@ -59,14 +57,11 @@ global.updateModals = async function (
         (modalFile) => exclude !== (include?.includes(modalFile.name) ?? true)
     );
 
-    // Remove outdated application command types
     modals.sweep((_, modal) => !modals.find((modalFile) => modalFile.name === modal));
 
-    // Iterate through application command types
     modalFiles.forEach((modalFile) => {
-        // Check if application command type already exists
+        // Check if modal already exists
         if (forceReload || exclude !== (include && include.includes(modalFile.name)) || !modals.has(modalFile.name)) {
-            // Set application command type
             modals.set(modalFile.name, modalFile);
         }
     });

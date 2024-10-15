@@ -26,9 +26,7 @@ global.readFiles = async function <FileType>(configuration: Configuration, direc
      */
     const newPath = relativePath(directory);
 
-    // Try to read files in directory
     try {
-        // Return all imported relevant files in the directory
         return (
             await Promise.all(
                 fs
@@ -55,14 +53,11 @@ global.readFiles = async function <FileType>(configuration: Configuration, direc
     } catch (error) {
         // Check if directory was found
         if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-            // Notification
             notify(configuration, "warning", `Found no directory at ${path.relative(newPath, path.resolve())}`);
 
-            // Return empty array
             return [];
         }
 
-        // Forward error
         throw error;
     }
 };

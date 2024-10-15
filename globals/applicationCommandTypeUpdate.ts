@@ -45,10 +45,8 @@ global.updateApplicationCommandTypes = async function (
      */
     const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    // Overwrite exlude parameter if include is empty
     exclude &&= Boolean(include);
 
-    // Notification
     notify(
         configuration,
         "info",
@@ -69,7 +67,6 @@ global.updateApplicationCommandTypes = async function (
         configuration.project.applicationCommandTypesPath
     );
 
-    // Remove outdated application command types
     applicationCommandTypes.sweep(
         (_, applicationCommandType) =>
             !applicationCommandTypeFiles.some(
@@ -77,7 +74,6 @@ global.updateApplicationCommandTypes = async function (
             )
     );
 
-    // Iterate through application command types
     applicationCommandTypeFiles.forEach((applicationCommandTypeFile) => {
         // Check if application command type already exists or should be reloaded anyway
         if (
@@ -85,12 +81,10 @@ global.updateApplicationCommandTypes = async function (
             exclude !== (include && include.includes(applicationCommandTypeFile.type)) ||
             !applicationCommandTypes.has(applicationCommandTypeFile.type)
         ) {
-            // Set application command type
             applicationCommandTypes.set(applicationCommandTypeFile.type, applicationCommandTypeFile);
         }
     });
 
-    // Notification
     notify(configuration, "success", "Finished updating application command types");
 };
 

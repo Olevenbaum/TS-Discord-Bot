@@ -23,9 +23,8 @@ const userCommandInteraction: SavedApplicationCommandType = {
             ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
         ].get(interaction.commandName) as SavedMessageCommand | undefined;
 
-        // Check if message command was found and cooldown expired
+        // Check if message command is implemented
         if (!messageCommand) {
-            // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it seems that interactions with the message command ${bold(
                     interaction.commandName
@@ -33,7 +32,6 @@ const userCommandInteraction: SavedApplicationCommandType = {
                 ephemeral: true,
             });
 
-            // Notifications
             notify(
                 configuration,
                 "error",
@@ -42,23 +40,19 @@ const userCommandInteraction: SavedApplicationCommandType = {
                 `I couldn't find any file handling the message command ${bold(interaction.commandName)}.`
             );
 
-            // Exit function
             return;
         }
 
         // Check if chat input command is for owners only
         if (messageCommand.owner) {
-            // Fetch bot owner
             await interaction.client.application.fetch();
 
-            // Check if user is bot owner
             if (
                 (interaction.client.application.owner instanceof User &&
                     interaction.user.id !== interaction.client.application.owner.id) ||
                 (interaction.client.application.owner instanceof Team &&
                     !interaction.client.application.owner.members.has(interaction.user.id))
             ) {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but you don't have permission to use the message command ${bold(
                         interaction.commandName
@@ -66,19 +60,18 @@ const userCommandInteraction: SavedApplicationCommandType = {
                     ephemeral: true,
                 });
 
-                // Exit function
                 return;
             }
         }
 
         /**
-         * Whether or not the cooldown expired
+         * Whether the cooldown expired or the time (in ms) a user has to wait till they can use the message command
+         * again
          */
         const cooldownValidation = await validateCooldown(messageCommand, interaction);
 
         // Check if cooldown expired
         if (typeof cooldownValidation === "number") {
-            // Interaction response
             interaction.reply({
                 content: `You need to wait ${underlined(
                     cooldownValidation
@@ -88,19 +81,13 @@ const userCommandInteraction: SavedApplicationCommandType = {
                 ephemeral: true,
             });
 
-            // Exit function
             return;
         }
 
-        // Try to forward message application command interaction response prompt
         await messageCommand
             .execute(configuration, interaction)
-            .then(() =>
-                // Update cooldown
-                updateCooldown("ApplicationCommand", messageCommand, interaction)
-            )
+            .then(() => updateCooldown("ApplicationCommand", messageCommand, interaction))
             .catch(async (error: Error) => {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but there was an error handling your interaction with the message command ${bold(
                         interaction.commandName
@@ -108,7 +95,6 @@ const userCommandInteraction: SavedApplicationCommandType = {
                     ephemeral: true,
                 });
 
-                // Notifications
                 notify(
                     configuration,
                     "error",

@@ -19,9 +19,8 @@ const interactionType: SavedInteractionType = {
          */
         const applicationCommandType = applicationCommandTypes.get(interaction.commandType);
 
-        // Check if application command type was found
+        // Check if application command type is implemented
         if (!applicationCommandType) {
-            // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it seems that interactions with the application command type ${bold(
                     ApplicationCommandType[interaction.commandType]
@@ -29,7 +28,6 @@ const interactionType: SavedInteractionType = {
                 ephemeral: true,
             });
 
-            // Notification
             notify(
                 configuration,
                 "error",
@@ -40,13 +38,10 @@ const interactionType: SavedInteractionType = {
                 )}.`
             );
 
-            // Exit function
             return;
         }
 
-        // Try to forward application command interaction response prompt
-        applicationCommandType.execute(configuration, interaction).catch((error: Error) => {
-            // Interaction response
+        await applicationCommandType.execute(configuration, interaction).catch((error: Error) => {
             interaction.reply({
                 content: `I'm sorry, but there was an error handling your interaction with the application command type ${bold(
                     ApplicationCommandType[interaction.commandType]
@@ -54,7 +49,6 @@ const interactionType: SavedInteractionType = {
                 ephemeral: true,
             });
 
-            // Notification
             notify(
                 configuration,
                 "error",

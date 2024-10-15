@@ -8,6 +8,7 @@
     "eventTypesPath": "./application/eventTypes",
     "interactionTypesPath": "./application/eventTypes/interactionTypes",
     "messageCommandsPath": "./resources/applicationCommands/messageCommands",
+    "messageComponentTypesPath": "./application/eventTypes/interactionTypes/messageComponentTypes",
     "modalsPath": "./resources/modals",
     "userCommandsPath": "./resources/applicationCommands/userCommands"
 }

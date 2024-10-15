@@ -34,16 +34,13 @@ if (!Array.prototype.asyncFind) {
          */
         const boundPredicate = predicate.bind(thisArg);
 
-        // Iterate over keys of array
         this.forEach(async (_, index) => {
             // Check if callback function returns true for element
             if (await boundPredicate(this[index], index, this)) {
-                // Return element
                 return this[index];
             }
         });
 
-        // Return undefined if no element matches the predicate
         return undefined;
     };
 }
@@ -53,27 +50,21 @@ if (!Array.prototype.rotate) {
     Array.prototype.rotate = function (count: number = 1, reverse: boolean = false) {
         // Check special cases for count
         if (count < 0) {
-            // Throw error
             throw new Error("Parameter 'count' must be a positive number");
         } else if (count === 0) {
-            // Return array
             return this;
         }
 
-        // Decrease counter
         count = Math.floor(count);
         count %= this.length;
 
         // Check direction
         if (reverse) {
-            // Shift elements up
             this.push(...this.splice(0, this.length - count));
         } else {
-            // Shift elements down
             this.unshift(...this.splice(count, this.length));
         }
 
-        // Return array
         return this;
     };
 }

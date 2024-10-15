@@ -1,13 +1,29 @@
 // Type imports
 import {
     ActionRowBuilder,
+    ButtonBuilder,
+    ButtonInteraction,
+    ButtonStyle,
+    ChannelSelectMenuBuilder,
+    ChannelSelectMenuInteraction,
+    ChannelType,
     ComponentBuilder,
+    ComponentEmojiResolvable,
     ComponentType,
+    MentionableSelectMenuBuilder,
+    MentionableSelectMenuInteraction,
+    MessageActionRowComponent,
+    MessageActionRowComponentBuilder,
     MessageComponentBuilder,
     MessageComponentInteraction,
     MessageComponentType,
     ModalActionRowComponent,
     ModalActionRowComponentBuilder,
+    ModalComponentBuilder,
+    RoleSelectMenuBuilder,
+    RoleSelectMenuInteraction,
+    StringSelectMenuBuilder,
+    StringSelectMenuInteraction,
     TextInputBuilder,
     TextInputStyle,
 } from "discord.js";
@@ -30,14 +46,51 @@ interface ActionRowCreateOptions extends ComponentCreateOptions {
 }
 
 /**
+ * Options that can be passed when creating a channel select component
+ */
+interface ChannelSelectComponentCreateOptions extends SelectComponentCreateOptions {
+    /**
+     * Channel type(s) that the channel can be selected from
+     */
+    channelTypes?: ChannelType[];
+}
+
+/**
+ * Options that can be passed when creating a button component
+ */
+interface ButtonComponentCreateOptions extends MessageComponentCreateOptions {
+    /**
+     * Emoji being shown on the button component
+     *
+     * **This option overwrites the label option!**
+     */
+    emoji?: ComponentEmojiResolvable;
+
+    /**
+     * Label of the button component
+     */
+    label?: string;
+
+    /**
+     * Style of the button component
+     */
+    style?: ButtonStyle;
+
+    /**
+     * URL linked to the button component
+     */
+    url?: string;
+}
+
+/**
  * Options that can be passed when creating a component
  */
 type ComponentCreateOptions = Record<string, any>;
 
 /**
- * Collection of components that can be used in the bot
+ * Options that can be passed when creating a mentionable select component
  */
-type ComponentCollection = Record<keyof typeof ComponentType, Collection<string, Component>>;
+interface MentionableSelectComponentCreateOptions extends SelectComponentCreateOptions {}
 
 /**
  * Options that can be passed when creating a message component
@@ -53,6 +106,21 @@ interface MessageComponentCreateOptions extends ComponentCreateOptions {
      */
     disabled?: boolean;
 }
+
+/**
+ * Options that can be passed when creating a modal
+ */
+interface ModalCreateOptions {
+    /**
+     * The title of the modal
+     */
+    title?: string;
+}
+
+/**
+ * Options that can be passed when creating a role select component
+ */
+interface RoleSelectComponentCreateOptions extends SelectComponentCreateOptions {}
 
 /**
  * Action row imported from local file
@@ -86,10 +154,60 @@ interface SavedActionRow extends SavedComponent {
     /**
      * Creates an action row including the components listed in the **includedComponents** property
      * @param configuration The configuration of the project and bot
-     * @param options The options that modify the included components
+     * @param options Options that modify the included components
      * @returns The action row builder
      */
     create(configuration: Configuration, options?: ActionRowCreateOptions): ActionRowBuilder;
+}
+
+/**
+ * Button component imported from local file
+ */
+interface SavedButtonComponent extends SavedMessageComponent {
+    /**
+     * Type of the button message component
+     */
+    type: ComponentType.Button;
+
+    /**
+     * Creates the button component
+     * @param configuration The configuration of the project and bot
+     * @param options Options that modify the button component
+     * @returns The button builder
+     */
+    create(configuration: Configuration, options?: ButtonComponentCreateOptions): ButtonBuilder;
+
+    /**
+     * Handles the response to the button interaction
+     * @param configuration The configuration of the project and bot
+     * @param interaction The button interaction to response to
+     */
+    execute(configuration: Configuration, interaction: ButtonInteraction): Promise<void>;
+}
+
+/**
+ * Channel select component imported from local file
+ */
+interface SavedChannelSelectComponent extends SavedMessageComponent {
+    /**
+     * Type of the channel select component
+     */
+    type: ComponentType.ChannelSelect;
+
+    /**
+     * Creates the channel select component
+     * @param configuration The configuration of the project and bot
+     * @param options The options that modify the channel select component
+     * @returns The channel select builder
+     */
+    create(configuration: Configuration, options?: ChannelSelectComponentCreateOptions): ChannelSelectMenuBuilder;
+
+    /**
+     * Handles the response to the channel select component interaction
+     * @param configuration The configuration of the project and bot
+     * @param interaction The channel select component interaction to response to
+     */
+    execute(configuration: Configuration, interaction: ChannelSelectMenuInteraction): Promise<void>;
 }
 
 /**
@@ -108,11 +226,39 @@ interface SavedComponent {
 
     /**
      * Creates the component
-     * @param options The options to modify the component
      * @param configuration The configuration of the project and bot
+     * @param options The options to modify the component
      * @returns The component builder
      */
     create(configuration: Configuration, options?: ComponentCreateOptions): ComponentBuilder;
+}
+
+/**
+ * Mentionable select component imported from local file
+ */
+interface SavedMentionableSelectComponent extends SavedMessageComponent {
+    /**
+     * Type of the mentionable select component
+     */
+    type: ComponentType.MentionableSelect;
+
+    /**
+     * Creates the mentionable select component
+     * @param configuration The configuration of the project and bot
+     * @param options The options that modify the mentionable select component
+     * @returns The mentionable select builder
+     */
+    create(
+        configuration: Configuration,
+        options?: MentionableSelectComponentCreateOptions
+    ): MentionableSelectMenuBuilder;
+
+    /**
+     * Handles the response to the mentionable select component interaction.
+     * @param configuration The configuration of the project and bot
+     * @param interaction The mentionable select component interaction to respond to
+     */
+    execute(configuration: Configuration, interaction: MentionableSelectMenuInteraction): Promise<void>;
 }
 
 /**
@@ -135,7 +281,7 @@ interface SavedMessageComponent extends SavedComponent {
      * @param options The options to modify the message component
      * @returns The message component builder
      */
-    create(configuration: Configuration, options?: MessageComponentCreateOptions): MessageComponentBuilder;
+    create(configuration: Configuration, options?: MessageComponentCreateOptions): MessageActionRowComponentBuilder;
 
     /**
      * Handles the response to the message component interaction
@@ -146,32 +292,108 @@ interface SavedMessageComponent extends SavedComponent {
 }
 
 /**
- * Saved modal component imported from local file
+ * Message component type imported from local file
+ */
+interface SavedMessageComponentType {
+    /**
+     * Message component type
+     */
+    type: MessageComponentType;
+
+    /**
+     * Handles the interaction with the message component type
+     * @param configuration The configuration of the project and bot
+     * @param interaction The interaction to response to
+     */
+    execute(configuration: Configuration, interaction: MessageComponentInteraction): Promise<void>;
+}
+
+/**
+ * Modal component imported from local file
  */
 interface SavedModalComponent extends SavedComponent {
     /**
      * Type of the modal component
      */
-    type: Omit<ComponentType, MessageComponentType>;
+    type: Omit<ComponentType[keyof typeof ComponentType], MessageComponentType>;
 
     /**
      * Creates the modal component
-     * @param options The options to modify the modal component
      * @param configuration The configuration of the project and bot
-     * @returns The modal component builder
+     * @param options The options to modify the modal component
+     * @returns The modal action row builder
      */
-    create(configuration: Configuration, options?: ModalComponentCreateOptions): ModalActionRowComponentBuilder;
+    create(configuration: Configuration, options?: ComponentCreateOptions): ModalActionRowComponentBuilder;
 }
 
 /**
- * Message components that can be included in action rows in modals
+ * Role select component imported from local file
  */
-type SavedModalComponent = SavedTextInputComponent;
+interface SavedRoleSelectComponent extends SavedMessageComponent {
+    /**
+     * Type of the role select component
+     */
+    type: ComponentType.RoleSelect;
+
+    /**
+     * Creates the role select component
+     * @param configuration The configuration of the project and bot
+     * @param options The options to modify the roles select component
+     * @returns The role select builder
+     */
+    create(configuration: Configuration, options?: RoleSelectComponentCreateOptions): RoleSelectMenuBuilder;
+
+    /**
+     * Handles the response to the role select component interaction
+     * @param configuration The configuration of the project and bot
+     * @param interaction The role select component interaction to response to
+     */
+    execute(configuration: Configuration, interaction: RoleSelectMenuInteraction): Promise<void>;
+}
+
+/**
+ * Select menu component imported from local file
+ */
+type SavedSelectMenuComponent =
+    | SavedChannelSelectComponent
+    | SavedMentionableSelectComponent
+    | SavedStringSelectComponent
+    | SavedRoleSelectComponent;
+
+/**
+ * String select component imported from local file
+ */
+interface SavedStringSelectComponent extends SavedMessageComponent {
+    /**
+     * Options of the string select component
+     */
+    options: string[];
+
+    /**
+     * Type of the string select component
+     */
+    type: ComponentType.StringSelect;
+
+    /**
+     * Creates the string select component
+     * @param configuration The configuration of the project and bot
+     * @param options The options to modify the string select component
+     * @returns The string select builder
+     */
+    create(configuration: Configuration, options?: StringSelectComponentCreateOptions): StringSelectMenuBuilder;
+
+    /**
+     * Handles the response to the string select component interaction
+     * @param configuration The configuration of the project and bot
+     * @param interaction The string select component interaction to response to
+     */
+    execute(configuration: Configuration, interaction: StringSelectMenuInteraction): Promise<void>;
+}
 
 /**
  * Text input component imported from local file
  */
-interface SavedTextInputComponent extends SavedComponent {
+interface SavedTextInputComponent extends SavedModalComponent {
     /**
      * Type of the text input component
      */
@@ -184,6 +406,61 @@ interface SavedTextInputComponent extends SavedComponent {
      * @returns The text input component builder
      */
     create(configuration: Configuration, options?: TextInputComponentCreateOptions): TextInputBuilder;
+}
+
+/**
+ * User select component imported from local file
+ */
+interface SavedUserSelectComponent extends SavedMessageComponent {
+    /**
+     * Type of the user select component
+     */
+    type: ComponentType.UserSelect;
+
+    /**
+     * Creates the user select component
+     * @param configuration The configuration of the project and bot
+     * @param options The options to modify the user select component
+     * @returns The user select builder
+     */
+    create(configuration: Configuration, options?: UserSelectComponentCreateOptions): UserSelectMenuBuilder;
+
+    /**
+     * Handles the response to the user select component interaction
+     * @param configuration The configuration of the project and bot
+     * @param interaction The user select component interaction to response to
+     */
+    execute(configuration: Configuration, interaction: UserSelectMenuInteraction): Promise<void>;
+}
+
+/**
+ * Options that can be passed when creating a select component
+ */
+interface SelectComponentCreateOptions extends MessageComponentCreateOptions {
+    /**
+     * The maximal number of options that have to be chosen
+     */
+    maximalValues?: number;
+
+    /**
+     * The minimal number of options that have to be chosen
+     */
+    minimalValues?: number;
+
+    /**
+     * The text that is written in the select menu if it is empty
+     */
+    placeholder?: string;
+}
+
+/**
+ * Options that can be passed when creating a string select component
+ */
+interface StringSelectComponentCreateOptions extends SelectComponentCreateOptions {
+    /**
+     * Options the user can choose from, overwrites the options of string select component
+     */
+    options?: string[];
 }
 
 /**
@@ -225,3 +502,8 @@ interface TextInputComponentCreateOptions extends ComponentCreateOptions {
      */
     value?: string;
 }
+
+/**
+ * Options that can be passed when creating a user select component
+ */
+interface UserSelectComponentCreateOptions extends SelectComponentCreateOptions {}

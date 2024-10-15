@@ -21,9 +21,8 @@ const interactionType: SavedInteractionType = {
          */
         const modal = modals.get(interaction.customId);
 
-        // Check if modal was found
+        // Check if modal is implemented
         if (!modal) {
-            // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it seems that interactions with the modal ${bold(
                     interaction.customId
@@ -31,7 +30,6 @@ const interactionType: SavedInteractionType = {
                 ephemeral: true,
             });
 
-            // Notification
             notify(
                 configuration,
                 "error",
@@ -40,18 +38,16 @@ const interactionType: SavedInteractionType = {
                 `I couldn't find any file handling the application command type ${bold(interaction.customId)}.`
             );
 
-            // Exit function
             return;
         }
 
         /**
-         * Whether or not the cooldown expired
+         * Whether the cooldown expired or the time (in ms) a user has to wait before submitting the modal again
          */
         const cooldownValidation = await validateCooldown(modal, interaction);
 
         // Check if cooldown expired
         if (typeof cooldownValidation === "number") {
-            // Interaction response
             interaction.reply({
                 content: `You need to wait ${underlined(
                     cooldownValidation
@@ -59,19 +55,13 @@ const interactionType: SavedInteractionType = {
                 ephemeral: true,
             });
 
-            // Exit function
             return;
         }
 
-        // Try to forward modal interaction response prompt
         await modal
             .execute(configuration, interaction)
-            .then(() =>
-                // Notification
-                updateCooldown("ModalSubmit", modal, interaction)
-            )
+            .then(() => updateCooldown("ModalSubmit", modal, interaction))
             .catch(async (error: Error) => {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but there was an error handling your interaction with the modal ${bold(
                         modal.name
@@ -79,7 +69,6 @@ const interactionType: SavedInteractionType = {
                     ephemeral: true,
                 });
 
-                // Notification
                 notify(
                     configuration,
                     "error",

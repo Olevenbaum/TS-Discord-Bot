@@ -1,5 +1,10 @@
 // Type imports
-import { AutocompleteInteraction, ChatInputCommandInteraction, Snowflake } from "discord.js";
+import {
+    ApplicationCommandOptionType,
+    AutocompleteInteraction,
+    ChatInputCommandInteraction,
+    Snowflake,
+} from "discord.js";
 import { NestedArray } from "types/others";
 
 declare global {
@@ -111,7 +116,10 @@ global.commandMention = function (
     // Check wich overload was called
     if (x instanceof AutocompleteInteraction || x instanceof ChatInputCommandInteraction) {
         // Check if chat input command has subcommands
-        if (x.options.getSubcommand()) {
+        if (
+            x.command!.options.length > 0 &&
+            x.command!.options.every((option) => option.type === ApplicationCommandOptionType.Subcommand)
+        ) {
             // Return chat input command mention with subcommand
             return `</${x.commandName} ${x.options.getSubcommandGroup() ?? ""}${x.options.getSubcommand()}:${
                 x.commandId

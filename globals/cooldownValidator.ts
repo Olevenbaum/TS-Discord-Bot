@@ -88,7 +88,7 @@ global.updateCooldown = async function (
     interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction
 ): Promise<void> {
     // Check if the interactable element has a cooldown
-    if (x.cooldown && typeof x.cooldown !== "undefined" && (x.cooldown.servers || x.cooldown.users)) {
+    if (typeof x.cooldown !== "undefined" && (x.cooldown.servers || x.cooldown.users)) {
         /**
          * Name of the interactable element
          */
@@ -101,33 +101,19 @@ global.updateCooldown = async function (
 
         // Check if there are any active cooldowns
         if (oldCooldowns) {
-            // Check if there is a server cooldown
             if (interaction.inGuild() && x.cooldown.servers) {
-                // Check if there is an active server cooldown
                 if (!oldCooldowns.servers) {
-                    // Create new server cooldown collection
                     oldCooldowns.servers = new Collection();
                 }
 
-                // Fetch servers
                 await interaction.client.guilds.fetch();
 
-                // Check if the user of the interaction exists
-                if (interaction.guild) {
-                    // Update server cooldown
-                    oldCooldowns.servers.set(interaction.guild.id, interaction.createdAt);
-                }
-            }
-
-            // Check if there is a user cooldown
-            if (x.cooldown.users) {
-                // Check if there is an active user cooldown
+                oldCooldowns.servers.set(interaction.guild!.id, interaction.createdAt);
+            } else if (x.cooldown.users) {
                 if (!oldCooldowns.users) {
-                    // Create new user cooldown collection
                     oldCooldowns.users = new Collection();
                 }
 
-                // Update user cooldown
                 oldCooldowns.users.set(interaction.user.id, interaction.createdAt);
             }
         } else {
@@ -136,31 +122,18 @@ global.updateCooldown = async function (
              */
             const cooldownObject: CooldownCollections = {};
 
-            // Check if there is a server cooldown
             if (x.cooldown.servers) {
-                // Create new server cooldown collection
                 cooldownObject.servers = new Collection();
 
-                // Fetch servers
                 await interaction.client.guilds.fetch();
 
-                // Check if the server of the interaction exists
-                if (interaction.guild) {
-                    // Update server cooldown
-                    cooldownObject.servers.set(interaction.guild.id, interaction.createdAt);
-                }
-            }
-
-            // Check if there is a user cooldown
-            if (x.cooldown.users) {
-                // Create new user cooldown collection
+                cooldownObject.servers.set(interaction.guild!.id, interaction.createdAt);
+            } else if (x.cooldown.users) {
                 cooldownObject.users = new Collection();
 
-                // Update user cooldown
                 cooldownObject.users.set(interaction.user.id, interaction.createdAt);
             }
 
-            // Create new cooldown object
             cooldowns[type].set(name, cooldownObject);
         }
     }
@@ -171,7 +144,7 @@ global.validateCooldown = async function (
     interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction
 ): Promise<true | number> {
     // Check if the interactable element has a cooldown
-    if (x.cooldown && typeof x.cooldown !== "undefined") {
+    if (typeof x.cooldown !== "undefined") {
         /**
          * Old cooldowns of the interactable element
          */
@@ -181,49 +154,34 @@ global.validateCooldown = async function (
 
         // Check if there are any active cooldowns
         if (!(oldCooldowns && (oldCooldowns.servers || oldCooldowns.users))) {
-            // Return true
             return true;
         }
 
-        /**
-         * Array of cooldown test results
-         */
-        const validations: (boolean | number)[] = [];
-
         // Check if there is an active server cooldown
-        if (interaction.inGuild() && oldCooldowns.servers && x.cooldown.servers) {
-            // Fetch servers
-            await interaction.client.guilds.fetch();
+        if (interaction.inGuild()) {
+            if (oldCooldowns.servers && x.cooldown.servers) {
+                await interaction.client.guilds.fetch();
 
-            // Check if the server of the interaction exists
-            if (interaction.guild) {
-                // Add server cooldown test result
-                validations.push(
-                    interaction.createdAt.getTime() -
-                        ((oldCooldowns.servers.get(interaction.guild.id)?.getTime() ?? 0) + x.cooldown.servers * 1000)
-                );
+                const validation =
+                    (oldCooldowns.servers.get(interaction.guild!.id)?.getTime() ?? 0) +
+                    x.cooldown.servers * 1000 -
+                    interaction.createdAt.getTime();
+
+                return validation < 0 ? true : validation / 1000;
+            } else {
+                return true;
             }
         } else {
-            // Add server cooldown test result
-            validations.push(true);
-        }
+            if (oldCooldowns.users && x.cooldown.users) {
+                const validation =
+                    (oldCooldowns.users.get(interaction.user.id)?.getTime() ?? 0) +
+                    x.cooldown.users * 1000 -
+                    interaction.createdAt.getTime();
 
-        // Check if there is an active user cooldown
-        if (oldCooldowns.users && x.cooldown.users) {
-            // Add user cooldown test result
-            validations.push(
-                interaction.createdAt.getTime() -
-                    ((oldCooldowns.users.get(interaction.user.id)?.getTime() ?? 0) + x.cooldown.users * 1000)
-            );
-        } else {
-            // Add server cooldown test result
-            validations.push(true);
-        }
-
-        // Check whether all cooldown tests passed
-        if (!validations.every((validation) => (typeof validation === "boolean" ? validation : validation >= 0))) {
-            // Return the highest cooldown time
-            return Math.abs(Math.min(...validations.filter((validation) => typeof validation === "number"))) / 1000;
+                return validation < 0 ? true : validation / 1000;
+            } else {
+                return true;
+            }
         }
     }
 

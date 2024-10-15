@@ -14,18 +14,21 @@ const clientReady: SavedEventType = {
     once: true,
     type: Events.ClientReady,
 
-    async execute(configuration: Configuration, client: Client<true>) {
-        // Notification
-        notify(
-            configuration,
-            "success",
-            `Client logged in as '${client.user.username}'`,
-            client,
-            `I've awaken, @member!`
-        );
+    async execute(configuration: Configuration, client: Client<true>, reload: boolean = false) {
+        // Check if bot was restarted
+        if (reload) {
+            updateFiles(configuration, client, true);
+        } else {
+            notify(
+                configuration,
+                "success",
+                `Client logged in as '${client.user.username}'`,
+                client,
+                `I've awaken, @member!`
+            );
 
-        // Load all files
-        updateFiles(configuration, client, ["configuration", "eventTypes"], true);
+            updateFiles(configuration, client, ["configuration", "eventTypes"], true);
+        }
     },
 };
 

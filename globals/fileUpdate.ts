@@ -3,6 +3,7 @@ import "./applicationCommandUpdate";
 import "./applicationCommandTypeUpdate";
 import "./eventTypeUpdate";
 import "./interactionTypeUpdate";
+import "./messageComponentTypeUpdate";
 import "./modalUpdate";
 import "./notifications";
 import "./pathRelativation";
@@ -169,6 +170,19 @@ global.updateFiles = async function (
         updateInteractionTypes(configuration, include.interactionTypes);
     } else if (Array.isArray(include.interactionTypes)) {
         updateInteractionTypes(configuration, include.interactionTypes, exclude);
+    }
+
+    // Call matching overload to update message component types
+    if (!include) {
+        updateMessageComponentTypes(configuration, forceReload);
+    } else if (Array.isArray(include)) {
+        if (include.includes("messageComponentTypes") !== exclude) {
+            updateMessageComponentTypes(configuration);
+        }
+    } else if (typeof include.messageComponentTypes === "boolean" && !exclude) {
+        updateMessageComponentTypes(configuration, include.messageComponentTypes);
+    } else if (Array.isArray(include.messageComponentTypes)) {
+        updateMessageComponentTypes(configuration, include.messageComponentTypes, exclude);
     }
 
     // Call matching overload to update modals

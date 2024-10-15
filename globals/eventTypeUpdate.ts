@@ -48,10 +48,8 @@ global.updateEventTypes = async function (
      */
     const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    // Overwrite exlude parameter if include is empty
     exclude &&= Boolean(include);
 
-    // Notification
     notify(
         configuration,
         "info",
@@ -65,34 +63,27 @@ global.updateEventTypes = async function (
      */
     const eventTypeFiles = await readFiles<SavedEventType>(configuration, configuration.project.eventTypesPath);
 
-    // Iterate through registered event listeners
     (client.eventNames() as (keyof ClientEvents)[]).forEach((eventType) => {
         if (
             forceReload ||
             exclude !== (include?.includes(eventType) ?? true) ||
             !eventTypeFiles.some((eventTypeFile) => eventTypeFile.type === eventType)
         ) {
-            // Remove event listener
             client.removeAllListeners(eventType);
         }
     });
 
-    // Iterate through event types
     eventTypeFiles.forEach((eventTypeFile) => {
-        // Check if event type needs to be loaded
         if (exclude !== (include?.includes(eventTypeFile.type) ?? true)) {
             // Check whether event type is called once
             if (eventTypeFile.once) {
-                // Add once event listener
                 client.once(eventTypeFile.type, (...args) => eventTypeFile.execute(configuration, ...args));
             } else {
-                // Add event listener
                 client.on(eventTypeFile.type, (...args) => eventTypeFile.execute(configuration, ...args));
             }
         }
     });
 
-    // Notification
     notify(configuration, "success", "Finished updating event types");
 };
 

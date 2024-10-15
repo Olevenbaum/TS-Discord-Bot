@@ -23,9 +23,8 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
             ApplicationCommandType[ApplicationCommandType.ChatInput] as keyof typeof ApplicationCommandType
         ].get(interaction.commandName) as SavedChatInputCommand | undefined;
 
-        // Check if chat input command was found
+        // Check if chat input command is implemented
         if (!(chatInputCommand && chatInputCommand.autocomplete)) {
-            // Interaction response
             interaction.respond([]);
 
             /**
@@ -42,13 +41,11 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                     lastNotificationTimestamp.getTime() +
                         configuration.project.applicationCommandAutocompleteErrorCooldown * 1000
             ) {
-                // Update last notification timestamp
                 timestamps.set(
                     `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,
                     interaction.createdAt
                 );
 
-                // Notification
                 notify(
                     configuration,
                     "error",
@@ -60,7 +57,6 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                 );
             }
 
-            // Exit function
             return;
         }
 
@@ -80,13 +76,11 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
                     lastNotificationTimestamp.getTime() +
                         configuration.project.applicationCommandAutocompleteErrorCooldown * 1000
             ) {
-                // Update last notification timestamp
                 timestamps.set(
                     `${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,
                     interaction.createdAt
                 );
 
-                // Notification
                 notify(
                     configuration,
                     "error",

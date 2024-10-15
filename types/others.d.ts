@@ -142,6 +142,11 @@ interface FileInclude {
     interactionTypes?: boolean | InteractionType[];
 
     /**
+     * Whether to update message component types or list of message component types to update
+     */
+    messageComponentTypes?: boolean | MessageComponentType[];
+
+    /**
      * Whether to update messages or list of messages to update
      */
     modals?: boolean | string[];

@@ -19,11 +19,9 @@ global.relativePath = function (destination: string, relativeTo: string = path.r
 
     // Check if relative path is empty
     if (/[\.\/\\]*/.test(relativePath)) {
-        // Return joined path
         return path.join(relativeTo, destination);
     }
 
-    // Return relative path
     return relativePath;
 };
 

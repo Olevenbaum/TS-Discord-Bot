@@ -38,7 +38,6 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
 
         // Check if application command was found
         if (!applicationCommand) {
-            // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it seems that interactions with the application command ${bold(
                     interaction.commandName
@@ -46,7 +45,6 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                 ephemeral: true,
             });
 
-            // Notifications
             notify(
                 configuration,
                 "error",
@@ -55,23 +53,19 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                 `I couldn't find any file handling the application command ${bold(interaction.commandName)}.`
             );
 
-            // Exit function
             return;
         }
 
-        // Check if chat input command is for owners only
+        // Check if ownership is required
         if (applicationCommand.owner) {
-            // Fetch bot owner
             await interaction.client.application.fetch();
 
-            // Check if user is bot owner
             if (
                 (interaction.client.application.owner instanceof User &&
                     interaction.user.id !== interaction.client.application.owner.id) ||
                 (interaction.client.application.owner instanceof Team &&
                     !interaction.client.application.owner.members.has(interaction.user.id))
             ) {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but you don't have permission to use the application command ${bold(
                         interaction.commandName
@@ -79,19 +73,18 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                     ephemeral: true,
                 });
 
-                // Exit function
                 return;
             }
         }
 
         /**
-         * Whether or not the cooldown expired
+         * Whether the cooldown expired or the time (in ms) a user has to wait untill they can use the application
+         * command again
          */
         const cooldownValidation = await validateCooldown(applicationCommand, interaction);
 
         // Check if cooldown expired
         if (typeof cooldownValidation === "number") {
-            // Interaction response
             interaction.reply({
                 content: `You need to wait ${underlined(
                     cooldownValidation
@@ -101,19 +94,13 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                 ephemeral: true,
             });
 
-            // Exit function
             return;
         }
 
-        // Try to forward application command interaction response prompt
         await applicationCommand
             .execute(configuration, interaction)
-            .then(() =>
-                // Update cooldown
-                updateCooldown("ApplicationCommand", applicationCommand, interaction)
-            )
+            .then(() => updateCooldown("ApplicationCommand", applicationCommand, interaction))
             .catch(async (error: Error) => {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but there was an error handling your interaction with the application command ${bold(
                         interaction.commandName
@@ -121,7 +108,6 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
                     ephemeral: true,
                 });
 
-                // Notifications
                 notify(
                     configuration,
                     "error",

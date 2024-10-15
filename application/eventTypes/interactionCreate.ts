@@ -22,19 +22,15 @@ const interactionCreate: SavedEventType = {
                 (blockedUsers.global.includes(interaction.user.id) ||
                     (interaction.guildId && blockedUsers.guilds[interaction.guildId]?.includes(interaction.user.id)))
             ) {
-                // Interaction response
                 interaction.reply({
                     content: "I'm sorry, you are currently not allowed to interact with me.",
                     ephemeral: true,
                 });
 
-                // Exit function
                 return;
             } else if (!configuration.bot.enableBotInteraction && interaction.user.bot) {
-                // Interaction response
                 interaction.reply("I'm sorry, but I'm not allowed to respond to interactions from bots.");
 
-                // Exit function
                 return;
             }
         }
@@ -44,11 +40,9 @@ const interactionCreate: SavedEventType = {
          */
         const interactionType = interactionTypes.get(interaction.type);
 
-        // Check if interaction type was found
+        // Check if interaction type handler is implemented
         if (!interactionType) {
-            // Check if interaction is autocomplete interaction
             if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but it seems that interactions of the type ${bold(
                         InteractionType[interaction.type]
@@ -57,7 +51,6 @@ const interactionCreate: SavedEventType = {
                 });
             }
 
-            // Notification
             notify(
                 configuration,
                 "error",
@@ -66,15 +59,11 @@ const interactionCreate: SavedEventType = {
                 `I couldn't find any file handling the interaction type ${bold(InteractionType[interaction.type])}.`
             );
 
-            // Exit function
             return;
         }
 
-        // Try to forward interaction response prompt
         interactionType.execute(configuration, interaction).catch((error: Error) => {
-            // Check if interaction is autocomplete interaction
             if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but there was an error handling your interaction of the type ${bold(
                         InteractionType[interaction.type]
@@ -83,7 +72,6 @@ const interactionCreate: SavedEventType = {
                 });
             }
 
-            // Notification
             notify(
                 configuration,
                 "error",

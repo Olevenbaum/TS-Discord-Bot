@@ -57,10 +57,8 @@ global.updateApplicationCommands = async function (
      */
     const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    // Overwrite exlude parameter if include is empty
     exclude &&= Boolean(include);
 
-    // Interaction response
     notify(
         configuration,
         "info",
@@ -92,7 +90,6 @@ global.updateApplicationCommands = async function (
      */
     const userCommandFiles = await readFiles<SavedUserCommand>(configuration, configuration.project.userCommandsPath);
 
-    // Remove all outdated application commands
     Object.keys(applicationCommands).forEach((key) => {
         applicationCommands[key as keyof typeof ApplicationCommandType].sweep((_, applicationCommandName) => {
             // Check type of application command
@@ -103,23 +100,19 @@ global.updateApplicationCommands = async function (
                         (chatInputCommandFile) => chatInputCommandFile.data.name === applicationCommandName
                     );
                 case ApplicationCommandType[ApplicationCommandType.Message]:
-                    // Return whether message command is outdated
                     return !messageCommandFiles.some(
                         (messageCommandFile) => messageCommandFile.data.name === applicationCommandName
                     );
                 case ApplicationCommandType[ApplicationCommandType.User]:
-                    // Return whether user command is outdated
                     return !userCommandFiles.some(
                         (userCommandFile) => userCommandFile.data.name === applicationCommandName
                     );
                 default:
-                    // Return false for unknown application command types
                     return false;
             }
         });
     });
 
-    // Iterate through chat input commands
     chatInputCommandFiles.forEach((applicationCommandFile) => {
         // Check if chat input command already exists
         if (
@@ -130,14 +123,12 @@ global.updateApplicationCommands = async function (
                 ApplicationCommandType[applicationCommandFile.type] as keyof typeof ApplicationCommandType
             ].has(applicationCommandFile.data.name)
         ) {
-            // Set chat input command
             applicationCommands[
                 ApplicationCommandType[applicationCommandFile.type] as keyof typeof ApplicationCommandType
             ].set(applicationCommandFile.data.name, applicationCommandFile);
         }
     });
 
-    // Iterate through message commands
     messageCommandFiles.forEach((applicationCommandFile) => {
         // Check if message command already exists
         if (
@@ -148,14 +139,12 @@ global.updateApplicationCommands = async function (
                 ApplicationCommandType[applicationCommandFile.type] as keyof typeof ApplicationCommandType
             ].has(applicationCommandFile.data.name)
         ) {
-            // Set message command
             applicationCommands[
                 ApplicationCommandType[applicationCommandFile.type] as keyof typeof ApplicationCommandType
             ].set(applicationCommandFile.data.name, applicationCommandFile);
         }
     });
 
-    // Iterate through user commands
     userCommandFiles.forEach((applicationCommandFile) => {
         // Check if user command already exists
         if (
@@ -166,7 +155,6 @@ global.updateApplicationCommands = async function (
                 ApplicationCommandType[applicationCommandFile.type] as keyof typeof ApplicationCommandType
             ].has(applicationCommandFile.data.name)
         ) {
-            // Set user command
             applicationCommands[
                 ApplicationCommandType[applicationCommandFile.type] as keyof typeof ApplicationCommandType
             ].set(applicationCommandFile.data.name, applicationCommandFile);
@@ -197,7 +185,6 @@ global.updateApplicationCommands = async function (
          */
         const promises: Promise<unknown>[] = [];
 
-        // Iterate over application commands
         Object.entries(applicationCommands)
             .map(([_, value]) => value)
             .forEach((applicationCommandCollection) => {
@@ -226,25 +213,19 @@ global.updateApplicationCommands = async function (
                                     (typeof value === "undefined" || (Array.isArray(value) && value.length === 0)) &&
                                     key in defaultValues
                                 ) {
-                                    // Return default value
                                     return [key, defaultValues[key as keyof typeof defaultValues]];
                                 }
 
-                                // Return key value pair
                                 return [key, value];
                             }),
-
-                            // Add application command type
                             ["type", savedApplicationCommand.type],
                         ]) as ApplicationCommandData;
 
                         if (!registeredApplicationCommand) {
-                            // Add create request to promises
                             promises.push(
                                 client.application.commands
                                     .create(savedApplicationCommand.data as ApplicationCommandData)
                                     .then(() => {
-                                        // Notification
                                         notify(
                                             configuration,
                                             "success",
@@ -256,7 +237,6 @@ global.updateApplicationCommands = async function (
                                         );
                                     })
                                     .catch((error: Error) => {
-                                        // Notification
                                         notify(
                                             configuration,
                                             "error",
@@ -271,12 +251,10 @@ global.updateApplicationCommands = async function (
                         } else {
                             // Check if application commands are equal
                             if (forceReload || !registeredApplicationCommand.equals(savedApplicationCommandData)) {
-                                // Add update request to promises
                                 promises.push(
                                     registeredApplicationCommand
                                         .edit(savedApplicationCommand.data as ApplicationCommandData)
                                         .then(() => {
-                                            // Notification
                                             notify(
                                                 configuration,
                                                 "success",
@@ -288,7 +266,6 @@ global.updateApplicationCommands = async function (
                                             );
                                         })
                                         .catch((error: Error) => {
-                                            // Notification
                                             notify(
                                                 configuration,
                                                 "error",
@@ -305,7 +282,6 @@ global.updateApplicationCommands = async function (
                     });
             });
 
-        // Iterate over registered application commands
         registeredApplicationCommands.forEach((registeredApplicationCommand) => {
             // Check if application command still exists locally
             if (
@@ -313,11 +289,9 @@ global.updateApplicationCommands = async function (
                     ApplicationCommandType[registeredApplicationCommand.type] as keyof typeof ApplicationCommandType
                 ].has(registeredApplicationCommand.name)
             ) {
-                // Add delete request to promises
                 registeredApplicationCommand
                     .delete()
                     .then(() => {
-                        // Notification
                         notify(
                             configuration,
                             "success",
@@ -329,7 +303,6 @@ global.updateApplicationCommands = async function (
                         );
                     })
                     .catch((error: Error) => {
-                        // Notification
                         notify(
                             configuration,
                             "error",
@@ -343,30 +316,29 @@ global.updateApplicationCommands = async function (
             }
         });
 
-        // Wait for all promises to resolve
-        await Promise.all(promises).catch((error: Error) => {
-            // Notification
-            notify(
-                configuration,
-                "error",
-                `Failed to update application commands:\n${error}`,
-                client,
-                `I tried to update my tricks, but failed! None of the application commands could be reloaded:\n${code(
-                    error.message
-                )}!`
-            );
-        });
-
-        // Notification
-        notify(
-            configuration,
-            "success",
-            `Added, deleted and updated ${promises.length} application commands`,
-            client,
-            `My update was completed! I've added, deleted and updated ${underlined(
-                promises.length
-            )} application commands!`
-        );
+        await Promise.all(promises)
+            .then(() =>
+                notify(
+                    configuration,
+                    "success",
+                    `Added, deleted and updated ${promises.length} application commands`,
+                    client,
+                    `My update was completed! I've added, deleted and updated ${underlined(
+                        promises.length
+                    )} application commands!`
+                )
+            )
+            .catch((error: Error) => {
+                notify(
+                    configuration,
+                    "error",
+                    `Failed to update application commands:\n${error}`,
+                    client,
+                    `I tried to update my tricks, but failed! None of the application commands could be reloaded:\n${code(
+                        error.message
+                    )}!`
+                );
+            });
     }
 };
 

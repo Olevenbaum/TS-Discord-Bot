@@ -23,9 +23,8 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
             ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
         ].get(interaction.commandName) as SavedChatInputCommand | undefined;
 
-        // Check if chat input command was found
+        // Check if chat input command is implemented
         if (!chatInputCommand) {
-            // Interaction response
             interaction.reply({
                 content: `I'm sorry, but it seems that interactions with the chat input command ${commandMention(
                     interaction
@@ -33,7 +32,6 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
                 ephemeral: true,
             });
 
-            // Notifications
             notify(
                 configuration,
                 "error",
@@ -42,23 +40,19 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
                 `I couldn't find any file handling the chat input command ${commandMention(interaction)}.`
             );
 
-            // Exit function
             return;
         }
 
         // Check if chat input command is for owners only
         if (chatInputCommand.owner) {
-            // Fetch bot owner
             await interaction.client.application.fetch();
 
-            // Check if user is bot owner
             if (
                 (interaction.client.application.owner instanceof User &&
                     interaction.user.id !== interaction.client.application.owner.id) ||
                 (interaction.client.application.owner instanceof Team &&
                     !interaction.client.application.owner.members.has(interaction.user.id))
             ) {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but you don't have permission to use the chat input command ${commandMention(
                         interaction
@@ -66,19 +60,18 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
                     ephemeral: true,
                 });
 
-                // Exit function
                 return;
             }
         }
 
         /**
-         * Whether or not the cooldown expired
+         * Whether the cooldown expired or the time (in ms) a user has to wait till they can use the chat input command
+         * again
          */
         const cooldownValidation = await validateCooldown(chatInputCommand, interaction);
 
         // Check if cooldown expired
         if (typeof cooldownValidation === "number") {
-            // Interaction response
             interaction.reply({
                 content: `You need to wait ${underlined(
                     cooldownValidation
@@ -88,19 +81,13 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
                 ephemeral: true,
             });
 
-            // Exit function
             return;
         }
 
-        // Try to forward chat input command interaction response prompt
         await chatInputCommand
             .execute(configuration, interaction)
-            .then(() =>
-                // Update cooldown
-                updateCooldown("ApplicationCommand", chatInputCommand, interaction)
-            )
+            .then(() => updateCooldown("ApplicationCommand", chatInputCommand, interaction))
             .catch(async (error: Error) => {
-                // Interaction response
                 interaction.reply({
                     content: `I'm sorry, but there was an error handling your interaction with the chat input command ${commandMention(
                         interaction
@@ -108,7 +95,6 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
                     ephemeral: true,
                 });
 
-                // Notifications
                 notify(
                     configuration,
                     "error",

@@ -45,10 +45,8 @@ global.updateInteractionTypes = async function (
      */
     const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    // Overwrite exlude parameter if include is empty
     exclude &&= Boolean(include);
 
-    // Notification
     notify(
         configuration,
         "info",
@@ -67,13 +65,11 @@ global.updateInteractionTypes = async function (
         configuration.project.interactionTypesPath
     );
 
-    // Remove outdated interaction types
     interactionTypes.sweep(
         (_, interactionType) =>
             !interactionTypeFiles.find((interactionTypeFile) => interactionTypeFile.type === interactionType)
     );
 
-    // Iterate through interaction types
     interactionTypeFiles.forEach((interactionTypeFile) => {
         // Check if interaction type already exists or should be reloaded anyway
         if (
@@ -81,12 +77,10 @@ global.updateInteractionTypes = async function (
             exclude !== (include && include.includes(interactionTypeFile.type)) ||
             !interactionTypes.has(interactionTypeFile.type)
         ) {
-            // Set interaction type
             interactionTypes.set(interactionTypeFile.type, interactionTypeFile);
         }
     });
 
-    // Notification
     notify(configuration, "success", `Finished updating interaction types`);
 };
 

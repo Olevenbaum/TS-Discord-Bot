@@ -69,7 +69,6 @@ const chatInputCommand: SavedChatInputCommand = {
                     !(interaction.user.id in interaction.client.application.owner.members.keys()))
             )
         ) {
-            // Interaction response
             interaction.reply({
                 content: `You don't have permission to use this command${
                     interaction.options.getSubcommand().toUpperCase() === "ENABLE" ? "" : " in DMs"
@@ -77,11 +76,9 @@ const chatInputCommand: SavedChatInputCommand = {
                 ephemeral: interaction.inGuild(),
             });
 
-            // Exit function
             return;
         }
 
-        // Check subcommand
         switch (interaction.options.getSubcommand().toUpperCase()) {
             case "BLOCK":
                 /**
@@ -96,7 +93,6 @@ const chatInputCommand: SavedChatInputCommand = {
                     (interaction.client.application.owner instanceof Team &&
                         interaction.client.application.owner?.members.some((member) => member.id === userToBlock.id))
                 ) {
-                    // Interaction response
                     interaction.reply({
                         content: `You can't block ${
                             interaction.client.application.owner instanceof User ? "the" : "an"
@@ -104,7 +100,6 @@ const chatInputCommand: SavedChatInputCommand = {
                         ephemeral: interaction.inGuild(),
                     });
 
-                    // Notification
                     notify(
                         configuration,
                         "warning",
@@ -114,27 +109,22 @@ const chatInputCommand: SavedChatInputCommand = {
                         } from interacting with me.`
                     );
 
-                    // Exit function
                     return;
                 } else if (interaction.client.user.id === userToBlock.id) {
-                    // Interaction response
                     interaction.reply({
                         content: `How the hell would I interact with myself...?! You can't block me!`,
                         ephemeral: interaction.inGuild(),
                     });
 
-                    // Exit function
                     return;
                 }
 
-                // Check if interaction was on a server
+                // Block user from interacting with bot
                 if (interaction.inGuild()) {
-                    // Check if user is already blocked
                     if (
                         interaction.guildId in blockedUsers.guilds &&
                         blockedUsers.guilds[interaction.guildId]!.includes(userToBlock.id)
                     ) {
-                        // Interaction response
                         interaction.reply({
                             content: `${userMention(
                                 userToBlock.id
@@ -142,19 +132,14 @@ const chatInputCommand: SavedChatInputCommand = {
                             ephemeral: true,
                         });
                     } else {
-                        // Check if server is in blocked users
                         if (!(interaction.guildId in blockedUsers.guilds)) {
-                            // Add server to blocked users
                             blockedUsers.guilds[interaction.guildId] = [];
                         }
 
-                        // Add user to blocked users
                         blockedUsers.guilds[interaction.guildId]!.push(userToBlock.id);
 
-                        // Sort blocked users
                         blockedUsers.guilds[interaction.guildId]!.sort();
 
-                        // Interaction response
                         interaction.reply({
                             content: `${userMention(
                                 userToBlock.id
@@ -163,25 +148,19 @@ const chatInputCommand: SavedChatInputCommand = {
                         });
                     }
                 } else {
-                    // Check if user is already blocked
                     if (blockedUsers.global.includes(userToBlock.id)) {
-                        // Interaction response
                         interaction.reply(
                             `${userMention(userToBlock.id)} is already blocked from interacting with me.`
                         );
                     } else {
-                        // Add user to blocked users
                         blockedUsers.global.push(userToBlock.id);
 
-                        // Sort blocked users
                         blockedUsers.global.sort();
 
-                        // Interaction response
                         interaction.reply(`${userMention(userToBlock.id)} has been blocked from interacting with me.`);
                     }
                 }
 
-                // Break switch
                 break;
 
             case "CLEAR":
