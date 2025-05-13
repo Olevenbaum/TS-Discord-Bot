@@ -92,9 +92,9 @@ interface SavedEventType {
     type: keyof ClientEvents;
 
     /**
-     * The **execute()** method forwards the prompt to response to the interaction or handles it by itself.
+     * Forwards the prompt to response to the interaction or handles it by itself
      *
-     * @param args The needed arguments to response to an interaction or the emitted event
+     * @param args Arguments to response to an interaction or an emitted event
      */
     execute(
         configuration: Configuration,
