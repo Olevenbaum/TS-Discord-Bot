@@ -48,44 +48,44 @@ global.updateApplicationCommandTypes = async function (
     exclude &&= Boolean(include);
 
     notify(
-        configuration,
-        "info",
-        `Updating application command type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
-            Array.isArray(include)
-                ? ` ${include
-                      .map((applicationCommandType) => `'${ApplicationCommandType[applicationCommandType]}'`)
-                      .join(", ")}`
-                : ""
-        }...`
-    );
+		configuration,
+		"INFO",
+		`Updating application command type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
+			Array.isArray(include)
+				? ` ${include
+						.map((applicationCommandType) => `'${ApplicationCommandType[applicationCommandType]}'`)
+						.join(", ")}`
+				: ""
+		}...`,
+	);
 
-    /**
-     * List of application command type files
-     */
-    const applicationCommandTypeFiles = await readFiles<SavedApplicationCommandType>(
-        configuration,
-        configuration.project.applicationCommandTypesPath
-    );
+	/**
+	 * List of application command type files
+	 */
+	const applicationCommandTypeFiles = await readFiles<SavedApplicationCommandType>(
+		configuration,
+		configuration.project.applicationCommandTypesPath,
+	);
 
-    applicationCommandTypes.sweep(
-        (_, applicationCommandType) =>
-            !applicationCommandTypeFiles.some(
-                (applicationCommandTypeFile) => applicationCommandTypeFile.type === applicationCommandType
-            )
-    );
+	applicationCommandTypes.sweep(
+		(_, applicationCommandType) =>
+			!applicationCommandTypeFiles.some(
+				(applicationCommandTypeFile) => applicationCommandTypeFile.type === applicationCommandType,
+			),
+	);
 
-    applicationCommandTypeFiles.forEach((applicationCommandTypeFile) => {
-        // Check if application command type already exists or should be reloaded anyway
-        if (
-            forceReload ||
-            exclude !== (include && include.includes(applicationCommandTypeFile.type)) ||
-            !applicationCommandTypes.has(applicationCommandTypeFile.type)
-        ) {
-            applicationCommandTypes.set(applicationCommandTypeFile.type, applicationCommandTypeFile);
-        }
-    });
+	applicationCommandTypeFiles.forEach((applicationCommandTypeFile) => {
+		// Check if application command type already exists or should be reloaded anyway
+		if (
+			forceReload ||
+			exclude !== (include && include.includes(applicationCommandTypeFile.type)) ||
+			!applicationCommandTypes.has(applicationCommandTypeFile.type)
+		) {
+			applicationCommandTypes.set(applicationCommandTypeFile.type, applicationCommandTypeFile);
+		}
+	});
 
-    notify(configuration, "success", "Finished updating application command types");
+	notify(configuration, "SUCCESS", "Finished updating application command types");
 };
 
 export {};

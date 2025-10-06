@@ -12,7 +12,7 @@ import {
 import { SavedApplicationCommand } from "../types/applicationCommands";
 import { SavedMessageComponent } from "../types/components";
 import { SavedModal } from "../types/modals";
-import { CooldownCollections } from "types/others";
+import { CooldownCollections } from "../types/others";
 
 declare global {
     /**

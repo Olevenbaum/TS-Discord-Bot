@@ -42,46 +42,48 @@ const interactionCreate: SavedEventType = {
 
         // Check if interaction type handler is implemented
         if (!interactionType) {
-            if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
-                interaction.reply({
-                    content: `I'm sorry, but it seems that interactions of the type ${bold(
-                        InteractionType[interaction.type]
-                    )} can't be processed at the moment.`,
-                    ephemeral: true,
-                });
-            }
+			if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
+				interaction.reply({
+					content: `I'm sorry, but it seems that interactions of the type ${bold(
+						InteractionType[interaction.type],
+					)} can't be processed at the moment.`,
+					ephemeral: true,
+				});
+			}
 
-            notify(
-                configuration,
-                "error",
-                `Found no file handling interaction type '${InteractionType[interaction.type]}'`,
-                interaction.client,
-                `I couldn't find any file handling the interaction type ${bold(InteractionType[interaction.type])}.`
-            );
+			notify(
+				configuration,
+				"ERROR",
+				`Found no file handling interaction type '${InteractionType[interaction.type]}'`,
+				interaction.client,
+				`I couldn't find any file handling the interaction type ${bold(InteractionType[interaction.type])}.`,
+				2,
+			);
 
-            return;
-        }
+			return;
+		}
 
-        interactionType.execute(configuration, interaction).catch((error: Error) => {
-            if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
-                interaction.reply({
-                    content: `I'm sorry, but there was an error handling your interaction of the type ${bold(
-                        InteractionType[interaction.type]
-                    )}.`,
-                    ephemeral: true,
-                });
-            }
+		interactionType.execute(configuration, interaction).catch((error: Error) => {
+			if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) {
+				interaction.reply({
+					content: `I'm sorry, but there was an error handling your interaction of the type ${bold(
+						InteractionType[interaction.type],
+					)}.`,
+					ephemeral: true,
+				});
+			}
 
-            notify(
-                configuration,
-                "error",
-                `Failed to execute interaction type '${InteractionType[interaction.type]}':\n${error}`,
-                interaction.client,
-                `I failed to execute the interaction type ${bold(InteractionType[interaction.type])}:\n${code(
-                    error.message
-                )}\nHave a look at the logs for more information.`
-            );
-        });
+			notify(
+				configuration,
+				"ERROR",
+				`Failed to execute interaction type '${InteractionType[interaction.type]}':\n${error}`,
+				interaction.client,
+				`I failed to execute the interaction type ${bold(InteractionType[interaction.type])}:\n${code(
+					error.message,
+				)}\nHave a look at the logs for more information.`,
+				3,
+			);
+		});
     },
 };
 

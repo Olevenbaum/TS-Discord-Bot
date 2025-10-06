@@ -22,12 +22,13 @@ const consoleCommand: ConsoleCommand = {
     async execute(configuration: Configuration, client: Client<true>, rlInterface: Interface) {
         // Notification
         await notify(
-            configuration,
-            "info",
-            "Shutting down...",
-            client,
-            `I'm tired and need to rest... See you! ZzZzZz...`
-        );
+			configuration,
+			"INFO",
+			"Shutting down...",
+			client,
+			`I'm tired and need to rest... See you! ZzZzZz...`,
+			5,
+		);
 
         // Destroy the client and terminate the connection
         await client.destroy();

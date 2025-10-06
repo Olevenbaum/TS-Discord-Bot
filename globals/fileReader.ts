@@ -53,7 +53,7 @@ global.readFiles = async function <FileType>(configuration: Configuration, direc
     } catch (error) {
         // Check if directory was found
         if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-            notify(configuration, "warning", `Found no directory at ${path.relative(newPath, path.resolve())}`);
+            notify(configuration, "WARNING", `Found no directory at ${path.relative(newPath, path.resolve())}`);
 
             return [];
         }

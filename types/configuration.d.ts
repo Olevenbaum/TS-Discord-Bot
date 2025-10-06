@@ -1,94 +1,105 @@
 // Type imports
 import { Snowflake } from "discord.js";
+import { NotificationImportance, NotificationType } from "./others";
 
 /**
  * Discord application data
  */
 interface Application {
-    /**
-     * Application ID
-     */
-    applicationId: string;
+	/**
+	 * Application ID
+	 */
+	applicationId: string;
 
-    /**
-     * Public key of the application
-     */
-    publicKey: string;
+	/**
+	 * Public key of the application
+	 */
+	publicKey: string;
 
-    /**
-     * Verification token of the application
-     */
-    token: string;
+	/**
+	 * Verification token of the application
+	 */
+	token: string;
 }
 
 /**
  * Configuration data imported from JSON file to specify the bots behavior
  */
 interface BotConfiguration {
-    /**
-     * Single or multiple applications that can be started
-     */
-    applications: Application | Application[];
+	/**
+	 * Single or multiple applications that can be started
+	 */
+	applications: Application | Application[];
 
-    /**
-     * Whether the commands should be updated automatically
-     */
-    enableAutoUpdate?: boolean;
+	/**
+	 * Whether the commands should be updated automatically
+	 */
+	enableAutoUpdate?: boolean;
 
-    /**
-     * Whether other bots can interact with this bot
-     */
-    enableBotInteraction?: boolean;
+	/**
+	 * Whether other bots can interact with this bot
+	 */
+	enableBotInteraction?: boolean;
 
-    /**
-     * Whether another bot should be started in case of an invalid token
-     */
-    enableBotIteration?: boolean;
+	/**
+	 * Whether another bot should be started in case of an invalid token
+	 */
+	enableBotIteration?: boolean;
 
-    /**
-     * Whether blocked users can interact with the bot
-     */
-    enableBlockedUsers?: boolean;
+	/**
+	 * Whether blocked users can interact with the bot
+	 */
+	enableBlockedUsers?: boolean;
 
-    /**
-     * Whether notifications should be enabled
-     */
-    notifications?: boolean | NotificationPreferences;
+	/**
+	 * Whether notifications should be enabled
+	 */
+	notifications?: boolean | number | NotificationPreferences;
 }
 
 /**
  * Configuration data to specify the bots behavior and project structure
  */
 interface Configuration {
-    /**
-     * Bot configuration data
-     */
-    bot: BotConfiguration;
+	/**
+	 * Bot configuration data
+	 */
+	bot: BotConfiguration;
 
-    /**
-     * Project configuration data
-     */
-    project: ProjectConfiguration;
+	/**
+	 * Project configuration data
+	 */
+	project: ProjectConfiguration;
 }
 
 /**
  * Notification preferences
  */
 interface NotificationPreferences {
-    /**
-     * Team members to exclude from receiving notifications
-     */
-    excludedMembers?: Snowflake[];
+	/**
+	 * Team members to exclude from receiving notifications
+	 */
+	excludedMembers?: Snowflake[];
 
-    /**
-     * Team member roles to exclude from receiving notifications
-     */
-    excludedRoles: string[];
+	/**
+	 * Team member roles to exclude from receiving notifications
+	 */
+	excludedRoles: string[];
 
-    /**
-     * Types of notifications to enable
-     */
-    types?: string[];
+	/**
+	 * Importance level of notifications to receive
+	 */
+	minImportance?: NotificationImportance;
+
+	/**
+	 * Team members and their chosen minimal importance of notifications to receive
+	 */
+	restrictedMembers?: { [key: Snowflake]: NotificationImportance };
+
+	/**
+	 * Types of notifications to enable
+	 */
+	types?: NotificationType[];
 }
 
 /**

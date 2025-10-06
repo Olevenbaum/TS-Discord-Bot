@@ -39,24 +39,23 @@ export const applicationCommandTypes: Collection<ApplicationCommandType, SavedAp
 /**
  * Collection of locally saved application commands
  */
-export const applicationCommands: Record<
-    keyof typeof ApplicationCommandType,
-    Collection<string, SavedApplicationCommand>
+export const applicationCommands: Partial<
+	Record<keyof typeof ApplicationCommandType, Collection<string, SavedApplicationCommand>>
 > = {
-    /**
-     * Chat input application commands
-     */
-    ChatInput: new Collection<string, SavedChatInputCommand>(),
+	/**
+	 * Chat input application commands
+	 */
+	ChatInput: new Collection<string, SavedChatInputCommand>(),
 
-    /**
-     * Message application commands
-     */
-    Message: new Collection<string, SavedMessageCommand>(),
+	/**
+	 * Message application commands
+	 */
+	Message: new Collection<string, SavedMessageCommand>(),
 
-    /**
-     * User application commands
-     */
-    User: new Collection<string, SavedUserCommand>(),
+	/**
+	 * User application commands
+	 */
+	User: new Collection<string, SavedUserCommand>(),
 };
 
 /**
@@ -67,51 +66,51 @@ export const blockedUsers: { global: Snowflake[]; guilds: Record<Snowflake, Snow
 /**
  * Collection of locally saved (message) components
  */
-export const components: Record<keyof typeof ComponentType, Collection<string, SavedComponent>> = {
-    /**
-     * Action rows
-     */
-    ActionRow: new Collection<string, SavedActionRow>(),
+export const components: Partial<Record<keyof typeof ComponentType, Collection<string, SavedComponent>>> = {
+	/**
+	 * Action rows
+	 */
+	ActionRow: new Collection<string, SavedActionRow>(),
 
-    /**
-     * Button components
-     */
-    Button: new Collection<string, SavedButtonComponent>(),
+	/**
+	 * Button components
+	 */
+	Button: new Collection<string, SavedButtonComponent>(),
 
-    /**
-     * Channel select components
-     */
-    ChannelSelect: new Collection<string, SavedChannelSelectComponent>(),
+	/**
+	 * Channel select components
+	 */
+	ChannelSelect: new Collection<string, SavedChannelSelectComponent>(),
 
-    /**
-     * Mentionable select components
-     */
-    MentionableSelect: new Collection<string, SavedMentionableSelectComponent>(),
+	/**
+	 * Mentionable select components
+	 */
+	MentionableSelect: new Collection<string, SavedMentionableSelectComponent>(),
 
-    /**
-     * Role select components
-     */
-    RoleSelect: new Collection<string, SavedRoleSelectComponent>(),
+	/**
+	 * Role select components
+	 */
+	RoleSelect: new Collection<string, SavedRoleSelectComponent>(),
 
-    /**
-     * Select menu components
-     */
-    SelectMenu: new Collection<string, SavedSelectMenuComponent>(),
+	/**
+	 * Select menu components
+	 */
+	SelectMenu: new Collection<string, SavedSelectMenuComponent>(),
 
-    /**
-     * String select components
-     */
-    StringSelect: new Collection<string, SavedStringSelectComponent>(),
+	/**
+	 * String select components
+	 */
+	StringSelect: new Collection<string, SavedStringSelectComponent>(),
 
-    /**
-     * Text input components
-     */
-    TextInput: new Collection<string, SavedTextInputComponent>(),
+	/**
+	 * Text input components
+	 */
+	TextInput: new Collection<string, SavedTextInputComponent>(),
 
-    /**
-     * User select components
-     */
-    UserSelect: new Collection<string, SavedUserSelectComponent>(),
+	/**
+	 * User select components
+	 */
+	UserSelect: new Collection<string, SavedUserSelectComponent>(),
 };
 
 /**

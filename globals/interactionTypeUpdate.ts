@@ -48,40 +48,40 @@ global.updateInteractionTypes = async function (
     exclude &&= Boolean(include);
 
     notify(
-        configuration,
-        "info",
-        `Updating interaction type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
-            Array.isArray(include)
-                ? ` ${include.map((interactionType) => `'${InteractionType[interactionType]}'`).join(", ")}`
-                : ""
-        }...`
-    );
+		configuration,
+		"INFO",
+		`Updating interaction type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
+			Array.isArray(include)
+				? ` ${include.map((interactionType) => `'${InteractionType[interactionType]}'`).join(", ")}`
+				: ""
+		}...`,
+	);
 
-    /**
-     * List of interaction type files
-     */
-    const interactionTypeFiles = await readFiles<SavedInteractionType>(
-        configuration,
-        configuration.project.interactionTypesPath
-    );
+	/**
+	 * List of interaction type files
+	 */
+	const interactionTypeFiles = await readFiles<SavedInteractionType>(
+		configuration,
+		configuration.project.interactionTypesPath,
+	);
 
-    interactionTypes.sweep(
-        (_, interactionType) =>
-            !interactionTypeFiles.find((interactionTypeFile) => interactionTypeFile.type === interactionType)
-    );
+	interactionTypes.sweep(
+		(_, interactionType) =>
+			!interactionTypeFiles.find((interactionTypeFile) => interactionTypeFile.type === interactionType),
+	);
 
-    interactionTypeFiles.forEach((interactionTypeFile) => {
-        // Check if interaction type already exists or should be reloaded anyway
-        if (
-            forceReload ||
-            exclude !== (include && include.includes(interactionTypeFile.type)) ||
-            !interactionTypes.has(interactionTypeFile.type)
-        ) {
-            interactionTypes.set(interactionTypeFile.type, interactionTypeFile);
-        }
-    });
+	interactionTypeFiles.forEach((interactionTypeFile) => {
+		// Check if interaction type already exists or should be reloaded anyway
+		if (
+			forceReload ||
+			exclude !== (include && include.includes(interactionTypeFile.type)) ||
+			!interactionTypes.has(interactionTypeFile.type)
+		) {
+			interactionTypes.set(interactionTypeFile.type, interactionTypeFile);
+		}
+	});
 
-    notify(configuration, "success", `Finished updating interaction types`);
+	notify(configuration, "SUCCESS", `Finished updating interaction types`);
 };
 
 export {};

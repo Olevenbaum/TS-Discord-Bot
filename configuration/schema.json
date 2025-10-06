@@ -1,72 +1,127 @@
 {
-    "additionalProperties": false,
-    "description": "Configuration data to configure the application to fit your bot",
-    "$id": "./configuration.json",
-    "properties": {
-        "applications": {
-            "description": "Bot specific data of a single bot or multiple bots",
-            "items": {
-                "description": "",
-                "properties": {
-                    "applicationId": {
-                        "description": "The ID of the bot",
-                        "pattern": "^([0-9]{18})$",
-                        "type": "string"
-                    },
-                    "publicKey": {
-                        "description": "The public key of the bot",
-                        "type": "string"
-                    },
-                    "token": {
-                        "description": "The token to login on Discord",
-                        "pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
-                        "type": "string"
-                    }
-                },
-                "required": ["applicationId", "publicKey", "token"],
-                "type": "object"
-            },
-            "minItems": 1,
-            "properties": {
-                "applicationId": {
-                    "description": "The ID of the bot",
-                    "pattern": "^([0-9]{18})$",
-                    "type": "string"
-                },
-                "publicKey": {
-                    "description": "The public key of the bot",
-                    "type": "string"
-                },
-                "token": {
-                    "description": "The token to login on Discord",
-                    "pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
-                    "type": "string"
-                }
-            },
-            "required": ["applicationId", "publicKey", "token"],
-            "type": ["array", "object"],
-            "uniqueItems": true
-        },
-        "enableBlockedUsers": {
-            "description": "Whether all users are allowed to interact with the bot",
-            "type": "boolean"
-        },
-        "enableBotInteraction": {
-            "description": "Whether other bots can unse features of this bot",
-            "type": "boolean"
-        },
-        "enableBotIteration": {
-            "description": "Whether another bot should be used in case of a wrong token",
-            "type": "boolean"
-        },
-        "notifications": {
-            "description": "",
-            "properties": {},
-            "type": ["boolean", "object"]
-        }
-    },
-    "required": ["applications"],
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Configuration",
-    "type": "object"
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "Configuration data to configure the application to fit your bot",
+	"$id": "./configuration.json",
+	"properties": {
+		"$schema": {
+			"description": "The schema version used",
+			"type": "string"
+		},
+		"applications": {
+			"additionalProperties": false,
+			"description": "Bot specific data of a single bot or multiple bots",
+			"items": {
+				"additionalProperties": false,
+				"description": "Bot specific data of a single bot",
+				"properties": {
+					"applicationId": {
+						"description": "The ID of the bot",
+						"pattern": "^([0-9]{18})$",
+						"type": "string"
+					},
+					"publicKey": {
+						"description": "The public key of the bot",
+						"type": "string"
+					},
+					"token": {
+						"description": "The token to login on Discord",
+						"pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
+						"type": "string"
+					}
+				},
+				"required": ["applicationId", "publicKey", "token"],
+				"type": "object"
+			},
+			"minItems": 1,
+			"properties": {
+				"applicationId": {
+					"description": "The ID of the bot",
+					"pattern": "^([0-9]{18})$",
+					"type": "string"
+				},
+				"publicKey": {
+					"description": "The public key of the bot",
+					"type": "string"
+				},
+				"token": {
+					"description": "The token to login on Discord",
+					"pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
+					"type": "string"
+				}
+			},
+			"required": ["applicationId", "publicKey", "token"],
+			"type": ["array", "object"],
+			"uniqueItems": true
+		},
+		"enableBlockedUsers": {
+			"description": "Whether all users are allowed to interact with the bot",
+			"type": "boolean"
+		},
+		"enableBotInteraction": {
+			"description": "Whether other bots can unse features of this bot",
+			"type": "boolean"
+		},
+		"enableBotIteration": {
+			"description": "Whether another bot should be used in case of a wrong token",
+			"type": "boolean"
+		},
+		"notifications": {
+			"description": "Preferences for who should receive which notifications",
+			"properties": {
+				"excludedMembers": {
+					"items": {
+						"description": "The ID of the team member",
+						"pattern": "^([0-9]{18})$",
+						"type": "string"
+					},
+					"description": "Team members, that do not want or are not supposed to receive any notifications",
+					"type": "array",
+					"uniqueItems": true
+				},
+				"excludedRoles": {
+					"items": {
+						"description": "The ID of the team role",
+						"type": "string"
+					},
+					"description": "Roles in the team, that do not want or are not supposed to receive any notifications",
+					"type": "array",
+					"uniqueItems": true
+				},
+				"minImportance": {
+					"description": "Minimal importance of notifications that should be received",
+					"minimum": 0,
+					"maximum": 5,
+					"type": "integer"
+				},
+				"restrictedMembers": {
+					"additionalProperties": false,
+					"description": "Team members, that only want or are supposed to receive notifications exceeding a certain importance level",
+					"patternProperties": {
+						"^([0-9]{18})$": {
+							"description": "Minimal importance level of notifications the team member wants or is supposed to receive",
+							"minimum": 0,
+							"maximum": 5,
+							"type": "integer"
+						}
+					},
+					"type": "object",
+					"uniqueProperties": true
+				},
+				"types": {
+					"items": {
+						"description": "The type of notification",
+						"enum": ["ERROR", "INFO", "SUCCESS", "TEST", "WARNING"],
+						"type": "string"
+					},
+					"description": "Types of notifications that should be received",
+					"type": "array"
+				}
+			},
+			"type": ["boolean", "number", "object"]
+		}
+	},
+	"required": ["applications"],
+	"title": "Configuration",
+	"type": "object"
 }

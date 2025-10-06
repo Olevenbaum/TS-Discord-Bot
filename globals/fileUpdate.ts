@@ -91,57 +91,57 @@ global.updateFiles = async function (
 
     // Check if global blocked users should be updated
     if (
-        !include ||
-        exclude !==
-            ((Array.isArray(include) && include.includes("blockedUsers")) ||
-                (!Array.isArray(include) && Boolean(include.blockedUsers)))
-    ) {
-        // Notification
-        notify(configuration, "info", "Updating global blocked users...");
+		!include ||
+		exclude !==
+			((Array.isArray(include) && include.includes("blockedUsers")) ||
+				(!Array.isArray(include) && Boolean(include.blockedUsers)))
+	) {
+		// Notification
+		notify(configuration, "INFO", "Updating global blocked users...");
 
-        // Import new blocked users
-        const newBlockedUsers = (await import(
-            relativePath(configuration.project.blockedUsersPath)
-        )) as typeof blockedUsers;
+		// Import new blocked users
+		const newBlockedUsers = (await import(
+			relativePath(configuration.project.blockedUsersPath)
+		)) as typeof blockedUsers;
 
-        // Iterate through blocked users
-        blockedUsers.global.forEach((blockedUser, index) => {
-            // Check if blocked user is still blocked
-            if (!newBlockedUsers.global.includes(blockedUser)) {
-                // Remove blocked user
-                blockedUsers.global.splice(index, 1);
-            }
-        });
+		// Iterate through blocked users
+		blockedUsers.global.forEach((blockedUser, index) => {
+			// Check if blocked user is still blocked
+			if (!newBlockedUsers.global.includes(blockedUser)) {
+				// Remove blocked user
+				blockedUsers.global.splice(index, 1);
+			}
+		});
 
-        // Iterate through new blocked users
-        newBlockedUsers.global.forEach((blockedUser) => {
-            // Check if blocked user is not already blocked
-            if (!blockedUsers.global.includes(blockedUser)) {
-                // Add blocked user
-                blockedUsers.global.push(blockedUser);
-            }
-        });
+		// Iterate through new blocked users
+		newBlockedUsers.global.forEach((blockedUser) => {
+			// Check if blocked user is not already blocked
+			if (!blockedUsers.global.includes(blockedUser)) {
+				// Add blocked user
+				blockedUsers.global.push(blockedUser);
+			}
+		});
 
-        // Notification
-        notify(configuration, "success", "Finished updating global blocked users");
-    }
+		// Notification
+		notify(configuration, "SUCCESS", "Finished updating global blocked users");
+	}
 
-    // Check if configuration should be updated
-    if (
-        !include ||
-        exclude !==
-            ((Array.isArray(include) && include.includes("configuration")) ||
-                (!Array.isArray(include) && Boolean(include.configuration)))
-    ) {
-        // Notification
-        notify(configuration, "info", "Updating configuration data...");
+	// Check if configuration should be updated
+	if (
+		!include ||
+		exclude !==
+			((Array.isArray(include) && include.includes("configuration")) ||
+				(!Array.isArray(include) && Boolean(include.configuration)))
+	) {
+		// Notification
+		notify(configuration, "INFO", "Updating configuration data...");
 
-        // Reload configuration
-        configuration.bot = await import(relativePath(configuration.project.configurationPath));
+		// Reload configuration
+		configuration.bot = await import(relativePath(configuration.project.configurationPath));
 
-        // Notification
-        notify(configuration, "success", "Finished updating configuration data");
-    }
+		// Notification
+		notify(configuration, "SUCCESS", "Finished updating configuration data");
+	}
 
     // Check if client was provided
     if (client) {

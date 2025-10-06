@@ -20,12 +20,13 @@ const clientReady: SavedEventType = {
             updateFiles(configuration, client, true);
         } else {
             notify(
-                configuration,
-                "success",
-                `Client logged in as '${client.user.username}'`,
-                client,
-                `I've awaken, @member!`
-            );
+				configuration,
+				"SUCCESS",
+				`Client logged in as '${client.user.username}'`,
+				client,
+				`I've awaken, @member!`,
+				5,
+			);
 
             updateFiles(configuration, client, ["configuration", "eventTypes"], true);
         }

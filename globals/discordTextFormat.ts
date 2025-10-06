@@ -5,7 +5,7 @@ import {
     ChatInputCommandInteraction,
     Snowflake,
 } from "discord.js";
-import { NestedArray } from "types/others";
+import { NestedArray } from "../types/others";
 
 declare global {
     /**

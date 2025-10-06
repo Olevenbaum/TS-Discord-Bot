@@ -153,6 +153,16 @@ interface FileInclude {
 }
 
 /**
+ * Importance of a notification
+ */
+type NotificationImportance = 0 | 1 | 2 | 3 | 4 | 5;
+
+/**
+ * Types of notifications
+ */
+type NotificationType = "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING";
+
+/**
  * Nested array with unknown depth
  */
 type NestedArray<Type> = Array<Type | NestedArray<Type>>;

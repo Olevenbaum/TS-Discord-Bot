@@ -48,42 +48,42 @@ global.updateMessageComponentTypes = async function (
     exclude &&= Boolean(include);
 
     notify(
-        configuration,
-        "info",
-        `Updating message component type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
-            Array.isArray(include)
-                ? ` ${include.map((messageComponentType) => `'${ComponentType[messageComponentType]}'`).join(", ")}`
-                : ""
-        }...`
-    );
+		configuration,
+		"INFO",
+		`Updating message component type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
+			Array.isArray(include)
+				? ` ${include.map((messageComponentType) => `'${ComponentType[messageComponentType]}'`).join(", ")}`
+				: ""
+		}...`,
+	);
 
-    /**
-     * List of message component type files
-     */
-    const messageComponentTypeFiles = await readFiles<SavedMessageComponentType>(
-        configuration,
-        configuration.project.messageComponentTypesPath
-    );
+	/**
+	 * List of message component type files
+	 */
+	const messageComponentTypeFiles = await readFiles<SavedMessageComponentType>(
+		configuration,
+		configuration.project.messageComponentTypesPath,
+	);
 
-    messageComponentTypes.sweep(
-        (_, messageComponentType) =>
-            !messageComponentTypeFiles.some(
-                (messageComponentTypeFile) => messageComponentTypeFile.type === messageComponentType
-            )
-    );
+	messageComponentTypes.sweep(
+		(_, messageComponentType) =>
+			!messageComponentTypeFiles.some(
+				(messageComponentTypeFile) => messageComponentTypeFile.type === messageComponentType,
+			),
+	);
 
-    messageComponentTypeFiles.forEach((messageComponentTypeFile) => {
-        // Check if message component type already exists or should be reloaded anyway
-        if (
-            forceReload ||
-            exclude !== (include && include.includes(messageComponentTypeFile.type)) ||
-            !messageComponentTypes.has(messageComponentTypeFile.type)
-        ) {
-            messageComponentTypes.set(messageComponentTypeFile.type, messageComponentTypeFile);
-        }
-    });
+	messageComponentTypeFiles.forEach((messageComponentTypeFile) => {
+		// Check if message component type already exists or should be reloaded anyway
+		if (
+			forceReload ||
+			exclude !== (include && include.includes(messageComponentTypeFile.type)) ||
+			!messageComponentTypes.has(messageComponentTypeFile.type)
+		) {
+			messageComponentTypes.set(messageComponentTypeFile.type, messageComponentTypeFile);
+		}
+	});
 
-    notify(configuration, "success", "Finished updating message component types");
+	notify(configuration, "SUCCESS", "Finished updating message component types");
 };
 
 export {};

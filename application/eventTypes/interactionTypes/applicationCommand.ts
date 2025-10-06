@@ -4,64 +4,66 @@ import { applicationCommandTypes } from "../../../globals/variables";
 
 // Type imports
 import { ApplicationCommandType, CommandInteraction, InteractionType } from "discord.js";
-import { Configuration } from "types/configuration";
+import { Configuration } from "../../../types/configuration";
 import { SavedInteractionType } from "../../../types/others";
 
 /**
  * Application command interaction handler
  */
 const interactionType: SavedInteractionType = {
-    type: InteractionType.ApplicationCommand,
+	type: InteractionType.ApplicationCommand,
 
-    async execute(configuration: Configuration, interaction: CommandInteraction) {
-        /**
-         * Application command type of the application command that was interacted with
-         */
-        const applicationCommandType = applicationCommandTypes.get(interaction.commandType);
+	async execute(configuration: Configuration, interaction: CommandInteraction) {
+		/**
+		 * Application command type of the application command that was interacted with
+		 */
+		const applicationCommandType = applicationCommandTypes.get(interaction.commandType);
 
-        // Check if application command type is implemented
-        if (!applicationCommandType) {
-            interaction.reply({
-                content: `I'm sorry, but it seems that interactions with the application command type ${bold(
-                    ApplicationCommandType[interaction.commandType]
-                )} can't be processed at the moment.`,
-                ephemeral: true,
-            });
+		// Check if application command type is implemented
+		if (!applicationCommandType) {
+			interaction.reply({
+				content: `I'm sorry, but it seems that interactions with the application command type ${bold(
+					ApplicationCommandType[interaction.commandType],
+				)} can't be processed at the moment.`,
+				ephemeral: true,
+			});
 
-            notify(
-                configuration,
-                "error",
-                `Found no file handling application command type '${ApplicationCommandType[interaction.commandType]}'`,
-                interaction.client,
-                `I couldn't find any file handling the application command type ${bold(
-                    ApplicationCommandType[interaction.commandType]
-                )}.`
-            );
+			notify(
+				configuration,
+				"ERROR",
+				`Found no file handling application command type '${ApplicationCommandType[interaction.commandType]}'`,
+				interaction.client,
+				`I couldn't find any file handling the application command type ${bold(
+					ApplicationCommandType[interaction.commandType],
+				)}.`,
+				2,
+			);
 
-            return;
-        }
+			return;
+		}
 
-        await applicationCommandType.execute(configuration, interaction).catch((error: Error) => {
-            interaction.reply({
-                content: `I'm sorry, but there was an error handling your interaction with the application command type ${bold(
-                    ApplicationCommandType[interaction.commandType]
-                )}.`,
-                ephemeral: true,
-            });
+		await applicationCommandType.execute(configuration, interaction).catch((error: Error) => {
+			interaction.reply({
+				content: `I'm sorry, but there was an error handling your interaction with the application command type ${bold(
+					ApplicationCommandType[interaction.commandType],
+				)}.`,
+				ephemeral: true,
+			});
 
-            notify(
-                configuration,
-                "error",
-                `Failed to execute application command type '${
-                    ApplicationCommandType[interaction.commandType]
-                }':\n${error}`,
-                interaction.client,
-                `I failed to execute the application command type ${bold(
-                    ApplicationCommandType[interaction.commandType]
-                )}:\n${code(error.message)}\nHave a look at the logs for more information.`
-            );
-        });
-    },
+			notify(
+				configuration,
+				"ERROR",
+				`Failed to execute application command type '${
+					ApplicationCommandType[interaction.commandType]
+				}':\n${error}`,
+				interaction.client,
+				`I failed to execute the application command type ${bold(
+					ApplicationCommandType[interaction.commandType],
+				)}:\n${code(error.message)}\nHave a look at the logs for more information.`,
+				3,
+			);
+		});
+	},
 };
 
 export default interactionType;
