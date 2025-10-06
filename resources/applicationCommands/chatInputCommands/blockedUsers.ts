@@ -11,7 +11,6 @@ import fs from "fs";
 import {
 	ApplicationCommandType,
 	ChatInputCommandInteraction,
-	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	Team,
