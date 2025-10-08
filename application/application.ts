@@ -55,7 +55,7 @@ const main = async (configuration: Configuration, applicationIndex: number = 0):
 		});
 	}
 
-    consoleCommandHandler(configuration, client);
+	consoleCommandHandler(configuration, client);
 };
 
 export { main };

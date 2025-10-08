@@ -13,13 +13,13 @@ import { Configuration } from "../../../../types/configuration";
  * Chat input command handler
  */
 const chatInputCommandInteraction: SavedApplicationCommandType = {
-    type: ApplicationCommandType.ChatInput,
+	type: ApplicationCommandType.ChatInput,
 
-    async execute(configuration: Configuration, interaction: ChatInputCommandInteraction) {
-        /**
-         * Chat input command that was interacted with
-         */
-        const chatInputCommand = applicationCommands[
+	async execute(configuration: Configuration, interaction: ChatInputCommandInteraction) {
+		/**
+		 * Chat input command that was interacted with
+		 */
+		const chatInputCommand = applicationCommands[
 			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
 		]?.get(interaction.commandName) as SavedChatInputCommand | undefined;
 
@@ -66,7 +66,7 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		/**
-		 * Whether the cooldown expired or the time (in ms) a user has to wait till they can use the chat input command
+		 * Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the chat input command
 		 * again
 		 */
 		const cooldownValidation = await validateCooldown(chatInputCommand, interaction);
@@ -107,7 +107,7 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 					3,
 				);
 			});
-    },
+	},
 };
 
 export default chatInputCommandInteraction;

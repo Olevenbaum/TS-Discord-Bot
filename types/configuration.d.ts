@@ -1,5 +1,5 @@
 // Type imports
-import { Snowflake } from "discord.js";
+import { Snowflake, TeamMemberRole } from "discord.js";
 import { NotificationImportance, NotificationType } from "./others";
 
 /**
@@ -84,7 +84,7 @@ interface NotificationPreferences {
 	/**
 	 * Team member roles to exclude from receiving notifications
 	 */
-	excludedRoles: string[];
+	excludedRoles: TeamMemberRole[];
 
 	/**
 	 * Importance level of notifications to receive

@@ -81,7 +81,8 @@
 				},
 				"excludedRoles": {
 					"items": {
-						"description": "The ID of the team role",
+						"description": "The team role",
+						"enum": ["admin", "developer", "read_only"],
 						"type": "string"
 					},
 					"description": "Roles in the team, that do not want or are not supposed to receive any notifications",

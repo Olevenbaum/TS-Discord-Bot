@@ -71,7 +71,7 @@ const chatInputCommand: SavedChatInputCommand = {
 					!(interaction.user.id in interaction.client.application.owner.members.keys()))
 			)
 		) {
-			interaction.reply({
+			await interaction.reply({
 				content: `You don't have permission to use this command${
 					interaction.options.getSubcommand().toUpperCase() === "ENABLE" ? "" : " in DMs"
 				}.`,
@@ -95,7 +95,7 @@ const chatInputCommand: SavedChatInputCommand = {
 					(interaction.client.application.owner instanceof Team &&
 						interaction.client.application.owner?.members.some((member) => member.id === userToBlock.id))
 				) {
-					interaction.reply({
+					await interaction.reply({
 						content: `You can't block ${
 							interaction.client.application.owner instanceof User ? "the" : "an"
 						} owner of this bot!`,
@@ -114,7 +114,7 @@ const chatInputCommand: SavedChatInputCommand = {
 
 					return;
 				} else if (interaction.client.user.id === userToBlock.id) {
-					interaction.reply({
+					await interaction.reply({
 						content: `How the hell would I interact with myself...?! You can't block me!`,
 						ephemeral: interaction.inGuild(),
 					});
@@ -128,7 +128,7 @@ const chatInputCommand: SavedChatInputCommand = {
 						interaction.guildId in blockedUsers.guilds &&
 						blockedUsers.guilds[interaction.guildId]!.includes(userToBlock.id)
 					) {
-						interaction.reply({
+						await interaction.reply({
 							content: `${userMention(
 								userToBlock.id,
 							)} is already blocked from interacting with me on this server.`,
@@ -143,7 +143,7 @@ const chatInputCommand: SavedChatInputCommand = {
 
 						blockedUsers.guilds[interaction.guildId]!.sort();
 
-						interaction.reply({
+						await interaction.reply({
 							content: `${userMention(
 								userToBlock.id,
 							)} has been blocked from interacting with me on this server.`,
@@ -160,7 +160,9 @@ const chatInputCommand: SavedChatInputCommand = {
 
 						blockedUsers.global.sort();
 
-						interaction.reply(`${userMention(userToBlock.id)} has been blocked from interacting with me.`);
+						await interaction.reply(
+							`${userMention(userToBlock.id)} has been blocked from interacting with me.`,
+						);
 					}
 				}
 
@@ -177,7 +179,7 @@ const chatInputCommand: SavedChatInputCommand = {
 				}
 
 				// Interaction response
-				interaction.reply({
+				await interaction.reply({
 					content: `All users have been unblocked from interacting with me${
 						interaction.inGuild() ? " on this server" : ""
 					}.`,
@@ -196,7 +198,7 @@ const chatInputCommand: SavedChatInputCommand = {
 						: !configuration.bot.enableBlockedUsers;
 
 				// Interaction response
-				interaction.reply({
+				await interaction.reply({
 					content: `Blocked users have been ${
 						configuration.bot.enableBlockedUsers ? "enabled" : "disabled"
 					}.`,
@@ -221,12 +223,12 @@ const chatInputCommand: SavedChatInputCommand = {
 						blockedUsers.guilds[interaction.guildId]!.length !== 0
 					) {
 						// Interaction response
-						interaction.reply(
+						await interaction.reply(
 							list(blockedUsers.guilds[interaction.guildId]!.map((userId) => userMention(userId))),
 						);
 					} else {
 						// Interaction response
-						interaction.reply({
+						await interaction.reply({
 							content: "No users are currently blocked from interacting with me on this server.",
 							ephemeral: true,
 						});
@@ -235,10 +237,10 @@ const chatInputCommand: SavedChatInputCommand = {
 					// Check if no users are blocked
 					if (blockedUsers.global.length === 0) {
 						// Interaction response
-						interaction.reply("No users are currently blocked from interacting with me.");
+						await interaction.reply("No users are currently blocked from interacting with me.");
 					} else {
 						// Interaction response
-						interaction.reply(list(blockedUsers.global.map((userId) => userMention(userId))));
+						await interaction.reply(list(blockedUsers.global.map((userId) => userMention(userId))));
 					}
 				}
 
@@ -268,7 +270,7 @@ const chatInputCommand: SavedChatInputCommand = {
 						blockedUsers.guilds[interaction.guildId]!.sort();
 
 						// Interaction response
-						interaction.reply({
+						await interaction.reply({
 							content: `${userMention(
 								userToUnblock.id,
 							)} has been unblocked from interacting with me on this server.`,
@@ -276,7 +278,7 @@ const chatInputCommand: SavedChatInputCommand = {
 						});
 					} else {
 						// Interaction response
-						interaction.reply({
+						await interaction.reply({
 							content: `${userMention(
 								userToUnblock.id,
 							)} is not blocked from interacting with me on this server and therefore can't be unblocked.`,
@@ -293,12 +295,12 @@ const chatInputCommand: SavedChatInputCommand = {
 						blockedUsers.global.sort();
 
 						// Interaction response
-						interaction.reply(
+						await interaction.reply(
 							`${userMention(userToUnblock.id)} has been unblocked from interacting with me.`,
 						);
 					} else {
 						// Interaction response
-						interaction.reply(
+						await interaction.reply(
 							`${userMention(
 								userToUnblock.id,
 							)} is not blocked from interacting with me and therefore can't be unblocked.`,

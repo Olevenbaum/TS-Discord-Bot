@@ -10,61 +10,63 @@ import { SavedChatInputCommand, SavedMessageCommand, SavedUserCommand } from "..
 import { Configuration } from "../types/configuration";
 
 declare global {
-    /**
-     * Updates all changed application commands, adds new ones and deletes removed ones and updates the registered
-     * application commands
-     * @param configuration The configuration of the project and bot
-     * @param client The Discord bot client to register the application commands to
-     * @param forceReload Whether to reload all files no matter if files were changed, new files added or old files
-     * removed, defaults to false
-     */
-    function updateApplicationCommands(
-        configuration: Configuration,
-        client?: Client<true>,
-        forceReload?: boolean
-    ): Promise<void>;
+	/**
+	 * Updates all changed application commands, adds new ones and deletes removed ones and updates the registered
+	 * application commands
+	 * @param configuration The configuration of the project and bot
+	 * @param client The Discord bot client to register the application commands to
+	 * @param forceReload Whether to reload all files no matter if files were changed, new files added or old files
+	 * removed, defaults to false
+	 */
+	function updateApplicationCommands(
+		configuration: Configuration,
+		client?: Client<true>,
+		forceReload?: boolean,
+	): Promise<void>;
 
-    /**
-     * Updates all changed application commands, adds new ones and deletes removed ones and updates the registered
-     * application commands
-     * @param configuration The configuration of the project and bot
-     * @param client The Discord bot client to register the application commands to
-     * @param include Application commands that should be reloaded, passing an empty array results in the same
-     * behavior as not passing this parameter
-     * @param exclude Whether to include or exclude the specified application commands
-     */
-    function updateApplicationCommands(
-        configuration: Configuration,
-        client?: Client<true>,
-        include?: `${string}:${ApplicationCommandType}`[],
-        exclude?: boolean
-    ): Promise<void>;
+	/**
+	 * Updates all changed application commands, adds new ones and deletes removed ones and updates the registered
+	 * application commands
+	 * @param configuration The configuration of the project and bot
+	 * @param client The Discord bot client to register the application commands to
+	 * @param include Application commands that should be reloaded, passing an empty array results in the same
+	 * behavior as not passing this parameter
+	 * @param exclude Whether to include or exclude the specified application commands
+	 */
+	function updateApplicationCommands(
+		configuration: Configuration,
+		client?: Client<true>,
+		include?: `${string}:${ApplicationCommandType}`[],
+		exclude?: boolean,
+	): Promise<void>;
 }
 
 global.updateApplicationCommands = async function (
-    configuration: Configuration,
-    client?: Client<true>,
-    x: boolean | `${string}:${ApplicationCommandType}`[] = false,
-    exclude: boolean = false
+	configuration: Configuration,
+	client?: Client<true>,
+	x: boolean | `${string}:${ApplicationCommandType}`[] = false,
+	exclude: boolean = false,
 ): Promise<void> {
-    /**
-     * Overload parameter
-     */
-    const forceReload = typeof x === "boolean" ? x : false;
+	/**
+	 * Overload parameter
+	 */
+	const forceReload = typeof x === "boolean" ? x : false;
 
-    /**
-     * Overload parameter
-     */
-    const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
+	/**
+	 * Overload parameter
+	 */
+	const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    exclude &&= Boolean(include);
+	exclude &&= Boolean(include);
 
-    notify(
+	notify(
 		configuration,
 		"INFO",
 		`Updating application command${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
 			Array.isArray(include)
-				? ` ${include.map((applicationCommand) => `'${applicationCommand}'`).join(", ")}`
+				? ` ${include
+						.map((applicationCommand) => `'${applicationCommand.replace(/:[1-4]$/i, "")}'`)
+						.join(", ")}`
 				: ""
 		}... `,
 	);
@@ -369,7 +371,7 @@ global.updateApplicationCommands = async function (
 					client,
 					`My update was completed! I've added, deleted and updated ${underlined(
 						promises.length,
-					)} application commands!`,
+					)} application command${promises.length === 1 ? "" : "s"}!`,
 					1,
 				),
 			)

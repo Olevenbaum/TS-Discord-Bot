@@ -16,10 +16,10 @@ const userCommandInteraction: SavedApplicationCommandType = {
     type: ApplicationCommandType.User,
 
     async execute(configuration: Configuration, interaction: UserContextMenuCommandInteraction) {
-        /**
-         * User command that was interacted with
-         */
-        const userCommand = applicationCommands[
+		/**
+		 * User command that was interacted with
+		 */
+		const userCommand = applicationCommands[
 			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
 		]?.get(interaction.commandName) as SavedUserCommand | undefined;
 
@@ -66,7 +66,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		/**
-		 * Whether cooldown expired or the time (in ms) a user has to wait till they can use the user command again
+		 * Whether cooldown expired or the time (in seconds) a user has to wait till they can use the user command again
 		 */
 		const cooldownValidation = await validateCooldown(userCommand, interaction);
 
@@ -106,7 +106,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
 					3,
 				);
 			});
-    },
+	},
 };
 
 export default userCommandInteraction;

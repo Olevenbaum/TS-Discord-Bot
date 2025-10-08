@@ -13,13 +13,13 @@ import { Configuration } from "../../../../types/configuration";
  * Message command handler
  */
 const userCommandInteraction: SavedApplicationCommandType = {
-    type: ApplicationCommandType.Message,
+	type: ApplicationCommandType.Message,
 
-    async execute(configuration: Configuration, interaction: MessageContextMenuCommandInteraction) {
-        /**
-         * Message application command that was interacted with
-         */
-        const messageCommand = applicationCommands[
+	async execute(configuration: Configuration, interaction: MessageContextMenuCommandInteraction) {
+		/**
+		 * Message application command that was interacted with
+		 */
+		const messageCommand = applicationCommands[
 			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
 		]?.get(interaction.commandName) as SavedMessageCommand | undefined;
 
@@ -66,7 +66,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		/**
-		 * Whether the cooldown expired or the time (in ms) a user has to wait till they can use the message command
+		 * Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the message command
 		 * again
 		 */
 		const cooldownValidation = await validateCooldown(messageCommand, interaction);
@@ -107,7 +107,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
 					3,
 				);
 			});
-    },
+	},
 };
 
 export default userCommandInteraction;

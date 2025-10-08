@@ -13,16 +13,16 @@ import { SavedInteractionType } from "../../../types/others";
  * Template for interaction handler
  */
 const interactionType: SavedInteractionType = {
-    type: InteractionType.ModalSubmit,
+	type: InteractionType.ModalSubmit,
 
-    async execute(configuration: Configuration, interaction: ModalSubmitInteraction) {
-        /**
-         * Modal that was interacted with
-         */
-        const modal = modals.get(interaction.customId);
+	async execute(configuration: Configuration, interaction: ModalSubmitInteraction) {
+		/**
+		 * Modal that was interacted with
+		 */
+		const modal = modals.get(interaction.customId);
 
-        // Check if modal is implemented
-        if (!modal) {
+		// Check if modal is implemented
+		if (!modal) {
 			interaction.reply({
 				content: `I'm sorry, but it seems that interactions with the modal ${bold(
 					interaction.customId,
@@ -43,7 +43,7 @@ const interactionType: SavedInteractionType = {
 		}
 
 		/**
-		 * Whether the cooldown expired or the time (in ms) a user has to wait before submitting the modal again
+		 * Whether the cooldown expired or the time (in seconds) a user has to wait before submitting the modal again
 		 */
 		const cooldownValidation = await validateCooldown(modal, interaction);
 
@@ -81,7 +81,7 @@ const interactionType: SavedInteractionType = {
 					3,
 				);
 			});
-    },
+	},
 };
 
 export default interactionType;
