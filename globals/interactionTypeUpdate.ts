@@ -40,8 +40,8 @@ global.updateInteractionTypes = async function (
 
 	notify(
 		"INFO",
-		`Updating interaction type${Array.isArray(types) && types.length === 1 ? " " : "s "}${
-			Array.isArray(types) ? `${types.map((interactionType) => `'${interactionType}'`).join(", ")}` : ""
+		`Updating interaction type${Array.isArray(types) && types.length === 1 ? "" : "s"}${
+			Array.isArray(types) ? ` ${types.map((interactionType) => `'${interactionType}'`).join(", ")}` : ""
 		}...`,
 	);
 

@@ -68,11 +68,17 @@ global.notify = async function (
 		}
 	}
 
+	/** Timestamp */
+	const timestamp = getTime();
+
 	/** Client overload parameter */
 	const client = typeof x === "string" ? (typeof y === "string" ? undefined : y) : x;
 
 	/** Console message overload parameter */
-	const consoleMessage = typeof x === "string" ? x : undefined;
+	const consoleMessage = (typeof x === "string" ? x : undefined)?.replaceAll(
+		"\n",
+		"\n" + " ".repeat(timestamp.length + 4),
+	);
 
 	/** Message overload parameter */
 	const message = typeof y === "string" ? y : typeof z === "string" ? z : undefined;

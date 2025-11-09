@@ -40,9 +40,9 @@ global.updateMessageComponentTypes = async function (
 
 	notify(
 		"INFO",
-		`Updating message component type${Array.isArray(types) && types.length === 1 ? " " : "s "}${
+		`Updating message component type${Array.isArray(types) && types.length === 1 ? "" : "s"}${
 			Array.isArray(types)
-				? `${types.map((messageComponentType) => `'${ComponentType[messageComponentType]}'`).join(", ")}`
+				? ` ${types.map((messageComponentType) => `'${ComponentType[messageComponentType]}'`).join(", ")}`
 				: ""
 		}...`,
 	);

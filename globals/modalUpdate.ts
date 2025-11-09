@@ -32,8 +32,8 @@ global.updateModals = async function (x: boolean | string[] = false, include: bo
 
 	notify(
 		"INFO",
-		`Updating modal${Array.isArray(files) && files.length === 1 ? " " : "s "}${
-			Array.isArray(files) ? `${files.map((modal) => `'${modal}'`).join(", ")}` : ""
+		`Updating modal${Array.isArray(files) && files.length === 1 ? "" : "s"}${
+			Array.isArray(files) ? ` ${files.map((modal) => `'${modal}'`).join(", ")}` : ""
 		}...`,
 	);
 

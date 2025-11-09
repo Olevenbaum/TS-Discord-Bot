@@ -40,8 +40,8 @@ global.updateEventTypes = async function (
 
 	notify(
 		"INFO",
-		`Updating event type${Array.isArray(eventTypes) && eventTypes.length === 1 ? " " : "s "}${
-			Array.isArray(eventTypes) ? eventTypes.map((eventType) => `'${eventType}'`).join(", ") : ""
+		`Updating event type${Array.isArray(eventTypes) && eventTypes.length === 1 ? "" : "s"}${
+			Array.isArray(eventTypes) ? eventTypes.map((eventType) => ` '${eventType}'`).join(", ") : ""
 		}...`,
 	);
 

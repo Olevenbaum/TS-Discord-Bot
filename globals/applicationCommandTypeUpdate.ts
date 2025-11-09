@@ -40,9 +40,9 @@ global.updateApplicationCommandTypes = async function (
 
 	notify(
 		"INFO",
-		`Updating application command type${!Array.isArray(types) || types.length > 1 ? "s " : " "}${
+		`Updating application command type${!Array.isArray(types) || types.length > 1 ? "s" : ""}${
 			Array.isArray(types)
-				? `${types.map((applicationCommandType) => `'${applicationCommandType}'`).join(", ")}`
+				? ` ${types.map((applicationCommandType) => `'${applicationCommandType}'`).join(", ")}`
 				: ""
 		}...`,
 	);

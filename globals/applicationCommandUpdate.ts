@@ -56,9 +56,9 @@ global.updateApplicationCommands = async function (
 
 	notify(
 		"INFO",
-		`Updating application command${Object.values(commands ?? {}).flat().length === 1 ? " " : "s "}${
+		`Updating application command${Object.values(commands ?? {}).flat().length === 1 ? "" : "s"}${
 			Object.values(commands ?? {}).flat().length === 1
-				? `${Object.values(commands ?? {})
+				? ` ${Object.values(commands ?? {})
 						.flat()
 						.map((applicationCommand) => `'${applicationCommand}'`)
 						.join(", ")}`
