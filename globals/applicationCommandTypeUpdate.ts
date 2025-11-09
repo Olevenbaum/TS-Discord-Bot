@@ -1,91 +1,84 @@
 // Global imports
 import "./fileReader";
 import "./notifications";
-import { applicationCommandTypes } from "./variables";
+import { applicationCommandTypes, configuration } from "./variables";
 
 // Type imports
 import { ApplicationCommandType } from "discord.js";
 import { SavedApplicationCommandType } from "../types/applicationCommands";
-import { Configuration } from "../types/configuration";
 
 declare global {
-    /**
-     * Adds new application command types and removes outdated ones or reloads all application command types
-     * @param configuration The configuration of the project and bot
-     * @param forceReload Whether to reload all files no matter if files were added or removed
-     */
-    function updateApplicationCommandTypes(configuration: Configuration, forceReload?: boolean): Promise<void>;
+	/**
+	 * Adds new application command types and removes outdated ones or reloads all application command types
+	 * @param forceReload Whether to reload all files no matter if files were added or removed
+	 */
+	function updateApplicationCommandTypes(forceReload?: boolean): Promise<void>;
 
-    /**
-     * Reloads the specified application command types or adds them if not already present
-     * @param configuration The configuration of the project and bot
-     * @param include Application command type files to reload, passing an empty array results in the same behavior as
-     * not passing this parameter
-     * @param exclude Whether to include or exclude the specified application command types
-     */
-    function updateApplicationCommandTypes(
-        configuration: Configuration,
-        include?: ApplicationCommandType[],
-        exclude?: boolean
-    ): Promise<void>;
+	/**
+	 * Reloads the specified application command types or adds them if not already present
+	 * @param applicationCommandTypes Application command type files to reload, passing an empty array results in the
+	 * same behavior as not passing this parameter
+	 * @param include Whether to include (`true`) or exclude (`false`) the specified application command types.
+	 * Defaults to `true`
+	 * @see {@link ApplicationCommandType}
+	 */
+	function updateApplicationCommandTypes(
+		applicationCommandTypes?: (keyof typeof ApplicationCommandType)[],
+		include?: boolean,
+	): Promise<void>;
 }
 
 global.updateApplicationCommandTypes = async function (
-    configuration: Configuration,
-    x: boolean | ApplicationCommandType[] = false,
-    exclude: boolean = false
+	x: boolean | (keyof typeof ApplicationCommandType)[] = false,
+	include: boolean = true,
 ): Promise<void> {
-    /**
-     * Overload parameter
-     */
-    const forceReload = typeof x === "boolean" ? x : false;
+	/** Force reload overload parameter */
+	const forceReload = typeof x === "boolean" ? x : false;
 
-    /**
-     * Overload parameter
-     */
-    const include = typeof x === "boolean" || x.length === 0 ? undefined : x;
+	/** Application command types overload parameter */
+	const types = typeof x === "boolean" || x.length === 0 ? undefined : x;
 
-    exclude &&= Boolean(include);
-
-    notify(
-		configuration,
+	notify(
 		"INFO",
-		`Updating application command type${!Array.isArray(include) || include.length > 1 ? "s" : ""}${
-			Array.isArray(include)
-				? ` ${include
-						.map((applicationCommandType) => `'${ApplicationCommandType[applicationCommandType]}'`)
-						.join(", ")}`
+		`Updating application command type${!Array.isArray(types) || types.length > 1 ? "s " : " "}${
+			Array.isArray(types)
+				? `${types.map((applicationCommandType) => `'${applicationCommandType}'`).join(", ")}`
 				: ""
 		}...`,
 	);
 
-	/**
-	 * List of application command type files
-	 */
+	/** List of application command type files */
 	const applicationCommandTypeFiles = await readFiles<SavedApplicationCommandType>(
-		configuration,
-		configuration.project.applicationCommandTypesPath,
+		configuration.paths.applicationCommandTypesPath,
 	);
 
 	applicationCommandTypes.sweep(
 		(_, applicationCommandType) =>
 			!applicationCommandTypeFiles.some(
-				(applicationCommandTypeFile) => applicationCommandTypeFile.type === applicationCommandType,
+				(applicationCommandTypeFile) =>
+					applicationCommandTypeFile.type === ApplicationCommandType[applicationCommandType],
 			),
 	);
 
 	applicationCommandTypeFiles.forEach((applicationCommandTypeFile) => {
-		// Check if application command type already exists or should be reloaded anyway
 		if (
 			forceReload ||
-			exclude !== (include && include.includes(applicationCommandTypeFile.type)) ||
-			!applicationCommandTypes.has(applicationCommandTypeFile.type)
+			(types &&
+				types.includes(
+					ApplicationCommandType[applicationCommandTypeFile.type] as keyof typeof ApplicationCommandType,
+				)) === include ||
+			!applicationCommandTypes.has(
+				ApplicationCommandType[applicationCommandTypeFile.type] as keyof typeof ApplicationCommandType,
+			)
 		) {
-			applicationCommandTypes.set(applicationCommandTypeFile.type, applicationCommandTypeFile);
+			applicationCommandTypes.set(
+				ApplicationCommandType[applicationCommandTypeFile.type] as keyof typeof ApplicationCommandType,
+				applicationCommandTypeFile,
+			);
 		}
 	});
 
-	notify(configuration, "SUCCESS", "Finished updating application command types");
+	notify("SUCCESS", "Finished updating application command types");
 };
 
 export {};

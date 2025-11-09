@@ -1,202 +1,171 @@
 // Global imports
-import "./applicationCommandUpdate";
 import "./applicationCommandTypeUpdate";
+import "./applicationCommandUpdate";
 import "./eventTypeUpdate";
 import "./interactionTypeUpdate";
 import "./messageComponentTypeUpdate";
 import "./modalUpdate";
 import "./notifications";
 import "./pathRelativation";
-import { blockedUsers } from "./variables";
+import { blockedUsers, configuration } from "./variables";
 
 // Type imports
 import { Client } from "discord.js";
-import { Configuration } from "../types/configuration";
 import { FileInclude } from "../types/others";
 
 declare global {
-    /**
-     * Updates all changed files, adds new ones and deletes removed ones
-     * @param configuration The configuration of the project and bot
-     * @param client The Discord bot client
-     * @param forceReload Whether to reload all files no matter if files were changed, added or removed
-     */
-    function updateFiles(configuration: Configuration, client?: Client, forceReload?: boolean): Promise<void>;
+	/**
+	 * Updates all changed files, adds new ones and deletes removed ones.
+	 *
+	 * **Note**: Only globally blocked users are reloaded, since blocked users of a guild should not be changed in the
+	 * file directly
+	 * @param client The Discord bot client
+	 * @param forceReload Whether to reload all files no matter if files were changed, added or removed
+	 * @see {@link Client}
+	 */
+	function updateFiles(client?: Client, forceReload?: boolean): Promise<void>;
 
-    /**
-     * Updates all changed files, adds new ones and deletes removed ones
-     * @param configuration The configuration of the project and bot
-     * @param client The Discord bot client
-     * @param include Files that should be reloaded, passing an empty object will result in the same behavior as not
-     * passing this parameter
-     * @param exclude Whether to include or exclude the specified files
-     */
-    function updateFiles(
-        configuration: Configuration,
-        client?: Client<true>,
-        include?: FileInclude | (keyof FileInclude)[],
-        exclude?: boolean
-    ): Promise<void>;
+	/**
+	 * Updates all changed files, adds new ones and deletes removed ones.
+	 *
+	 * **Note**: Only globally blocked users are reloaded, since blocked users of a guild should not be changed in the
+	 * file directly
+	 * @param client The Discord bot client
+	 * @param files Files to reload. If undefined all files are reloaded. If an object is provided, the presence of a
+	 * key alone indicates whether to reload the specific file type or not, a boolean value indicates whether to force
+	 * reload all files of the specific type or not. If include is `false`, the value of any key is ignored
+	 * @param include Whether to include (`true`) or exclude (`false`) the specified files. Defaults to `true`
+	 * @see {@link Client} | {@link FileInclude}
+	 */
+	function updateFiles(
+		client?: Client,
+		files?: FileInclude | (keyof FileInclude)[],
+		include?: boolean,
+	): Promise<void>;
 }
 
 global.updateFiles = async function (
-    configuration: Configuration,
-    client?: Client,
-    x: boolean | FileInclude | (keyof FileInclude)[] = false,
-    exclude: boolean = false
-): Promise<void> {
-    /**
-     * Overload parameter
-     */
-    const forceReload = typeof x === "boolean" ? x : false;
+	client?: Client,
+	x: boolean | FileInclude | (keyof FileInclude)[] = false,
+	include: boolean = true,
+) {
+	/** Force reload overload parameter */
+	const forceReload = typeof x === "boolean" ? x : false;
 
-    /**
-     * Overload parameter
-     */
-    const include = typeof x === "boolean" || Object.keys(x).length === 0 ? undefined : x;
+	/** Files overload parameter */
+	const files = typeof x === "boolean" || Object.keys(x).length === 0 ? undefined : x;
 
-    // Overwrite exlude parameter if include is empty
-    exclude &&= Boolean(include);
+	if (!files) {
+		updateApplicationCommands(client?.isReady() ? client : undefined, forceReload);
+	} else if (Array.isArray(files)) {
+		if (files.includes("applicationCommands") === include) {
+			updateApplicationCommands(client?.isReady() ? client : undefined);
+		}
+	} else if ("applicationCommands" in files) {
+		if (typeof files.applicationCommands !== "boolean") {
+			updateApplicationCommands(client?.isReady() ? client : undefined, files.applicationCommands, include);
+		} else {
+			updateApplicationCommands(client?.isReady() ? client : undefined, files.applicationCommands);
+		}
+	}
 
-    // Call matching overload to update application commands
-    if (!include) {
-        updateApplicationCommands(configuration, client?.isReady() ? client : undefined, forceReload);
-    } else if (Array.isArray(include)) {
-        if (include.includes("applicationCommands") !== exclude) {
-            updateApplicationCommands(configuration, client?.isReady() ? client : undefined);
-        }
-    } else if (typeof include.applicationCommands === "boolean" && !exclude) {
-        updateApplicationCommands(configuration, client?.isReady() ? client : undefined, include.applicationCommands);
-    } else if (Array.isArray(include.applicationCommands)) {
-        updateApplicationCommands(
-            configuration,
-            client?.isReady() ? client : undefined,
-            include.applicationCommands,
-            exclude
-        );
-    }
+	if (!files) {
+		updateApplicationCommandTypes(forceReload);
+	} else if (Array.isArray(files)) {
+		if (files.includes("applicationCommandTypes") === include) {
+			updateApplicationCommandTypes();
+		}
+	} else if ("applicationCommandTypes" in files) {
+		if (Array.isArray(files.applicationCommandTypes)) {
+			updateApplicationCommandTypes(files.applicationCommandTypes, include);
+		} else {
+			updateApplicationCommandTypes(files.applicationCommandTypes);
+		}
+	}
 
-    // Call matching overload to update application command types
-    if (!include) {
-        updateApplicationCommandTypes(configuration, forceReload);
-    } else if (Array.isArray(include)) {
-        if (include.includes("applicationCommandTypes") !== exclude) {
-            updateApplicationCommandTypes(configuration);
-        }
-    } else if (typeof include.applicationCommandTypes === "boolean" && !exclude) {
-        updateApplicationCommandTypes(configuration, include.applicationCommandTypes);
-    } else if (Array.isArray(include.applicationCommandTypes)) {
-        updateApplicationCommandTypes(configuration, include.applicationCommandTypes, exclude);
-    }
+	if (!files || (Array.isArray(files) ? files.includes("blockedUsers") : Boolean(files.blockedUsers)) === include) {
+		notify("INFO", "Updating global blocked users...");
 
-    // Check if global blocked users should be updated
-    if (
-		!include ||
-		exclude !==
-			((Array.isArray(include) && include.includes("blockedUsers")) ||
-				(!Array.isArray(include) && Boolean(include.blockedUsers)))
-	) {
-		// Notification
-		notify(configuration, "INFO", "Updating global blocked users...");
-
-		// Import new blocked users
 		const newBlockedUsers = (await import(
-			relativePath(configuration.project.blockedUsersPath)
+			relativePath(configuration.paths.blockedUsersPath)
 		)) as typeof blockedUsers;
 
-		// Iterate through blocked users
 		blockedUsers.global.forEach((blockedUser, index) => {
-			// Check if blocked user is still blocked
 			if (!newBlockedUsers.global.includes(blockedUser)) {
-				// Remove blocked user
 				blockedUsers.global.splice(index, 1);
 			}
 		});
 
-		// Iterate through new blocked users
 		newBlockedUsers.global.forEach((blockedUser) => {
-			// Check if blocked user is not already blocked
 			if (!blockedUsers.global.includes(blockedUser)) {
-				// Add blocked user
 				blockedUsers.global.push(blockedUser);
 			}
 		});
 
-		// Notification
-		notify(configuration, "SUCCESS", "Finished updating global blocked users");
+		notify("SUCCESS", "Finished updating global blocked users");
 	}
 
-	// Check if configuration should be updated
-	if (
-		!include ||
-		exclude !==
-			((Array.isArray(include) && include.includes("configuration")) ||
-				(!Array.isArray(include) && Boolean(include.configuration)))
-	) {
-		// Notification
-		notify(configuration, "INFO", "Updating configuration data...");
+	if (!files || (Array.isArray(files) ? files.includes("configuration") : Boolean(files.configuration)) === include) {
+		notify("INFO", "Updating configuration data...");
 
-		// Reload configuration
-		configuration.bot = await import(relativePath(configuration.project.configurationPath));
+		configuration.bot = await import(relativePath(configuration.paths.configurationPath));
 
-		// Notification
-		notify(configuration, "SUCCESS", "Finished updating configuration data");
+		notify("SUCCESS", "Finished updating configuration data");
 	}
 
-    // Check if client was provided
-    if (client) {
-        // Call matching overload to update events
-        if (!include) {
-            updateEventTypes(configuration, client, forceReload);
-        } else if (Array.isArray(include)) {
-            if (include.includes("eventTypes") !== exclude) {
-                updateEventTypes(configuration, client);
-            }
-        } else if (typeof include.eventTypes === "boolean" && !exclude) {
-            updateEventTypes(configuration, client, include.eventTypes);
-        } else if (Array.isArray(include.eventTypes)) {
-            updateEventTypes(configuration, client, include.eventTypes, exclude);
-        }
-    }
+	if (client) {
+		if (!files) {
+			updateEventTypes(client, forceReload);
+		} else if (Array.isArray(files)) {
+			if (files.includes("eventTypes") === include) {
+				updateEventTypes(client);
+			}
+		} else if ("eventTypes" in files) {
+			if (Array.isArray(files.eventTypes)) {
+				updateEventTypes(client, files.eventTypes, include);
+			} else {
+				updateEventTypes(client, files.eventTypes);
+			}
+		}
+	}
 
-    // Call matching overload to update interaction types
-    if (!include) {
-        updateInteractionTypes(configuration, forceReload);
-    } else if (Array.isArray(include)) {
-        if (include.includes("interactionTypes") !== exclude) {
-            updateInteractionTypes(configuration);
-        }
-    } else if (typeof include.interactionTypes === "boolean" && !exclude) {
-        updateInteractionTypes(configuration, include.interactionTypes);
-    } else if (Array.isArray(include.interactionTypes)) {
-        updateInteractionTypes(configuration, include.interactionTypes, exclude);
-    }
+	if (!files) {
+		updateInteractionTypes(forceReload);
+	} else if (Array.isArray(files)) {
+		if (files.includes("interactionTypes") === include) {
+			updateInteractionTypes();
+		}
+	} else if (Array.isArray(files.interactionTypes)) {
+		updateInteractionTypes(files.interactionTypes, include);
+	}
 
-    // Call matching overload to update message component types
-    if (!include) {
-        updateMessageComponentTypes(configuration, forceReload);
-    } else if (Array.isArray(include)) {
-        if (include.includes("messageComponentTypes") !== exclude) {
-            updateMessageComponentTypes(configuration);
-        }
-    } else if (typeof include.messageComponentTypes === "boolean" && !exclude) {
-        updateMessageComponentTypes(configuration, include.messageComponentTypes);
-    } else if (Array.isArray(include.messageComponentTypes)) {
-        updateMessageComponentTypes(configuration, include.messageComponentTypes, exclude);
-    }
+	if (!files) {
+		updateMessageComponentTypes(forceReload);
+	} else if (Array.isArray(files)) {
+		if (files.includes("messageComponentTypes") === include) {
+			updateMessageComponentTypes();
+		}
+	} else if ("messageComponentTypes" in files) {
+		if (Array.isArray(files.messageComponentTypes)) {
+			updateMessageComponentTypes(files.messageComponentTypes, include);
+		} else {
+			updateMessageComponentTypes(files.messageComponentTypes);
+		}
+	}
 
-    // Call matching overload to update modals
-    if (!include) {
-        updateModals(configuration, forceReload);
-    } else if (Array.isArray(include)) {
-        if (include.includes("modals") !== exclude) {
-            updateModals(configuration);
-        }
-    } else if (typeof include.modals === "boolean" && !exclude) {
-        updateModals(configuration, include.modals);
-    } else if (Array.isArray(include.modals)) {
-        updateModals(configuration, include.modals, exclude);
-    }
+	if (!files) {
+		updateModals(forceReload);
+	} else if (Array.isArray(files)) {
+		if (files.includes("modals") === include) {
+			updateModals();
+		}
+	} else if ("modals" in files) {
+		if (Array.isArray(files.modals)) {
+			updateModals(files.modals, include);
+		} else {
+			updateModals(files.modals);
+		}
+	}
 };
 
 export {};

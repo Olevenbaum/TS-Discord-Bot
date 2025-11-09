@@ -1,58 +1,41 @@
 // Global imports
 import "../../globals/interactionTypeUpdate";
+import { interactionTypes } from "../../globals/variables";
 
 // Type imports
-import { Client } from "discord.js";
-import { Interface } from "readline";
-import { Configuration } from "../../types/configuration";
-import { ConsoleCommand, NestedArray } from "../../types/others";
+import { InteractionType } from "discord.js";
+import { ConsoleCommand } from "../../types/others";
 
-/**
- * Console command to update application commands
- */
+/** Console command to update interaction types */
 const consoleCommand: ConsoleCommand = {
 	description: "Updates all or specified interaction types",
-
 	name: "INTERACTIONTYPES",
-
-	usage: [
-		"interactionTypes",
-		"interactionTypes <interaction type 1> <interaction type 2> ...",
-		"interactionTypes [<interaction type 1> <interaction type 2> ...]",
+	parameters: [
+		[
+			{
+				description: "List of interaction types to update",
+				name: "interaction types",
+				options: () => Object.keys(interactionTypes),
+				type: "object",
+			},
+			{
+				description: "Whether all interaction types should be updated regardless of changes",
+				name: "force reload",
+				type: "boolean",
+			},
+		],
 	],
 
-	async execute(
-		configuration: Configuration,
-		_: Client<true>,
-		___: Interface,
-		...values: NestedArray<boolean | number | string>
-	) {
-		// Check if values are present
-		if (values.length > 0) {
-			// Check if values have the right type
-			if (values.length === 1 && typeof values[0] === "boolean") {
-				// Update all interaction types
-				updateInteractionTypes(configuration, values[0]);
-			} else if (values.length === 1 && Array.isArray(values[0])) {
-				// Check if values have the right type
-				if (values[0].every((value) => typeof value === "number")) {
-					// Update spefified interaction types
-					updateInteractionTypes(configuration, values[0]);
-				} else {
-					throw TypeError("Invalid parameters");
-				}
+	async execute(_, ___, ...parameters: (keyof typeof InteractionType)[] | [boolean]) {
+		// Call matching overload to update interaction types
+		if (parameters.length > 0) {
+			if (typeof parameters[0] === "boolean") {
+				updateInteractionTypes(parameters[0]);
 			} else {
-				// Check if values have the right type
-				if (values.every((value) => typeof value === "number")) {
-					// Update spefified interaction types
-					updateInteractionTypes(configuration, values);
-				} else {
-					throw TypeError("Invalid parameters");
-				}
+				updateInteractionTypes(parameters as (keyof typeof InteractionType)[]);
 			}
 		} else {
-			// Update all interaction types
-			updateInteractionTypes(configuration);
+			updateInteractionTypes();
 		}
 	},
 };

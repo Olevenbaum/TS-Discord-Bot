@@ -1,26 +1,18 @@
-// GLobal imports
-import "../../globals/pathRelativation";
+// Global imports
+import "../../globals/fileUpdate";
 
 // Type imports
-import { Configuration } from "../../types/configuration";
 import { ConsoleCommand } from "../../types/others";
 
-/**
- * Template for console command
- */
+/** Console command to update the configuration data */
 const consoleCommand: ConsoleCommand = {
-    aliases: ["UPDATECONFIGURATION"],
+	aliases: ["UPDATECONFIGURATION"],
+	description: "Updates the configuration data",
+	name: "UPDATECONFIGURATIONDATA",
 
-    description: "Updates the configuration data",
-
-    name: "UPDATECONFIGURATIONDATA",
-
-    usage: "updateConfigurationData",
-
-    async execute(configuration: Configuration) {
-        // Reload configuration
-        configuration.bot = await import(relativePath(configuration.project.configurationPath));
-    },
+	async execute() {
+		updateFiles(undefined, ["configuration"]);
+	},
 };
 
 export default consoleCommand;

@@ -6,37 +6,28 @@ import { modals } from "../../../globals/variables";
 
 // Type imports
 import { InteractionType, ModalSubmitInteraction } from "discord.js";
-import { Configuration } from "../../../types/configuration";
 import { SavedInteractionType } from "../../../types/others";
 
-/**
- * Template for interaction handler
- */
+/** Template for interaction handler */
 const interactionType: SavedInteractionType = {
 	type: InteractionType.ModalSubmit,
 
-	async execute(configuration: Configuration, interaction: ModalSubmitInteraction) {
-		/**
-		 * Modal that was interacted with
-		 */
+	async execute(interaction: ModalSubmitInteraction) {
+		/** Modal that was interacted with */
 		const modal = modals.get(interaction.customId);
 
-		// Check if modal is implemented
 		if (!modal) {
 			interaction.reply({
-				content: `I'm sorry, but it seems that interactions with the modal ${bold(
-					interaction.customId,
-				)} can't be processed at the moment.`,
+				content: `I'm sorry, but it seems like submissions of the modal you just interacted with can't be processed at the moment.`,
 				ephemeral: true,
 			});
 
 			notify(
-				configuration,
 				"ERROR",
 				`Found no file handling modal '${interaction.customId}'`,
 				interaction.client,
-				`I couldn't find any file handling the application command type ${bold(interaction.customId)}.`,
-				2,
+				`I couldn't find any file handling the modal ${bold(interaction.customId)}.`,
+				4,
 			);
 
 			return;
@@ -47,20 +38,21 @@ const interactionType: SavedInteractionType = {
 		 */
 		const cooldownValidation = await validateCooldown(modal, interaction);
 
-		// Check if cooldown expired
+		// TODO: Add title of modal received from interaction, not name of modal file
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
 				content: `You need to wait ${underlined(
 					cooldownValidation,
-				)} more seconds before submitting the modal ${bold(interaction.customId)} again. Please be patient.`,
+				)} more seconds before submitting the modal ${bold(modal.name)} again. Please be patient.`,
 				ephemeral: true,
 			});
 
 			return;
 		}
 
+		// TODO: Replace name of modal file with title of modal received from interaction
 		await modal
-			.execute(configuration, interaction)
+			.execute(interaction)
 			.then(() => updateCooldown("ModalSubmit", modal, interaction))
 			.catch(async (error: Error) => {
 				interaction.reply({
@@ -71,7 +63,6 @@ const interactionType: SavedInteractionType = {
 				});
 
 				notify(
-					configuration,
 					"ERROR",
 					`Failed to execute modal '${modal.name}':\n${error}`,
 					interaction.client,

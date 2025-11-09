@@ -1,15 +1,15 @@
 // Global imports
-import { components } from "../../../globals/variables";
+import { components } from "../../globals/variables";
 
 // Type imports
 import { ActionRowBuilder, ComponentType, ModalActionRowComponentBuilder, ModalBuilder } from "discord.js";
-import { SavedModalComponent } from "../../../types/components";
-import { SavedModal } from "../../../types/modals";
+import { SavedModalComponent } from "../../types/components";
+import { SavedModal } from "../../types/modals";
 
 /** Template for modal */
 const modal: SavedModal = {
 	includedComponents: [],
-	name: "",
+	name: "blockUser",
 
 	create(options = {}) {
 		/** Text input components to add to the modal */
@@ -44,7 +44,9 @@ const modal: SavedModal = {
 			.setTitle(options.title ?? this.name);
 	},
 
-	async execute(interaction) {},
+	async execute(interaction) {
+		interaction;
+	},
 };
 
 export default modal;

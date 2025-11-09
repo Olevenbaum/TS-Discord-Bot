@@ -7,59 +7,66 @@ import fs from "fs";
 import path from "path";
 
 // Type imports
-import { Configuration } from "../types/configuration";
+import { Task } from "../types/others";
 
 declare global {
-    /**
-     * Reads all JavaScript and TypeScript files of a given directory
-     * @param configuration The configuration of the project and bot
-     * @param directory The path to read the files from
-     * @returns The default export of each file if existing of every TypeScript
-     * and JavaScript file
-     */
-    function readFiles<FileType>(configuration: Configuration, directory: string): Promise<FileType[]>;
+	/**
+	 * Reads all JavaScript and TypeScript files of a given directory
+	 * @param directories One or more paths of directories to read files from
+	 * @returns The default export of each file if existing of every TypeScript and JavaScript file
+	 * @see {@link FileType}
+	 */
+	function readFiles<FileType>(directories: string | string[]): Promise<FileType[]>;
 }
 
-global.readFiles = async function <FileType>(configuration: Configuration, directory: string): Promise<FileType[]> {
-    /**
-     * Relative path to directory
-     */
-    const newPath = relativePath(directory);
+global.readFiles = async function <FileType>(directories: string | string[]) {
+	if (!Array.isArray(directories)) {
+		directories = [directories];
+	}
 
-    try {
-        return (
-            await Promise.all(
-                fs
-                    .readdirSync(newPath)
-                    .filter(
-                        (fileName) =>
-                            (path.extname(fileName) === ".ts" &&
-                                path.extname(path.basename(fileName, ".ts")) !== ".d") ||
-                            path.extname(fileName) === ".js"
-                    )
-                    .map((fileName) =>
-                        path.extname(fileName) === ".ts"
-                            ? path.basename(fileName, ".ts")
-                            : path.basename(fileName, ".js")
-                    )
-                    .map(
-                        async (moduleName) =>
-                            (
-                                await import(path.join(newPath, moduleName))
-                            ).default as FileType | undefined
-                    )
-            )
-        ).filter((module) => typeof module !== "undefined");
-    } catch (error) {
-        // Check if directory was found
-        if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-            notify(configuration, "WARNING", `Found no directory at ${path.relative(newPath, path.resolve())}`);
+	/** Array of tasks, that return promises if executed */
+	const tasks: Task<FileType | undefined>[] = [];
 
-            return [];
-        }
+	for (const directory of directories) {
+		/** Relative path to directory */
+		const newPath = relativePath(directory);
 
-        throw error;
-    }
+		try {
+			tasks.push(
+				...fs
+					.readdirSync(newPath)
+					.filter(
+						(fileName) =>
+							(path.extname(fileName) === ".ts" &&
+								path.extname(path.basename(fileName, ".ts")) !== ".d") ||
+							path.extname(fileName) === ".js",
+					)
+					.map((fileName) =>
+						path.extname(fileName) === ".ts"
+							? path.basename(fileName, ".ts")
+							: path.basename(fileName, ".js"),
+					)
+					.map(
+						(moduleName) => async () =>
+							(await import(path.join(newPath, moduleName))).default as FileType | undefined,
+					),
+			);
+		} catch (error) {
+			/** Error raised by the file system */
+			const errno = error as NodeJS.ErrnoException;
+
+			if (errno && errno.code === "ENOENT") {
+				notify(
+					"WARNING",
+					`Found no directory at ${errno.path ? relativePath(errno.path, true) : "unknown path"}`,
+				);
+			} else {
+				throw error;
+			}
+		}
+	}
+
+	return (await Promise.all(tasks.map((task) => task()))).filter((module) => typeof module !== "undefined");
 };
 
 export {};

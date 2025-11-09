@@ -8,7 +8,12 @@
 			"description": "The schema version used",
 			"type": "string"
 		},
-		"applications": {
+		"autocompleteErrorCooldown": {
+			"description": "Cooldown in seconds between two autocomplete error notifications",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"botData": {
 			"additionalProperties": false,
 			"description": "Bot specific data of a single bot or multiple bots",
 			"items": {
@@ -26,7 +31,7 @@
 					},
 					"token": {
 						"description": "The token to login on Discord",
-						"pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
+						"pattern": "^[\\w-]{24}.[\\w-]{6}.[\\w-]{38}$",
 						"type": "string"
 					}
 				},
@@ -46,7 +51,7 @@
 				},
 				"token": {
 					"description": "The token to login on Discord",
-					"pattern": "^([0-9A-Za-z]{24})\\.([0-9A-Za-z]{6})\\.([0-9A-Za-z]{38})$",
+					"pattern": "^[\\w-]{24}.[\\w-]{6}.[\\w-]{38}$",
 					"type": "string"
 				}
 			},
@@ -122,7 +127,7 @@
 			"type": ["boolean", "number", "object"]
 		}
 	},
-	"required": ["applications"],
+	"required": ["botData"],
 	"title": "Configuration",
 	"type": "object"
 }

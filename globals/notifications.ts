@@ -1,25 +1,24 @@
 // Global imports
 import "./date";
+import { configuration } from "./variables";
 
 // Type imports
 import { Client, Team, TeamMemberMembershipState, User, userMention } from "discord.js";
-import { Configuration } from "../types/configuration";
 import { NotificationImportance } from "../types/others";
 
 declare global {
 	/**
 	 * Prints console output and sends a message to the bot owner(s)
 	 * Use '@bot' to mention the bot, '@member' to mention the user, the message is sent to, '@owner' to mention the
-	 * bot owner(s) and '@team' to mention the bot owner team
-	 * @param configuration The configuration of the project and bot
+	 * bot owner(s) and '@team' to insert the bot owner team's name
 	 * @param type The type of the message
 	 * @param consoleMessage The message to print to the console
 	 * @param client The Discord bot client
 	 * @param message The message to send
 	 * @param importance The importance of the message
+	 * @see {@link Client} | {@link NotificationImportance}
 	 */
 	function notify(
-		configuration: Configuration,
 		type: "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING",
 		consoleMessage: string,
 		client: Client<true>,
@@ -29,28 +28,22 @@ declare global {
 
 	/**
 	 * Prints console output
-	 * @param configuration The configuration of the project and bot
 	 * @param type The type of the message
 	 * @param consoleMessage The message to print to the console
 	 */
-	function notify(
-		configuration: Configuration,
-		type: "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING",
-		consoleMessage: string,
-	): Promise<void>;
+	function notify(type: "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING", consoleMessage: string): Promise<void>;
 
 	/**
 	 * Sends a message to the bot owner(s)
 	 * Use '@bot' to mention the bot, '@member' to mention the user, the message is sent to, '@owner' to mention the
 	 * bot owner(s) and '@team' to mention the bot owner team
-	 * @param configuration The configuration of the project and bot
 	 * @param type The type of the message
 	 * @param client The Discord bot client
 	 * @param message The message to send
 	 * @param importance The importance of the message
+	 * @see {@link Client} | {@link NotificationImportance}
 	 */
 	function notify(
-		configuration: Configuration,
 		type: "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING",
 		client: Client<true>,
 		message: string,
@@ -59,51 +52,37 @@ declare global {
 }
 
 global.notify = async function (
-	configuration: Configuration,
-	type: "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING",
+	type,
 	x: Client<true> | string,
 	y?: Client<true> | string,
 	z?: NotificationImportance | string,
-	importance?: NotificationImportance,
-): Promise<void> {
-	// Check type of overload parameter
+	importance: NotificationImportance = 0,
+) {
 	if (typeof x === "string") {
 		if (typeof y === "string") {
 			throw new TypeError("Parameter 'client' must be of type 'Client'");
 		}
 	} else {
-		// Check type of overload parameter
 		if (typeof y !== "string") {
 			throw new TypeError("Parameter 'message' must be of type 'string'");
 		}
 	}
 
-	/**
-	 * Overload parameter
-	 */
+	/** Client overload parameter */
 	const client = typeof x === "string" ? (typeof y === "string" ? undefined : y) : x;
 
-	/**
-	 * Overload parameter
-	 */
+	/** Console message overload parameter */
 	const consoleMessage = typeof x === "string" ? x : undefined;
 
-	/**
-	 * Overload parameter
-	 */
+	/** Message overload parameter */
 	const message = typeof y === "string" ? y : typeof z === "string" ? z : undefined;
 
-	/**
-	 * Overload parameter
-	 */
 	importance = (typeof z === "string" ? importance : z) ?? 0;
 
-	// Check if client is provided
 	if (client) {
 		await client.application.fetch();
 	}
 
-	// Check if console message is provided
 	if (consoleMessage) {
 		switch (type) {
 			case "ERROR":
@@ -130,25 +109,28 @@ global.notify = async function (
 				console.warn(`[${getTime()}] \x1b[33m ${consoleMessage} \x1b[0m`);
 
 				break;
+
+			default:
+				throw new TypeError("Parameter 'type' must be one of 'ERROR', 'INFO', 'SUCCESS', 'TEST' or 'WARNING'");
 		}
 	}
 
-	/**
-	 * Notification settings
-	 */
-	const notifications = configuration.bot.notifications;
+	/** Notification preferences from configuration */
+	const notificationsPreference = configuration.bot.notifications;
 
-	// Check if notifications are enabled
-	if (message && client && notifications) {
-		// Check if notifications are enabled for the type and importance of message
-		if (
-			typeof notifications !== "boolean" &&
-			(typeof notifications === "number" ? importance < notifications : !notifications.types?.includes(type))
-		) {
-			return;
-		}
-
-		const newMessage = message
+	if (
+		message &&
+		client &&
+		notificationsPreference &&
+		!(
+			typeof notificationsPreference !== "boolean" &&
+			(typeof notificationsPreference === "number"
+				? importance < notificationsPreference
+				: !notificationsPreference.types?.includes(type))
+		)
+	) {
+		/** Formatted message with mentions */
+		const formattedMessage = message
 			.replace("@bot", userMention(client.user.id))
 			.replace(
 				"@owner",
@@ -158,24 +140,25 @@ global.notify = async function (
 			)
 			.replace("@team", client.application.owner instanceof Team ? client.application.owner.name : "");
 
-		/**
-		 * Discord users to receive the notification
-		 */
+		/** Discord users to receive the notification */
 		const receiver: User[] = [];
 
-		// Check type of owner
 		if (client.application.owner instanceof User) {
 			receiver.push(client.application.owner);
 		} else if (client.application.owner instanceof Team) {
 			client.application.owner.members.forEach((teamMember) => {
-				// Check if member is excluded
+				if (!["boolean", "number"].includes(typeof notificationsPreference)) {
+					receiver.push(teamMember.user);
+					return;
+				}
+
 				if (
-					(typeof notifications !== "boolean" &&
-						typeof notifications !== "number" &&
-						(("excludedMembers" in notifications &&
-							notifications.excludedMembers?.includes(teamMember.user.id)) ||
-							("excludedRoles" in notifications &&
-								notifications.excludedRoles?.includes(teamMember.role)))) ||
+					(typeof notificationsPreference !== "boolean" &&
+						typeof notificationsPreference !== "number" &&
+						(("excludedMembers" in notificationsPreference &&
+							notificationsPreference.excludedMembers?.includes(teamMember.user.id)) ||
+							("excludedRoles" in notificationsPreference &&
+								notificationsPreference.excludedRoles?.includes(teamMember.role)))) ||
 					teamMember.membershipState === TeamMemberMembershipState.Invited
 				) {
 					return;
@@ -183,11 +166,9 @@ global.notify = async function (
 
 				receiver.push(teamMember.user);
 			});
-		} else {
-			return;
 		}
 
-		await Promise.all(receiver.map((user) => user.send(newMessage.replace("@member", userMention(user.id)))));
+		await Promise.all(receiver.map((user) => user.send(formattedMessage.replace("@member", userMention(user.id)))));
 	}
 };
 

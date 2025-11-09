@@ -1,24 +1,16 @@
 // Type imports
-import {
-    ApplicationCommandType,
-    AutocompleteInteraction,
-    ChatInputCommandInteraction,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ApplicationCommandType, SlashCommandBuilder } from "discord.js";
 import { SavedChatInputCommand } from "../../../../types/applicationCommands";
-import { Configuration } from "../../../../types/configuration";
 
-/**
- * Template for chat input command
- */
+/** Template for chat input command */
 const chatInputCommand: SavedChatInputCommand = {
-    data: new SlashCommandBuilder(),
+	data: new SlashCommandBuilder(),
 
-    type: ApplicationCommandType.ChatInput,
+	type: ApplicationCommandType.ChatInput,
 
-    async autocomplete(configuration: Configuration, interaction: AutocompleteInteraction) {},
+	async autocomplete(interaction) {},
 
-    async execute(configuration: Configuration, interaction: ChatInputCommandInteraction) {},
+	async execute(interaction) {},
 };
 
 export default chatInputCommand;

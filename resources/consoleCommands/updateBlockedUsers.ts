@@ -2,23 +2,16 @@
 import "../../globals/fileUpdate";
 
 // Type imports
-import { Configuration } from "../../types/configuration";
 import { ConsoleCommand } from "../../types/others";
 
-/**
- * Template for console command
- */
+/** Console command to update blocked users*/
 const consoleCommand: ConsoleCommand = {
-    description: "Updates all global blocked users",
+	description: "Updates all global blocked users",
+	name: "UPDATEBLOCKEDUSERS",
 
-    name: "UPDATEBLOCKEDUSERS",
-
-    usage: "updateBlockedUsers",
-
-    async execute(configuration: Configuration) {
-        // Update global blocked users
-        updateFiles(configuration, undefined, { blockedUsers: true });
-    },
+	async execute() {
+		updateFiles(undefined, ["blockedUsers"]);
+	},
 };
 
 export default consoleCommand;

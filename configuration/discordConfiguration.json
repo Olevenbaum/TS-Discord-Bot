@@ -1,0 +1,5 @@
+{
+	"applicationCommandNameRegex": "^[-_'\\p{L}\\p{N}\\p{sc=Deva}\\p{sc=Thai}]{1,32}$u",
+	"maximalAutocompleteResults": 25,
+	"tokenRegex": "^[\\w-]{24}.[\\w-]{6}.[\\w-]{38}$"
+}

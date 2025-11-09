@@ -3,177 +3,206 @@ import { Snowflake, TeamMemberRole } from "discord.js";
 import { NotificationImportance, NotificationType } from "./others";
 
 /**
- * Discord application data
+ * Required individual data of any Discord bot to function.
+ * Can be extracted from {@link https://discord.com/developers/applications | Discord Developer Portal} for each bot.
+ * 
+ * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
-interface Application {
+interface BotData {
 	/**
-	 * Application ID
+	 * Application ID of the bot
+	 * @see {@link Snowflake}
 	 */
-	applicationId: string;
+	applicationId: Snowflake;
 
-	/**
-	 * Public key of the application
-	 */
+	/** Public key of the bot */
 	publicKey: string;
 
-	/**
-	 * Verification token of the application
+	/** Verification token of the bot. Can only be shown once on
+	 * {@link https://discord.com/developers/applications | Discord Developer Portal}. If lost, create a new one. Make
+	 * sure to keep it secret and never share it with anyone!
 	 */
 	token: string;
 }
 
 /**
- * Configuration data imported from JSON file to specify the bots behavior
+ * Configuration data imported from JSON file to specify the bots behavior.
+ * 
+ * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface BotConfiguration {
 	/**
-	 * Single or multiple applications that can be started
+	 * Cooldown in seconds between two autocomplete error notifications.
+	 * @defaultValue `300`
 	 */
-	applications: Application | Application[];
+	autocompleteErrorCooldown?: number;
 
 	/**
-	 * Whether the commands should be updated automatically
+	 * Data of a single or multiple bots that can be started
+	 * @see {@link BotData}
+	 */
+	botData: BotData | BotData[];
+
+	/**
+	 * Whether commands should be updated automatically
+	 * @defaultValue `true`
 	 */
 	enableAutoUpdate?: boolean;
 
 	/**
 	 * Whether other bots can interact with this bot
+	 * @defaultValue `false`
 	 */
 	enableBotInteraction?: boolean;
 
 	/**
 	 * Whether another bot should be started in case of an invalid token
+	 * @defaultValue `false`
 	 */
 	enableBotIteration?: boolean;
 
 	/**
 	 * Whether blocked users can interact with the bot
+	 * @defaultValue `false`
 	 */
 	enableBlockedUsers?: boolean;
 
 	/**
-	 * Whether notifications should be enabled
+	 * Whether notifications should be enabled and if yes, which one should be sent and who should receive them
+	 * Can be a boolean to enable/disable notifications, a number to set the minimal importance of notifications to
+	 * receive or an object to specify detailed preferences
+	 * @defaultValue `false`
+	 * @see {@link NotificationPreferences}
 	 */
 	notifications?: boolean | number | NotificationPreferences;
 }
 
 /**
- * Configuration data to specify the bots behavior and project structure
+ * Configuration data specifying the bots behavior and project structure
+ * 
+ * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface Configuration {
 	/**
 	 * Bot configuration data
+	 * @see {@link BotConfiguration}
+	 *
+	 * More documentation can be found on the
+	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
 	 */
 	bot: BotConfiguration;
 
 	/**
-	 * Project configuration data
+	 * Constants given by Discord API
+	 * @see {@link DiscordConstants}
+	 *
+	 * More documentation can be found on the
+	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
 	 */
-	project: ProjectConfiguration;
+	discord: DiscordConstants;
+
+	/**
+	 * Paths of various files and directories used in the project
+	 * @see {@link Paths}
+	 *
+	 * More documentation can be found on the
+	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
+	 */
+	paths: Paths;
+}
+
+interface DiscordConstants {
+	/**
+	 * Maximal number of autocomplete results Discord can show
+	 * 
+	 * See on the {@link https://discord.com/developers/docs/interactions/application-commands#autocomplete-structure-autocomplete-choices | Discord Documentation}.
+	 */
+	maximalAutocompleteResults: number;
+
+	/** Regular expression to test the token against */
+	tokenRegex: RegExp;
 }
 
 /**
  * Notification preferences
+ * 
+ * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface NotificationPreferences {
 	/**
 	 * Team members to exclude from receiving notifications
+	 * @see {@link Snowflake}
 	 */
 	excludedMembers?: Snowflake[];
 
 	/**
 	 * Team member roles to exclude from receiving notifications
+	 * @see {@link TeamMemberRole}
 	 */
 	excludedRoles: TeamMemberRole[];
 
 	/**
 	 * Importance level of notifications to receive
+	 * @defaultValue `0`
+	 * @see {@link NotificationImportance}
 	 */
 	minImportance?: NotificationImportance;
 
 	/**
 	 * Team members and their chosen minimal importance of notifications to receive
+	 * @see {@link Snowflake} | {@link NotificationImportance}
 	 */
 	restrictedMembers?: { [key: Snowflake]: NotificationImportance };
 
 	/**
 	 * Types of notifications to enable
+	 * @see {@link NotificationType}
 	 */
 	types?: NotificationType[];
 }
 
 /**
- * Configuration data to specify project structure and other important settings
+ * Paths of various files and directories used in the project
+ * 
+ * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
-interface ProjectConfiguration {
-    /**
-     * Time that has to pass until an error message is sent again for application command autocomplete interactions (in
-     * seconds)
-     */
-    applicationCommandAutocompleteErrorCooldown: number;
+interface Paths {
+	/** Path(s) of application command types directory/directories */
+	applicationCommandTypesPath: string | string[];
 
-    /**
-     * Path to the directory where the application command types are stored
-     */
-    applicationCommandTypesPath: string;
+	/** Path of blocked users file */
+	blockedUsersPath: string;
 
-    /**
-     * Path to the file where the blocked users are stored
-     */
-    blockedUsersPath: string;
+	/** Paths of chat input commands directory/directories */
+	chatInputCommandsPath: string | string[];
 
-    /**
-     * Path to the directory where the chat input commands are stored
-     */
-    chatInputCommandsPath: string;
+	/** Path(s) of (message) components directory/directories */
+	componentsPath: string | string[];
 
-    /**
-     * Path to the directory where the (message) components are stored
-     */
-    componentsPath: string;
+	/** Path of configuration data file */
+	configurationPath: string;
 
-    /**
-     * Path to the file where the configuration data is stored
-     */
-    configurationPath: string;
+	/** Path(s) of console commands directory/directories */
+	consoleCommandsPath: string | string[];
 
-    /**
-     * Path to the directory where the console commands are stored
-     */
-    consoleCommandsPath: string;
+	/** Path of Discord data file */
+	discordConfigurationsPath: string;
 
-    /**
-     * Path to the directory where the event types are stored
-     */
-    eventTypesPath: string;
+	/** Path(s) of event types directory/directories */
+	eventTypesPath: string | string[];
 
-    /**
-     * Path to the directory where the interactions types are stored
-     */
-    interactionTypesPath: string;
+	/** Path(s) of interactions types directory/directories */
+	interactionTypesPath: string | string[];
 
-    /**
-     * Path to the directory where the message commands are stored
-     */
-    messageCommandsPath: string;
+	/** Path(s) of message commands directory/directories */
+	messageCommandsPath: string | string[];
 
-    /**
-     * Path to the directory where the message component types are stored
-     */
-    messageComponentTypesPath: string;
+	/** Path(s) of message component types directory/directories */
+	messageComponentTypesPath: string | string[];
 
-    /**
-     * Path to the directory where the modals are stored
-     */
-    modalsPath: string;
+	/** Path(s) of modals directory/directories */
+	modalsPath: string | string[];
 
-    /**
-     * Regular expression to test the token against
-     */
-    tokenRegex: RegExp;
-
-    /**
-     * Path to the directory where the user commands are stored
-     */
-    userCommandsPath: string;
+	/** Path(s) of user commands directory/directories */
+	userCommandsPath: string | string[];
 }

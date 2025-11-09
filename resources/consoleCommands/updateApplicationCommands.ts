@@ -1,62 +1,62 @@
 // Global imports
 import "../../globals/applicationCommandUpdate";
+import { applicationCommands } from "../../globals/variables";
 
 // Type imports
 import { ApplicationCommandType, Client } from "discord.js";
-import { Interface } from "readline";
-import { Configuration } from "../../types/configuration";
-import { ConsoleCommand, NestedArray } from "../../types/others";
+import { ConsoleCommand } from "../../types/others";
 
-/**
- * Console command to update application commands
- */
+/** Console command to update application commands */
 const consoleCommand: ConsoleCommand = {
 	description: "Updates all or specified application commands",
-
 	name: "UPDATEAPPLICATIONCOMMANDS",
-
-	usage: [
-		"updateApplicationCommands",
-		"updateApplicationCommands <application command name 1> <application command name 2> ...",
-		"updateApplicationCommands [<application command name 1> <application command name 2> ...]",
+	parameters: [
+		[
+			{
+				description: "List of application commands to update",
+				name: "application commands",
+				options: () =>
+					Object.entries(applicationCommands)
+						.map(([applicationCommandType, specificApplicationCommands]) =>
+							specificApplicationCommands.map(
+								(_, applicationCommandName) => `${applicationCommandName}:${applicationCommandType}`,
+							),
+						)
+						.flat(),
+				type: "object",
+			},
+			{
+				description: "Whether all application commands should be updated regardless of changes",
+				name: "force reload",
+				type: "boolean",
+			},
+		],
 	],
 
-	async execute(
-		configuration: Configuration,
-		client: Client<true>,
-		_: Interface,
-		...values: NestedArray<boolean | number | string>
-	) {
-		// Check if values are present
-		if (values.length > 0) {
-			// Check if values have the right type
-			if (values.length === 1 && typeof values[0] === "boolean") {
-				// Update all application commands
-				updateApplicationCommands(configuration, client, values[0]);
-			} else if (values.length === 1 && Array.isArray(values[0])) {
-				// Check if values have the right type
-				if (values[0].every((value) => typeof value === "string" && /^[A-Za-z]*[0-9]$/i.test(value))) {
-					// Update spefified application commands
-					updateApplicationCommands(
-						configuration,
-						client,
-						values[0] as `${string}:${ApplicationCommandType}`[],
-					);
-				} else {
-					throw TypeError("Invalid parameters");
-				}
+	async execute(client: Client<true>, _, ...parameters: `${string}:${ApplicationCommandType}`[] | [boolean]) {
+		// Call matching overload to update application commands
+		if (parameters.length > 0) {
+			if (typeof parameters[0] === "boolean") {
+				updateApplicationCommands(client, parameters[0]);
 			} else {
-				// Check if values have the right type
-				if (values.every((value) => typeof value === "string")) {
-					// Update spefified application commands
-					updateApplicationCommands(configuration, client, values as `${string}:${ApplicationCommandType}`[]);
-				} else {
-					throw TypeError("Invalid parameters");
-				}
+				const transformedParameters: Partial<Record<keyof typeof ApplicationCommandType, string[]>> = {};
+
+				parameters.forEach((parameter) => {
+					const colonPosition = (parameter as string).lastIndexOf(":");
+					const applicationCommandType = (parameter as string).slice(colonPosition + 1);
+					if (!(applicationCommandType in transformedParameters)) {
+						transformedParameters[applicationCommandType as keyof typeof transformedParameters] = [];
+					}
+
+					transformedParameters[applicationCommandType as keyof typeof transformedParameters]!.push(
+						(parameter as string).slice(undefined, colonPosition),
+					);
+				});
+
+				updateApplicationCommands(client, transformedParameters);
 			}
 		} else {
-			// Update all application commands
-			updateApplicationCommands(configuration, client);
+			updateApplicationCommands(client);
 		}
 	},
 };

@@ -7,44 +7,36 @@ import { applicationCommands } from "../../../../globals/variables";
 // Type imports
 import { ApplicationCommandType, ChatInputCommandInteraction, Team, User } from "discord.js";
 import { SavedApplicationCommandType, SavedChatInputCommand } from "../../../../types/applicationCommands";
-import { Configuration } from "../../../../types/configuration";
 
-/**
- * Chat input command handler
- */
+/** Chat input command handler */
 const chatInputCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.ChatInput,
 
-	async execute(configuration: Configuration, interaction: ChatInputCommandInteraction) {
-		/**
-		 * Chat input command that was interacted with
-		 */
+	async execute(interaction: ChatInputCommandInteraction) {
+		/** Chat input command that was interacted with */
 		const chatInputCommand = applicationCommands[
 			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
 		]?.get(interaction.commandName) as SavedChatInputCommand | undefined;
 
-		// Check if chat input command is implemented
 		if (!chatInputCommand) {
 			interaction.reply({
-				content: `I'm sorry, but it seems that interactions with the chat input command ${commandMention(
+				content: `I'm sorry, but it seems like interactions with the command ${commandMention(
 					interaction,
 				)} can't be processed at the moment.`,
 				ephemeral: true,
 			});
 
 			notify(
-				configuration,
 				"ERROR",
 				`Found no file handling chat input command '${interaction.commandName}'`,
 				interaction.client,
 				`I couldn't find any file handling the chat input command ${commandMention(interaction)}.`,
-				2,
+				4,
 			);
 
 			return;
 		}
 
-		// Check if chat input command is for owners only
 		if (chatInputCommand.owner) {
 			await interaction.client.application.fetch();
 
@@ -55,7 +47,7 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 					!interaction.client.application.owner.members.has(interaction.user.id))
 			) {
 				interaction.reply({
-					content: `I'm sorry, but you don't have permission to use the chat input command ${commandMention(
+					content: `I'm sorry, but you don't have permission to use the command ${commandMention(
 						interaction,
 					)}.`,
 					ephemeral: true,
@@ -65,20 +57,16 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 			}
 		}
 
-		/**
-		 * Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the chat input command
-		 * again
+		/** Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the chat input
+		 * command again
 		 */
 		const cooldownValidation = await validateCooldown(chatInputCommand, interaction);
 
-		// Check if cooldown expired
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
 				content: `You need to wait ${underlined(
 					cooldownValidation,
-				)} more seconds before using the chat input command ${commandMention(
-					interaction,
-				)} again. Please be patient.`,
+				)} more seconds before using the command ${commandMention(interaction)} again. Please be patient.`,
 				ephemeral: true,
 			});
 
@@ -86,18 +74,17 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		await chatInputCommand
-			.execute(configuration, interaction)
+			.execute(interaction)
 			.then(() => updateCooldown("ApplicationCommand", chatInputCommand, interaction))
 			.catch(async (error: Error) => {
 				interaction.reply({
-					content: `I'm sorry, but there was an error handling your interaction with the chat input command ${commandMention(
+					content: `I'm sorry, but there was an error handling your interaction with the command ${commandMention(
 						interaction,
 					)}.`,
 					ephemeral: true,
 				});
 
 				notify(
-					configuration,
 					"ERROR",
 					`Failed to execute chat input command '${interaction.commandName}':\n${error}`,
 					interaction.client,

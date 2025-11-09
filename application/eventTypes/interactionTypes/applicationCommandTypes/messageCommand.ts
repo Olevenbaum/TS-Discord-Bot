@@ -7,44 +7,36 @@ import { applicationCommands } from "../../../../globals/variables";
 // Type imports
 import { ApplicationCommandType, MessageContextMenuCommandInteraction, Team, User } from "discord.js";
 import { SavedApplicationCommandType, SavedMessageCommand } from "../../../../types/applicationCommands";
-import { Configuration } from "../../../../types/configuration";
 
-/**
- * Message command handler
- */
+/** Message command handler */
 const userCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.Message,
 
-	async execute(configuration: Configuration, interaction: MessageContextMenuCommandInteraction) {
-		/**
-		 * Message application command that was interacted with
-		 */
+	async execute(interaction: MessageContextMenuCommandInteraction) {
+		/** Message application command that was interacted with */
 		const messageCommand = applicationCommands[
 			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
 		]?.get(interaction.commandName) as SavedMessageCommand | undefined;
 
-		// Check if message command is implemented
 		if (!messageCommand) {
 			interaction.reply({
-				content: `I'm sorry, but it seems that interactions with the message command ${bold(
+				content: `I'm sorry, but it seems like interactions with the command ${bold(
 					interaction.commandName,
 				)} can't be processed at the moment.`,
 				ephemeral: true,
 			});
 
 			notify(
-				configuration,
 				"ERROR",
 				`Found no file handling message command '${interaction.commandName}'`,
 				interaction.client,
 				`I couldn't find any file handling the message command ${bold(interaction.commandName)}.`,
-				2,
+				4,
 			);
 
 			return;
 		}
 
-		// Check if chat input command is for owners only
 		if (messageCommand.owner) {
 			await interaction.client.application.fetch();
 
@@ -55,7 +47,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
 					!interaction.client.application.owner.members.has(interaction.user.id))
 			) {
 				interaction.reply({
-					content: `I'm sorry, but you don't have permission to use the message command ${bold(
+					content: `I'm sorry, but you don't have permission to use the command ${bold(
 						interaction.commandName,
 					)}.`,
 					ephemeral: true,
@@ -66,19 +58,16 @@ const userCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		/**
-		 * Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the message command
-		 * again
+		 * Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the message
+		 * command again
 		 */
 		const cooldownValidation = await validateCooldown(messageCommand, interaction);
 
-		// Check if cooldown expired
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
 				content: `You need to wait ${underlined(
 					cooldownValidation,
-				)} more seconds before using the message command ${bold(
-					interaction.commandName,
-				)} again. Please be patient.`,
+				)} more seconds before using the command ${bold(interaction.commandName)} again. Please be patient.`,
 				ephemeral: true,
 			});
 
@@ -86,18 +75,17 @@ const userCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		await messageCommand
-			.execute(configuration, interaction)
+			.execute(interaction)
 			.then(() => updateCooldown("ApplicationCommand", messageCommand, interaction))
 			.catch(async (error: Error) => {
 				interaction.reply({
-					content: `I'm sorry, but there was an error handling your interaction with the message command ${bold(
+					content: `I'm sorry, but there was an error handling your interaction with the command ${bold(
 						interaction.commandName,
 					)}.`,
 					ephemeral: true,
 				});
 
 				notify(
-					configuration,
 					"ERROR",
 					`Failed to execute message command '${interaction.commandName}':\n${error}`,
 					interaction.client,

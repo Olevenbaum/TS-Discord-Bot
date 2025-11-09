@@ -2,27 +2,16 @@
 import "../../../globals/discordTextFormat";
 import "../../../globals/notifications";
 import "../../../globals/pathRelativation";
-import { blockedUsers } from "../../../globals/variables";
+import { blockedUsers, configuration } from "../../../globals/variables";
 
 // Module imports
 import fs from "fs";
 
 // Type imports
-import {
-	ApplicationCommandType,
-	ChatInputCommandInteraction,
-	PermissionFlagsBits,
-	SlashCommandBuilder,
-	Team,
-	User,
-	userMention,
-} from "discord.js";
+import { ApplicationCommandType, PermissionFlagsBits, SlashCommandBuilder, Team, User, userMention } from "discord.js";
 import { SavedChatInputCommand } from "../../../types/applicationCommands";
-import { Configuration } from "../../../types/configuration";
 
-/**
- * Template for chat input command
- */
+/** Chat input command to manage blocked users */
 const chatInputCommand: SavedChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.addSubcommand((subcommand) =>
@@ -57,18 +46,17 @@ const chatInputCommand: SavedChatInputCommand = {
 
 	type: ApplicationCommandType.ChatInput,
 
-	async execute(configuration: Configuration, interaction: ChatInputCommandInteraction) {
-		// Fetch owner(s) of the bot
+	async execute(interaction) {
 		await interaction.client.application.fetch();
 
-		// Check if user is allowed to use this command
+		// Block interaction if user has no permission to use it
 		if (
 			!(
 				(interaction.inGuild() && interaction.options.getSubcommand().toUpperCase() !== "ENABLE") ||
 				(interaction.client.application.owner instanceof User &&
 					interaction.user.id === interaction.client.application.owner.id) ||
 				(interaction.client.application.owner instanceof Team &&
-					!(interaction.user.id in interaction.client.application.owner.members.keys()))
+					!interaction.client.application.owner.members.some((member) => member.id === interaction.user.id))
 			)
 		) {
 			await interaction.reply({
@@ -83,17 +71,15 @@ const chatInputCommand: SavedChatInputCommand = {
 
 		switch (interaction.options.getSubcommand().toUpperCase()) {
 			case "BLOCK":
-				/**
-				 * User to add to blocked users
-				 */
+				/** User to add to blocked users */
 				const userToBlock = interaction.options.getUser("user", true);
 
-				// Check if user is owner
+				// Prevent blocking the owner(s), the bot itself or the user themself
 				if (
 					(interaction.client.application.owner instanceof User &&
-						interaction.client.application.owner?.id === userToBlock.id) ||
+						interaction.client.application.owner.id === userToBlock.id) ||
 					(interaction.client.application.owner instanceof Team &&
-						interaction.client.application.owner?.members.some((member) => member.id === userToBlock.id))
+						interaction.client.application.owner.members.some((member) => member.id === userToBlock.id))
 				) {
 					await interaction.reply({
 						content: `You can't block ${
@@ -103,7 +89,6 @@ const chatInputCommand: SavedChatInputCommand = {
 					});
 
 					notify(
-						configuration,
 						"WARNING",
 						interaction.client,
 						`${userMention(interaction.user.id)} tried to block ${
@@ -120,9 +105,16 @@ const chatInputCommand: SavedChatInputCommand = {
 					});
 
 					return;
+				} else if (interaction.user.id === userToBlock.id) {
+					await interaction.reply({
+						content: "Are you serious...? You can't block yourself.",
+						ephemeral: true,
+					});
+
+					return;
 				}
 
-				// Block user from interacting with bot
+				// Block user from interacting with the bot if not already blocked
 				if (interaction.inGuild()) {
 					if (
 						interaction.guildId in blockedUsers.guilds &&
@@ -169,16 +161,13 @@ const chatInputCommand: SavedChatInputCommand = {
 				break;
 
 			case "CLEAR":
-				// Check if interaction was on a server
+				// Clear blocked users
 				if (interaction.inGuild()) {
-					// Clear blocked users
 					blockedUsers.guilds[interaction.guildId] = [];
 				} else {
-					// Clear blocked users
 					blockedUsers.global = [];
 				}
 
-				// Interaction response
 				await interaction.reply({
 					content: `All users have been unblocked from interacting with me${
 						interaction.inGuild() ? " on this server" : ""
@@ -186,18 +175,15 @@ const chatInputCommand: SavedChatInputCommand = {
 					ephemeral: interaction.inGuild(),
 				});
 
-				// Break switch
 				break;
 
 			case "ENABLE":
-				// Update configuration
 				configuration.bot.enableBlockedUsers =
 					interaction.options.getBoolean("enable") ??
-					typeof configuration.bot.enableBlockedUsers === "undefined"
+					(typeof configuration.bot.enableBlockedUsers === "undefined"
 						? false
-						: !configuration.bot.enableBlockedUsers;
+						: !configuration.bot.enableBlockedUsers);
 
-				// Interaction response
 				await interaction.reply({
 					content: `Blocked users have been ${
 						configuration.bot.enableBlockedUsers ? "enabled" : "disabled"
@@ -205,71 +191,59 @@ const chatInputCommand: SavedChatInputCommand = {
 					ephemeral: interaction.inGuild(),
 				});
 
-				// Update configuration file
 				fs.writeFileSync(
-					relativePath(configuration.project.configurationPath),
+					relativePath(configuration.paths.configurationPath),
 					JSON.stringify(configuration.bot, undefined, 4),
 				);
 
-				// Break switch
 				break;
 
 			case "LIST":
-				// Check if interaction was on a server
-				if (interaction.inGuild()) {
-					// Check if no users are blocked
+				if (configuration.bot.enableBlockedUsers === false) {
+					await interaction.reply({
+						content: "Blocked users are currently disabled.",
+						ephemeral: interaction.inGuild(),
+					});
+				} else if (interaction.inGuild()) {
 					if (
 						interaction.guildId in blockedUsers.guilds &&
 						blockedUsers.guilds[interaction.guildId]!.length !== 0
 					) {
-						// Interaction response
 						await interaction.reply(
 							list(blockedUsers.guilds[interaction.guildId]!.map((userId) => userMention(userId))),
 						);
 					} else {
-						// Interaction response
 						await interaction.reply({
 							content: "No users are currently blocked from interacting with me on this server.",
 							ephemeral: true,
 						});
 					}
 				} else {
-					// Check if no users are blocked
 					if (blockedUsers.global.length === 0) {
-						// Interaction response
 						await interaction.reply("No users are currently blocked from interacting with me.");
 					} else {
-						// Interaction response
 						await interaction.reply(list(blockedUsers.global.map((userId) => userMention(userId))));
 					}
 				}
 
-				// Break switch
 				break;
 
 			case "UNBLOCK":
-				/**
-				 * User to add to blocked users
-				 */
+				/** User to remove from blocked users */
 				const userToUnblock = interaction.options.getUser("user", true);
 
-				// Check if interaction was on a server
 				if (interaction.inGuild()) {
-					// Check if user is already blocked
 					if (
 						interaction.guildId in blockedUsers.guilds &&
 						blockedUsers.guilds[interaction.guildId]!.includes(userToUnblock.id)
 					) {
-						// Remove user from blocked users
 						blockedUsers.guilds[interaction.guildId]!.splice(
 							blockedUsers.guilds[interaction.guildId]!.indexOf(userToUnblock.id),
 							1,
 						);
 
-						// Sort blocked users
 						blockedUsers.guilds[interaction.guildId]!.sort();
 
-						// Interaction response
 						await interaction.reply({
 							content: `${userMention(
 								userToUnblock.id,
@@ -277,7 +251,6 @@ const chatInputCommand: SavedChatInputCommand = {
 							ephemeral: true,
 						});
 					} else {
-						// Interaction response
 						await interaction.reply({
 							content: `${userMention(
 								userToUnblock.id,
@@ -286,20 +259,15 @@ const chatInputCommand: SavedChatInputCommand = {
 						});
 					}
 				} else {
-					// Check if user is already blocked
 					if (blockedUsers.global.includes(userToUnblock.id)) {
-						// Remove user from blocked users
 						blockedUsers.global.splice(blockedUsers.global.indexOf(userToUnblock.id), 1);
 
-						// Sort blocked users
 						blockedUsers.global.sort();
 
-						// Interaction response
 						await interaction.reply(
 							`${userMention(userToUnblock.id)} has been unblocked from interacting with me.`,
 						);
 					} else {
-						// Interaction response
 						await interaction.reply(
 							`${userMention(
 								userToUnblock.id,
@@ -308,22 +276,38 @@ const chatInputCommand: SavedChatInputCommand = {
 					}
 				}
 
-				// Break switch
 				break;
+
+			default:
+				await interaction.reply({
+					content: `The subcommand '${interaction.options.getSubcommand()}' does not exist.`,
+					ephemeral: true,
+				});
+
+				notify(
+					"ERROR",
+					`Unknown subcommand '${interaction.options.getSubcommand()}' used with 'blocked_users' chat input command`,
+					interaction.client,
+					`${userMention(
+						interaction.user.id,
+					)} used an unknown subcommand '${interaction.options.getSubcommand()}' with ${commandMention(
+						interaction,
+					)}.`,
+					2,
+				);
+
+				return;
 		}
 
-		// Check if blocked users file needs to be updated
+		// Update blocked users file if a change was made
 		if (["BLOCK", "CLEAR", "UNBLOCK"].includes(interaction.options.getSubcommand().toUpperCase())) {
-			// Update blocked users file
 			fs.writeFileSync(
-				relativePath(configuration.project.blockedUsersPath),
+				relativePath(configuration.paths.blockedUsersPath),
 				JSON.stringify(blockedUsers, undefined, 4),
 			);
 		}
 
-		// Check if blocked users are enabled
-		if (configuration.bot.enableBlockedUsers ?? true) {
-			// Interaction follow up message
+		if (!(configuration.bot.enableBlockedUsers ?? true)) {
 			interaction.followUp({
 				content: "Please note, that blocked users are currently disabled.",
 				ephemeral: interaction.inGuild(),

@@ -23,50 +23,45 @@ declare global {
     }
 }
 
-// Check if method is already defined
 if (!Array.prototype.asyncFind) {
-    Array.prototype.asyncFind = function <T>(
-        predicate: (element: T, key: number, array: T[]) => Promise<boolean>,
-        thisArg?: T[]
-    ): T | undefined {
-        /**
-         * Predicate with replaced "this" object
-         */
-        const boundPredicate = predicate.bind(thisArg);
+	Array.prototype.asyncFind = async function <T>(
+		predicate: (element: T, key: number, array: T[]) => Promise<boolean>,
+		thisArg?: T[],
+	): Promise<T | undefined> {
+		/** Predicate with replaced "this" object */
+		const boundPredicate = predicate.bind(thisArg);
 
-        this.forEach(async (_, index) => {
-            // Check if callback function returns true for element
-            if (await boundPredicate(this[index], index, this)) {
-                return this[index];
-            }
-        });
+		for (const index of this.keys()) {
+			const element = this[index] as T;
 
-        return undefined;
-    };
+			if (await boundPredicate(element, index, this)) {
+				return element;
+			}
+		}
+
+		return undefined;
+	};
 }
 
-// Check if method is already defined
 if (!Array.prototype.rotate) {
-    Array.prototype.rotate = function (count: number = 1, reverse: boolean = false) {
-        // Check special cases for count
-        if (count < 0) {
-            throw new Error("Parameter 'count' must be a positive number");
-        } else if (count === 0) {
-            return this;
-        }
+	Array.prototype.rotate = function (count: number = 1, reverse: boolean = false) {
+		if (count < 0) {
+			throw new Error("Parameter 'count' must be a positive number");
+		} else if (count === 0) {
+			return this;
+		}
 
-        count = Math.floor(count);
-        count %= this.length;
+		count = Math.floor(count);
+		count %= this.length;
 
-        // Check direction
-        if (reverse) {
-            this.push(...this.splice(0, this.length - count));
-        } else {
-            this.unshift(...this.splice(count, this.length));
-        }
+		if (reverse) {
+			this.push(...this.splice(0, this.length - count));
+		} else {
+			this.unshift(...this.splice(count, this.length));
+		}
 
-        return this;
-    };
+		return this;
+	};
 }
 
 export {};

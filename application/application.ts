@@ -1,61 +1,60 @@
 // Global imports
 import "../globals/consoleCommandHandler";
-import "../globals/eventTypeUpdate";
 import "../globals/fileReader";
+import "../globals/fileUpdate";
 import "../globals/notifications";
+import { configuration } from "../globals/variables";
 
 // Type imports
 import "../extensions/array.extensions";
 import { Client, DiscordAPIError, GatewayIntentBits } from "discord.js";
-import { Configuration } from "../types/configuration";
 
-const main = async (configuration: Configuration, applicationIndex: number = 0): Promise<void> => {
-    /**
-     * Discord bot client
-     */
-    const client = new Client({
-        intents: GatewayIntentBits.Guilds,
-    });
+/**
+ * Starts the Discord bot and handles login. Then starts the console command handler.
+ * @param intents Gateway intents your bot needs
+ * @see {@link GatewayIntentBits}
+ */
+const main = async (botIndex: number = 0, intents: GatewayIntentBits[]): Promise<void> => {
+	/**  Discord bot client */
+	const client = new Client({ intents });
 
-    notify(configuration, "INFO", "Bot is starting...");
+	notify("INFO", "Bot is starting...");
 
-	await updateEventTypes(configuration, client);
+	await updateFiles(client, ["eventTypes"]);
 
-	// Check if multiple bots are provided
-	if (Array.isArray(configuration.bot.applications)) {
-		configuration.bot.applications.rotate(applicationIndex);
+	if (Array.isArray(configuration.bot.botData)) {
+		configuration.bot.botData.rotate(botIndex);
 
-		const sucess = await configuration.bot.applications.asyncFind(async (application) => {
-			// Check if token could be valid
-			if (application.token && configuration.project.tokenRegex.test(application.token)) {
+		/** Whether the bot was logged in successfully */
+		const success = await configuration.bot.botData.asyncFind(async (bot) => {
+			if (bot.token && configuration.discord.tokenRegex.test(bot.token)) {
 				return await client
-					.login(application.token)
+					.login(bot.token)
 					.then((returnedToken) => {
-						return application.token === returnedToken;
+						return bot.token === returnedToken;
 					})
 					.catch((error: DiscordAPIError) => {
-						notify(configuration, "ERROR", String(error));
+						notify("ERROR", String(error));
 
 						return Boolean(configuration.bot.enableBotIteration);
 					});
 			}
 
-			notify(configuration, "WARNING", `Invalid token provided for bot with ID '${application.applicationId}'`);
+			notify("WARNING", `Invalid token provided for bot with ID '${bot.applicationId}'`);
 
 			return Boolean(configuration.bot.enableBotIteration);
 		});
 
-		// Check if no application was successfully logged in
-		if (!sucess && configuration.bot.enableBotIteration) {
-			notify(configuration, "WARNING", "Found no application with valid token");
+		if (!success && configuration.bot.enableBotIteration) {
+			notify("WARNING", "No bot with valid token was found");
 		}
 	} else {
-		await client.login(configuration.bot.applications.token).catch((error: DiscordAPIError) => {
-			notify(configuration, "ERROR", String(error));
+		await client.login(configuration.bot.botData.token).catch((error: DiscordAPIError) => {
+			notify("ERROR", String(error));
 		});
 	}
 
-	consoleCommandHandler(configuration, client);
+	consoleCommandHandler(client);
 };
 
 export { main };

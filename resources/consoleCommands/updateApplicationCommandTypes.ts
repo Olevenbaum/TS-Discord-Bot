@@ -1,60 +1,41 @@
 // Global imports
 import "../../globals/applicationCommandTypeUpdate";
+import { applicationCommandTypes } from "../../globals/variables";
 
 // Type imports
-import { Client } from "discord.js";
-import { Interface } from "readline";
-import { Configuration } from "../../types/configuration";
-import { ConsoleCommand, NestedArray } from "../../types/others";
+import { ApplicationCommandType } from "discord.js";
+import { ConsoleCommand } from "../../types/others";
 
-/**
- * Console command to update application command types
- */
+/** Console command to update application command types */
 const consoleCommand: ConsoleCommand = {
-	description: "Updates all or spefified application command types",
-
+	description: "Updates all or specified application command types",
 	name: "UPDATEAPPLICATIONCOMMANDTYPES",
-
-	usage: [
-		"updateApplicationCommandTypes",
-		"updateApplicationCommandTypes <application command type 1> <application command type 2> ...",
-		"updateApplicationCommandTypes [<application command type 1> <application command type 2> ...]",
+	parameters: [
+		[
+			{
+				description: "List of application command types to update",
+				name: "application command types",
+				options: () => Object.keys(applicationCommandTypes),
+				type: "object",
+			},
+			{
+				description: "Whether all application command types should be updated regardless of changes",
+				name: "force reload",
+				type: "boolean",
+			},
+		],
 	],
 
-	async execute(
-		configuration: Configuration,
-		_: Client<true>,
-		__: Interface,
-		...values: NestedArray<boolean | number | string>
-	) {
-		// Check if values are present
-		if (values.length > 0) {
-			// Check if values have the right type
-			if (values.length === 1 && typeof values[0] === "boolean") {
-				// Update all application command types
-				updateApplicationCommandTypes(configuration, values[0]);
-			} else if (values.length === 1 && Array.isArray(values[0])) {
-				// Check if values have the right type
-				if (values[0].every((value) => typeof value === "number")) {
-					// Update spefified application command types
-					updateApplicationCommandTypes(configuration, values[0]);
-				} else {
-					// Notification
-					notify(configuration, "ERROR", "Invalid parameters");
-				}
+	async execute(_, __, ...parameters: (keyof typeof ApplicationCommandType)[] | [boolean]) {
+		// Call matching overload to update application command types
+		if (parameters.length > 0) {
+			if (typeof parameters[0] === "boolean") {
+				updateApplicationCommandTypes(parameters[0]);
 			} else {
-				// Check if values have the right type
-				if (values.every((value) => typeof value === "number")) {
-					// Update spefified application command types
-					updateApplicationCommandTypes(configuration, values);
-				} else {
-					// Notification
-					notify(configuration, "ERROR", "Invalid parameters");
-				}
+				updateApplicationCommandTypes(parameters as (keyof typeof ApplicationCommandType)[]);
 			}
 		} else {
-			// Update all application command types
-			updateApplicationCommandTypes(configuration);
+			updateApplicationCommandTypes();
 		}
 	},
 };
