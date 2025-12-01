@@ -44,6 +44,12 @@ interface BotConfiguration {
 	botData: BotData | BotData[];
 
 	/**
+	 * Database configuration data
+	 * @see {@link DatabaseConfiguration}
+	 */
+	database?: DatabaseConfiguration;
+
+	/**
 	 * Whether commands should be updated automatically
 	 * @defaultValue `true`
 	 */
@@ -79,7 +85,7 @@ interface BotConfiguration {
 
 /**
  * Configuration data specifying the bots behavior and project structure
- * 
+ *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface Configuration {
@@ -109,6 +115,17 @@ interface Configuration {
 	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
 	 */
 	paths: Paths;
+}
+
+/**
+ * Database configuration data
+ */
+interface DatabaseConfiguration {
+	/** Host of the database */
+	host: string;
+
+	/** Name of the database */
+	name: string;
 }
 
 interface DiscordConstants {

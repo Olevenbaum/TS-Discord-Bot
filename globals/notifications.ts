@@ -60,11 +60,11 @@ global.notify = async function (
 ) {
 	if (typeof x === "string") {
 		if (typeof y === "string") {
-			throw new TypeError("Parameter 'client' must be of type 'Client'");
+			throw TypeError("Parameter 'client' must be of type 'Client'");
 		}
 	} else {
 		if (typeof y !== "string") {
-			throw new TypeError("Parameter 'message' must be of type 'string'");
+			throw TypeError("Parameter 'message' must be of type 'string'");
 		}
 	}
 
@@ -117,7 +117,7 @@ global.notify = async function (
 				break;
 
 			default:
-				throw new TypeError("Parameter 'type' must be one of 'ERROR', 'INFO', 'SUCCESS', 'TEST' or 'WARNING'");
+				throw TypeError("Parameter 'type' must be one of 'ERROR', 'INFO', 'SUCCESS', 'TEST' or 'WARNING'");
 		}
 	}
 

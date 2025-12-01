@@ -46,7 +46,7 @@ if (!Array.prototype.asyncFind) {
 if (!Array.prototype.rotate) {
 	Array.prototype.rotate = function (count: number = 1, reverse: boolean = false) {
 		if (count < 0) {
-			throw new Error("Parameter 'count' must be a positive number");
+			throw Error("Parameter 'count' must be a positive number");
 		} else if (count === 0) {
 			return this;
 		}

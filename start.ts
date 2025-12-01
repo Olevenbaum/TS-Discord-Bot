@@ -8,4 +8,4 @@ import { GatewayIntentBits } from "discord.js";
 const gatewayIntents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent];
 
 // Start bot
-main(0, gatewayIntents);
+main(gatewayIntents, 0);

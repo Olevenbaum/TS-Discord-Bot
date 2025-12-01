@@ -12,9 +12,10 @@ import { Client, DiscordAPIError, GatewayIntentBits } from "discord.js";
 /**
  * Starts the Discord bot and handles login. Then starts the console command handler.
  * @param intents Gateway intents your bot needs
+ * @param botIndex Index of the bot to use when multiple bots are configured. Defaults to `0`
  * @see {@link GatewayIntentBits}
  */
-const main = async (botIndex: number = 0, intents: GatewayIntentBits[]): Promise<void> => {
+const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise<void> => {
 	/**  Discord bot client */
 	const client = new Client({ intents });
 

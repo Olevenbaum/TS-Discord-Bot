@@ -22,7 +22,7 @@ const actionRow: SavedActionRow = {
 			) as SavedMessageComponent | SavedModalComponent | undefined;
 
 			if (!component) {
-				throw new Error(`Found no component with name '${includedComponent.name}'`);
+				throw Error(`Found no component with name '${includedComponent.name}'`);
 			}
 
 			for (let counter = 0; counter < includedComponent.count; counter++) {

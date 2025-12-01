@@ -22,7 +22,7 @@ const modal: SavedModal = {
 			]?.get(includedComponent.name) as SavedModalComponent | undefined;
 
 			if (!modalComponent) {
-				throw new Error(`Found no modal action row component with name '${includedComponent.name}'`);
+				throw Error(`Found no modal action row component with name '${includedComponent.name}'`);
 			}
 
 			for (let counter = 0; counter < includedComponent.count; counter++) {

@@ -8,7 +8,9 @@
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
+		"@sequelize/postgres": "^7.0.0-alpha.47",
 		"discord.js": "^14.24.2",
+		"sequelize": "^6.37.7",
 		"ts-node": "^10.9.2"
 	},
 	"displayName": "Typescript Discord Bot",

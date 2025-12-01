@@ -59,6 +59,7 @@
 			"type": ["array", "object"],
 			"uniqueItems": true
 		},
+		"database": {},
 		"enableBlockedUsers": {
 			"description": "Whether all users are allowed to interact with the bot",
 			"type": "boolean"
