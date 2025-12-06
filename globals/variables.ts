@@ -1,6 +1,7 @@
 // Data imports
 import botConfiguration from "../configuration/configuration.json";
-import discordConfiguration from "../configuration/discordConfiguration.json";
+import databaseConfiguration from "../configuration/database.json";
+import discordConfiguration from "../configuration/discord.json";
 import paths from "../configuration/paths.json";
 
 // Type imports
@@ -12,6 +13,7 @@ import {
 	MessageComponentType,
 	Snowflake,
 } from "discord.js";
+import { Sequelize } from "@sequelize/core";
 import {
 	SavedApplicationCommand,
 	SavedApplicationCommandType,
@@ -141,6 +143,7 @@ export const components: Partial<Record<keyof typeof ComponentType, Collection<s
  */
 export const configuration: Configuration = {
 	bot: botConfiguration,
+	database: databaseConfiguration,
 	discord: Object.fromEntries(
 		Object.entries(discordConfiguration).map(([key, value]) =>
 			key === "tokenRegex" ? [key, new RegExp(value as string)] : [key, value],
@@ -164,6 +167,12 @@ export const cooldowns = Object.fromEntries(
 		.filter((key) => isNaN(parseInt(key)))
 		.map((interactionType) => [interactionType, new Collection()]),
 ) as Cooldowns;
+
+/**
+ * Database connection instance
+ * @see {@link Sequelize}
+ */
+export const database: Sequelize | null = configuration.database ? new Sequelize(configuration.database) : null;
 
 /**
  * Collection of locally saved interaction types

@@ -1,5 +1,6 @@
 // Global imports
 import "../../globals/notifications";
+import { database } from "../../globals/variables";
 
 // Type imports
 import { Client } from "discord.js";
@@ -15,6 +16,10 @@ const consoleCommand: ConsoleCommand = {
 		await notify("INFO", "Shutting down...", client, `I'm tired and need to rest... See you! ZzZzZz...`, 5);
 
 		await client.destroy();
+
+		if (database) {
+			await database.close();
+		}
 
 		rlInterface.close();
 	},

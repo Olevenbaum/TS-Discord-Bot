@@ -3,7 +3,7 @@ import "../globals/consoleCommandHandler";
 import "../globals/fileReader";
 import "../globals/fileUpdate";
 import "../globals/notifications";
-import { configuration } from "../globals/variables";
+import { configuration, database } from "../globals/variables";
 
 // Type imports
 import "../extensions/array.extensions";
@@ -18,6 +18,17 @@ import { Client, DiscordAPIError, GatewayIntentBits } from "discord.js";
 const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise<void> => {
 	/**  Discord bot client */
 	const client = new Client({ intents });
+
+	if (database) {
+		await database
+			.authenticate()
+			.then(() => {
+				notify("SUCCESS", "Established connection to database");
+			})
+			.catch((error: Error) => {
+				notify("ERROR", `Unable to connect to the database:\n${error}`);
+			});
+	}
 
 	notify("INFO", "Bot is starting...");
 
@@ -34,10 +45,14 @@ const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise
 					.then((returnedToken) => {
 						return bot.token === returnedToken;
 					})
-					.catch((error: DiscordAPIError) => {
-						notify("ERROR", String(error));
+					.catch((error: Error) => {
+						if (error instanceof DiscordAPIError) {
+							notify("ERROR", String(error));
 
-						return Boolean(configuration.bot.enableBotIteration);
+							return Boolean(configuration.bot.enableBotIteration);
+						} else {
+							throw error;
+						}
 					});
 			}
 
@@ -50,8 +65,12 @@ const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise
 			notify("WARNING", "No bot with valid token was found");
 		}
 	} else {
-		await client.login(configuration.bot.botData.token).catch((error: DiscordAPIError) => {
-			notify("ERROR", String(error));
+		await client.login(configuration.bot.botData.token).catch((error: Error) => {
+			if (error instanceof DiscordAPIError) {
+				notify("ERROR", String(error));
+			} else {
+				throw error;
+			}
 		});
 	}
 

@@ -27,7 +27,7 @@ global.consoleCommandHandler = async function (client) {
 	const rlInterface = rl.createInterface({
 		input: process.stdin,
 		output: process.stdout,
-		prompt: `[${getTime()}] \x1b[35m Enter command: \x1b[0m`,
+		prompt: `[${getTime(configuration.bot.logDate)}] \x1b[35m Enter command: \x1b[0m`,
 	});
 
 	consoleCommands.push(...(await readFiles<ConsoleCommand>(configuration.paths.consoleCommandsPath)));

@@ -1,11 +1,12 @@
 // Type imports
 import { Snowflake, TeamMemberRole } from "discord.js";
+import { Options } from "@sequelize/core";
 import { NotificationImportance, NotificationType } from "./others";
 
 /**
  * Required individual data of any Discord bot to function.
  * Can be extracted from {@link https://discord.com/developers/applications | Discord Developer Portal} for each bot.
- * 
+ *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface BotData {
@@ -27,7 +28,7 @@ interface BotData {
 
 /**
  * Configuration data imported from JSON file to specify the bots behavior.
- * 
+ *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface BotConfiguration {
@@ -74,6 +75,12 @@ interface BotConfiguration {
 	enableBlockedUsers?: boolean;
 
 	/**
+	 * Whether console messages should be logged with a date prefix. The timestamp is always included.
+	 * @defaultValue `false`
+	 */
+	logDate?: boolean;
+
+	/**
 	 * Whether notifications should be enabled and if yes, which one should be sent and who should receive them
 	 * Can be a boolean to enable/disable notifications, a number to set the minimal importance of notifications to
 	 * receive or an object to specify detailed preferences
@@ -97,6 +104,14 @@ interface Configuration {
 	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
 	 */
 	bot: BotConfiguration;
+
+	/**
+	 * Database configuration data
+	 * @see {@link Options}
+	 *
+	 * More documentation can be found on {@link https://sequelize.org/ | Sequelize}.
+	 */
+	database?: Options;
 
 	/**
 	 * Constants given by Discord API

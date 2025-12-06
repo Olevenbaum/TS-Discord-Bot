@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"additionalProperties": false,
-	"description": "Configuration data to configure the application to fit your bot",
-	"$id": "./configuration.json",
+	"description": "Configuration data to make this template work as wanted",
+	"$id": "configuration.json",
 	"properties": {
 		"$schema": {
 			"description": "The schema version used",
@@ -59,17 +59,24 @@
 			"type": ["array", "object"],
 			"uniqueItems": true
 		},
-		"database": {},
 		"enableBlockedUsers": {
+			"default": true,
 			"description": "Whether all users are allowed to interact with the bot",
 			"type": "boolean"
 		},
 		"enableBotInteraction": {
+			"default": false,
 			"description": "Whether other bots can unse features of this bot",
 			"type": "boolean"
 		},
 		"enableBotIteration": {
+			"default": false,
 			"description": "Whether another bot should be used in case of a wrong token",
+			"type": "boolean"
+		},
+		"logDate": {
+			"default": false,
+			"description": "Whether to print the date in front of every log message",
 			"type": "boolean"
 		},
 		"notifications": {

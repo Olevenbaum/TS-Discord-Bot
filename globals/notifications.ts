@@ -69,7 +69,7 @@ global.notify = async function (
 	}
 
 	/** Timestamp */
-	const timestamp = getTime();
+	const timestamp = getTime(configuration.bot.logDate);
 
 	/** Client overload parameter */
 	const client = typeof x === "string" ? (typeof y === "string" ? undefined : y) : x;
@@ -92,22 +92,22 @@ global.notify = async function (
 	if (consoleMessage) {
 		switch (type) {
 			case "ERROR":
-				console.error(`[${getTime()}] \x1b[31m ${consoleMessage} \x1b[0m`);
+				console.error(`[${timestamp}] \x1b[31m ${consoleMessage} \x1b[0m`);
 
 				break;
 
 			case "INFO":
-				console.info(`[${getTime()}] \x1b[34m ${consoleMessage} \x1b[0m`);
+				console.info(`[${timestamp}] \x1b[34m ${consoleMessage} \x1b[0m`);
 
 				break;
 
 			case "SUCCESS":
-				console.log(`[${getTime()}] \x1b[32m ${consoleMessage} \x1b[0m`);
+				console.log(`[${timestamp}] \x1b[32m ${consoleMessage} \x1b[0m`);
 
 				break;
 
 			case "TEST":
-				console.log(`[${getTime()}] ${consoleMessage}`);
+				console.log(`[${timestamp}] ${consoleMessage}`);
 
 				break;
 
@@ -147,14 +147,14 @@ global.notify = async function (
 			.replace("@team", client.application.owner instanceof Team ? client.application.owner.name : "");
 
 		/** Discord users to receive the notification */
-		const receiver: User[] = [];
+		const receivers: User[] = [];
 
 		if (client.application.owner instanceof User) {
-			receiver.push(client.application.owner);
+			receivers.push(client.application.owner);
 		} else if (client.application.owner instanceof Team) {
 			client.application.owner.members.forEach((teamMember) => {
 				if (!["boolean", "number"].includes(typeof notificationsPreference)) {
-					receiver.push(teamMember.user);
+					receivers.push(teamMember.user);
 					return;
 				}
 
@@ -170,11 +170,13 @@ global.notify = async function (
 					return;
 				}
 
-				receiver.push(teamMember.user);
+				receivers.push(teamMember.user);
 			});
 		}
 
-		await Promise.all(receiver.map((user) => user.send(formattedMessage.replace("@member", userMention(user.id)))));
+		await Promise.all(
+			receivers.map((user) => user.send(formattedMessage.replace("@member", userMention(user.id)))),
+		);
 	}
 };
 
