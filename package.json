@@ -5,23 +5,26 @@
 	},
 	"description": "",
 	"devDependencies": {
-		"typescript": "^5.9.3"
+		"@types/bun": "latest"
 	},
 	"dependencies": {
 		"@sequelize/postgres": "^7.0.0-alpha.47",
 		"discord.js": "^14.24.2",
-		"sequelize": "^6.37.7",
-		"ts-node": "^10.9.2"
+		"sequelize": "^6.37.7"
 	},
 	"displayName": "Typescript Discord Bot",
 	"license": "BSD-3-Clause",
 	"main": "start.ts",
 	"name": "ts-discord-bot",
+	"peerDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"private": true,
 	"readme": "README.md",
 	"scripts": {
-		"start": "ts-node .",
-		"test": "ts-node temp/test.ts",
-		"test.js": "ts-node temp/test.js"
+		"start": "bun .",
+		"test": "bun temp/test.ts",
+		"test.js": "bun temp/test.js"
 	},
 	"type": "commonjs"
 }
