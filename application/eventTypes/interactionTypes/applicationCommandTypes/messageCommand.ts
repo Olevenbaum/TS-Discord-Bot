@@ -1,12 +1,24 @@
-// Global imports
-import "../../../../globals/cooldownValidator";
-import "../../../../globals/discordTextFormat";
-import "../../../../globals/notifications";
-import { applicationCommands } from "../../../../globals/variables";
+// Class & type imports
+import type { SavedApplicationCommandType, SavedMessageCommand } from "../../../../types";
 
-// Type imports
-import { ApplicationCommandType, MessageContextMenuCommandInteraction, Team, User } from "discord.js";
-import { SavedApplicationCommandType, SavedMessageCommand } from "../../../../types/applicationCommands";
+// Data imports
+import { applicationCommands } from "#variables";
+
+// External libraries imports
+import {
+	ApplicationCommandType,
+	bold,
+	codeBlock,
+	MessageContextMenuCommandInteraction,
+	MessageFlags,
+	Team,
+	underline,
+	User,
+} from "discord.js";
+
+// Module imports
+import notify from "../../../../modules/notification";
+import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
 /** Message command handler */
 const userCommandInteraction: SavedApplicationCommandType = {
@@ -14,24 +26,23 @@ const userCommandInteraction: SavedApplicationCommandType = {
 
 	async execute(interaction: MessageContextMenuCommandInteraction) {
 		/** Message application command that was interacted with */
-		const messageCommand = applicationCommands[
-			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
-		]?.get(interaction.commandName) as SavedMessageCommand | undefined;
+		const messageCommand = applicationCommands[this.type]?.get(interaction.commandName) as
+			| SavedMessageCommand
+			| undefined;
 
 		if (!messageCommand) {
 			interaction.reply({
 				content: `I'm sorry, but it seems like interactions with the command ${bold(
 					interaction.commandName,
 				)} can't be processed at the moment.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			notify(
-				"ERROR",
 				`Found no file handling message command '${interaction.commandName}'`,
-				interaction.client,
+				"ERROR",
 				`I couldn't find any file handling the message command ${bold(interaction.commandName)}.`,
-				4,
+				5,
 			);
 
 			return;
@@ -50,7 +61,7 @@ const userCommandInteraction: SavedApplicationCommandType = {
 					content: `I'm sorry, but you don't have permission to use the command ${bold(
 						interaction.commandName,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				return;
@@ -65,10 +76,10 @@ const userCommandInteraction: SavedApplicationCommandType = {
 
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
-				content: `You need to wait ${underlined(
-					cooldownValidation,
+				content: `You need to wait ${underline(
+					cooldownValidation.toString(),
 				)} more seconds before using the command ${bold(interaction.commandName)} again. Please be patient.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			return;
@@ -82,17 +93,16 @@ const userCommandInteraction: SavedApplicationCommandType = {
 					content: `I'm sorry, but there was an error handling your interaction with the command ${bold(
 						interaction.commandName,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				notify(
-					"ERROR",
-					`Failed to execute message command '${interaction.commandName}':\n${error}`,
-					interaction.client,
-					`I failed to execute the message command ${bold(interaction.commandName)}:\n${code(
+					`Failed to execute message command '${interaction.commandName}':`,
+					error,
+					`I failed to execute the message command ${bold(interaction.commandName)}:\n${codeBlock(
 						error.message,
 					)}\nHave a look at the logs for more information.`,
-					3,
+					4,
 				);
 			});
 	},

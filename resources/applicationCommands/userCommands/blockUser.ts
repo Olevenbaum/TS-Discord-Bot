@@ -1,11 +1,10 @@
-// Global imports
-import "../../../globals/discordTextFormat";
-import { blockedUsers, configuration } from "../../../globals/variables";
+// Class & type imports
+import { SavedUserCommand } from "../../../types";
 
-// Module imports
-import fs from "fs";
+// Data imports
+import { blockedUsers, configuration } from "#variables";
 
-// Type imports
+// External libraries imports
 import {
 	ApplicationCommandType,
 	ApplicationIntegrationType,
@@ -16,7 +15,11 @@ import {
 	User,
 	userMention,
 } from "discord.js";
-import { SavedUserCommand } from "../../../types/applicationCommands";
+
+// Module imports
+import fs from "fs";
+import { relativePath } from "../../../modules/fileReader";
+import notify from "../../../modules/notification";
 
 /** Block user command */
 const userCommand: SavedUserCommand = {
@@ -59,12 +62,13 @@ const userCommand: SavedUserCommand = {
 			});
 
 			notify(
+				`'${interaction.user.username}' tried to block '${interaction.targetUser.username}' without permission`,
 				"WARNING",
-				interaction.client,
 				`${userMention(interaction.user.id)} tried to block ${
 					interaction.client.application.owner instanceof User ? "you" : userMention(interaction.targetId)
 				} from interacting with me.`,
-				1,
+
+				3,
 			);
 
 			return;

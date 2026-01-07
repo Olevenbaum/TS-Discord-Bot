@@ -1,12 +1,25 @@
-// Global imports
-import "../../../../globals/discordTextFormat";
-import "../../../../globals/cooldownValidator";
-import "../../../../globals/notifications";
-import { applicationCommands } from "../../../../globals/variables";
+// Class & type imports
+import type { SavedApplicationCommandType, SavedChatInputCommand } from "../../../../types";
 
-// Type imports
-import { ApplicationCommandType, ChatInputCommandInteraction, Team, User } from "discord.js";
-import { SavedApplicationCommandType, SavedChatInputCommand } from "../../../../types/applicationCommands";
+// Data imports
+import { applicationCommands } from "#variables";
+
+// External libraries imports
+import {
+	ApplicationCommandType,
+	chatInputApplicationCommandMention,
+	ChatInputCommandInteraction,
+	codeBlock,
+	Collection,
+	MessageFlags,
+	Team,
+	underline,
+	User,
+} from "discord.js";
+
+// Module imports
+import notify from "../../../../modules/notification";
+import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
 /** Chat input command handler */
 const chatInputCommandInteraction: SavedApplicationCommandType = {
@@ -14,24 +27,27 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		/** Chat input command that was interacted with */
-		const chatInputCommand = applicationCommands[
-			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
-		]?.get(interaction.commandName) as SavedChatInputCommand | undefined;
+		const chatInputCommand = (applicationCommands[this.type] as Collection<string, SavedChatInputCommand>)?.get(
+			interaction.commandName,
+		);
 
 		if (!chatInputCommand) {
 			interaction.reply({
-				content: `I'm sorry, but it seems like interactions with the command ${commandMention(
-					interaction,
+				content: `I'm sorry, but it seems like interactions with the command ${chatInputApplicationCommandMention(
+					interaction.commandName,
+					interaction.commandId,
 				)} can't be processed at the moment.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			notify(
-				"ERROR",
 				`Found no file handling chat input command '${interaction.commandName}'`,
-				interaction.client,
-				`I couldn't find any file handling the chat input command ${commandMention(interaction)}.`,
-				4,
+				"ERROR",
+				`I couldn't find any file handling the chat input command ${chatInputApplicationCommandMention(
+					interaction.commandName,
+					interaction.commandId,
+				)}.`,
+				5,
 			);
 
 			return;
@@ -47,27 +63,32 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 					!interaction.client.application.owner.members.has(interaction.user.id))
 			) {
 				interaction.reply({
-					content: `I'm sorry, but you don't have permission to use the command ${commandMention(
-						interaction,
+					content: `I'm sorry, but you don't have permission to use the command ${chatInputApplicationCommandMention(
+						interaction.commandName,
+						interaction.commandId,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				return;
 			}
 		}
 
-		/** Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the chat input
+		/**
+		 * Whether the cooldown expired or the time (in seconds) a user has to wait till they can use the chat input
 		 * command again
 		 */
 		const cooldownValidation = await validateCooldown(chatInputCommand, interaction);
 
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
-				content: `You need to wait ${underlined(
-					cooldownValidation,
-				)} more seconds before using the command ${commandMention(interaction)} again. Please be patient.`,
-				ephemeral: true,
+				content: `You need to wait ${underline(
+					cooldownValidation.toString(),
+				)} more seconds before using the command ${chatInputApplicationCommandMention(
+					interaction.commandName,
+					interaction.commandId,
+				)} again. Please be patient.`,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			return;
@@ -78,20 +99,21 @@ const chatInputCommandInteraction: SavedApplicationCommandType = {
 			.then(() => updateCooldown("ApplicationCommand", chatInputCommand, interaction))
 			.catch(async (error: Error) => {
 				interaction.reply({
-					content: `I'm sorry, but there was an error handling your interaction with the command ${commandMention(
-						interaction,
+					content: `I'm sorry, but there was an error handling your interaction with the command ${chatInputApplicationCommandMention(
+						interaction.commandName,
+						interaction.commandId,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				notify(
-					"ERROR",
-					`Failed to execute chat input command '${interaction.commandName}':\n${error}`,
-					interaction.client,
-					`I failed to execute the chat input command ${commandMention(interaction)}:\n${code(
-						error.message,
-					)}\nHave a look at the logs for more information.`,
-					3,
+					`Failed to execute chat input command '${interaction.commandName}':`,
+					error,
+					`I failed to execute the chat input command ${chatInputApplicationCommandMention(
+						interaction.commandName,
+						interaction.commandId,
+					)}:\n${codeBlock(error.message)}\nHave a look at the logs for more information.`,
+					4,
 				);
 			});
 	},

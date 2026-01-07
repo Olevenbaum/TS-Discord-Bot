@@ -1,36 +1,38 @@
-// Global imports
-import "../../../globals/discordTextFormat";
-import "../../../globals/notifications";
-import { messageComponentTypes } from "../../../globals/variables";
+// Class & type imports
+import type { SavedInteractionType } from "../../../types";
 
-// Type imports
-import { InteractionType, MessageComponentInteraction, ComponentType } from "discord.js";
-import { SavedInteractionType } from "../../../types/others";
+// Data imports
+import { componentTypes } from "#variables";
 
-/** Template for interaction handler */
+// External libraries imports
+import { InteractionType, MessageComponentInteraction, ComponentType, bold, codeBlock, MessageFlags } from "discord.js";
+
+// Module imports
+import notify from "../../../modules/notification";
+
+/** Message component interaction handler */
 const interactionType: SavedInteractionType = {
 	type: InteractionType.MessageComponent,
 
 	async execute(interaction: MessageComponentInteraction) {
 		/** Message component type of the message component that was interacted with */
-		const messageComponentType = messageComponentTypes.get(interaction.componentType);
+		const messageComponentType = componentTypes.get(interaction.componentType);
 
 		if (!messageComponentType) {
 			interaction.reply({
 				content: `I'm sorry, but it seems like interactions with the message component type ${bold(
 					ComponentType[interaction.componentType],
 				)} can't be processed at the moment.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			notify(
-				"ERROR",
 				`Found no file handling message component type '${ComponentType[interaction.componentType]}'`,
-				interaction.client,
+				"ERROR",
 				`I couldn't find any file handling the message component type ${bold(
 					ComponentType[interaction.componentType],
 				)}.`,
-				4,
+				5,
 			);
 
 			return;
@@ -41,17 +43,16 @@ const interactionType: SavedInteractionType = {
 				content: `I'm sorry, but there was an error handling your interaction with the message component type ${bold(
 					ComponentType[interaction.componentType],
 				)}.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			notify(
-				"ERROR",
-				`Failed to execute message component type '${ComponentType[interaction.componentType]}':\n${error}`,
-				interaction.client,
+				`Failed to execute message component type '${ComponentType[interaction.componentType]}':`,
+				error,
 				`I failed to execute the message component type ${bold(
 					ComponentType[interaction.componentType],
-				)}:\n${code(error.message)}\nHave a look at the logs for more information.`,
-				3,
+				)}:\n${codeBlock(error.message)}\nHave a look at the logs for more information.`,
+				4,
 			);
 		});
 	},

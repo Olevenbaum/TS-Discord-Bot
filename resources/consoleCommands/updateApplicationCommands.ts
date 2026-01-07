@@ -1,10 +1,14 @@
-// Global imports
-import "../../globals/applicationCommandUpdate";
-import { applicationCommands } from "../../globals/variables";
+// Class & type imports
+import { ConsoleCommand } from "../../types/consoleCommands";
 
-// Type imports
-import { ApplicationCommandType, Client } from "discord.js";
-import { ConsoleCommand } from "../../types/others";
+// Data imports
+import { applicationCommands } from "#variables";
+
+// External libraries imports
+import { ApplicationCommandType } from "discord.js";
+
+// Module imports
+import { updateApplicationCommands } from "../../modules/update";
 
 /** Console command to update application commands */
 const consoleCommand: ConsoleCommand = {
@@ -33,11 +37,11 @@ const consoleCommand: ConsoleCommand = {
 		],
 	],
 
-	async execute(client: Client<true>, _, ...parameters: `${string}:${ApplicationCommandType}`[] | [boolean]) {
+	async execute(...parameters: `${string}:${ApplicationCommandType}`[] | [boolean]) {
 		// Call matching overload to update application commands
 		if (parameters.length > 0) {
 			if (typeof parameters[0] === "boolean") {
-				updateApplicationCommands(client, parameters[0]);
+				updateApplicationCommands(parameters[0]);
 			} else {
 				const transformedParameters: Partial<Record<keyof typeof ApplicationCommandType, string[]>> = {};
 
@@ -53,10 +57,10 @@ const consoleCommand: ConsoleCommand = {
 					);
 				});
 
-				updateApplicationCommands(client, transformedParameters);
+				updateApplicationCommands(transformedParameters);
 			}
 		} else {
-			updateApplicationCommands(client);
+			updateApplicationCommands();
 		}
 	},
 };

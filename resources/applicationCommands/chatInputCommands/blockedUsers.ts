@@ -1,15 +1,26 @@
-// Global imports
-import "../../../globals/discordTextFormat";
-import "../../../globals/notifications";
-import "../../../globals/pathRelativation";
-import { blockedUsers, configuration } from "../../../globals/variables";
+// Class & type imports
+import { SavedChatInputCommand } from "../../../types";
 
-// Module imports
+// Data imports
+import { blockedUsers, configuration } from "#variables";
+
+// External libraries imports
+import {
+	ApplicationCommandType,
+	chatInputApplicationCommandMention,
+	MessageFlags,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	Team,
+	unorderedList,
+	User,
+	userMention,
+} from "discord.js";
 import fs from "fs";
 
-// Type imports
-import { ApplicationCommandType, PermissionFlagsBits, SlashCommandBuilder, Team, User, userMention } from "discord.js";
-import { SavedChatInputCommand } from "../../../types/applicationCommands";
+// Module imports
+import { relativePath } from "../../../modules/fileReader";
+import notify from "../../../modules/notification";
 
 /** Chat input command to manage blocked users */
 const chatInputCommand: SavedChatInputCommand = {
@@ -63,7 +74,7 @@ const chatInputCommand: SavedChatInputCommand = {
 				content: `You don't have permission to use this command${
 					interaction.options.getSubcommand().toUpperCase() === "ENABLE" ? "" : " in DMs"
 				}.`,
-				ephemeral: interaction.inGuild(),
+				flags: interaction.inGuild() ? MessageFlags.Ephemeral : undefined,
 			});
 
 			return;
@@ -74,7 +85,6 @@ const chatInputCommand: SavedChatInputCommand = {
 				/** User to add to blocked users */
 				const userToBlock = interaction.options.getUser("user", true);
 
-				// Prevent blocking the owner(s), the bot itself or the user themself
 				if (
 					(interaction.client.application.owner instanceof User &&
 						interaction.client.application.owner.id === userToBlock.id) ||
@@ -85,15 +95,15 @@ const chatInputCommand: SavedChatInputCommand = {
 						content: `You can't block ${
 							interaction.client.application.owner instanceof User ? "the" : "an"
 						} owner of this bot!`,
-						ephemeral: interaction.inGuild(),
+						flags: interaction.inGuild() ? MessageFlags.Ephemeral : undefined,
 					});
 
 					notify(
-						"WARNING",
-						interaction.client,
 						`${userMention(interaction.user.id)} tried to block ${
 							interaction.client.application.owner instanceof User ? "you" : userMention(userToBlock.id)
 						} from interacting with me.`,
+						"WARNING",
+						true,
 						1,
 					);
 
@@ -101,20 +111,19 @@ const chatInputCommand: SavedChatInputCommand = {
 				} else if (interaction.client.user.id === userToBlock.id) {
 					await interaction.reply({
 						content: `How the hell would I interact with myself...?! You can't block me!`,
-						ephemeral: interaction.inGuild(),
+						flags: interaction.inGuild() ? MessageFlags.Ephemeral : undefined,
 					});
 
 					return;
 				} else if (interaction.user.id === userToBlock.id) {
 					await interaction.reply({
 						content: "Are you serious...? You can't block yourself.",
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					});
 
 					return;
 				}
 
-				// Block user from interacting with the bot if not already blocked
 				if (interaction.inGuild()) {
 					if (
 						interaction.guildId in blockedUsers.guilds &&
@@ -124,7 +133,7 @@ const chatInputCommand: SavedChatInputCommand = {
 							content: `${userMention(
 								userToBlock.id,
 							)} is already blocked from interacting with me on this server.`,
-							ephemeral: true,
+							flags: MessageFlags.Ephemeral,
 						});
 					} else {
 						if (!(interaction.guildId in blockedUsers.guilds)) {
@@ -139,7 +148,7 @@ const chatInputCommand: SavedChatInputCommand = {
 							content: `${userMention(
 								userToBlock.id,
 							)} has been blocked from interacting with me on this server.`,
-							ephemeral: true,
+							flags: MessageFlags.Ephemeral,
 						});
 					}
 				} else {
@@ -161,7 +170,6 @@ const chatInputCommand: SavedChatInputCommand = {
 				break;
 
 			case "CLEAR":
-				// Clear blocked users
 				if (interaction.inGuild()) {
 					blockedUsers.guilds[interaction.guildId] = [];
 				} else {
@@ -172,7 +180,7 @@ const chatInputCommand: SavedChatInputCommand = {
 					content: `All users have been unblocked from interacting with me${
 						interaction.inGuild() ? " on this server" : ""
 					}.`,
-					ephemeral: interaction.inGuild(),
+					flags: interaction.inGuild() ? MessageFlags.Ephemeral : undefined,
 				});
 
 				break;
@@ -188,7 +196,7 @@ const chatInputCommand: SavedChatInputCommand = {
 					content: `Blocked users have been ${
 						configuration.bot.enableBlockedUsers ? "enabled" : "disabled"
 					}.`,
-					ephemeral: interaction.inGuild(),
+					flags: interaction.inGuild() ? MessageFlags.Ephemeral : undefined,
 				});
 
 				fs.writeFileSync(
@@ -202,7 +210,7 @@ const chatInputCommand: SavedChatInputCommand = {
 				if (configuration.bot.enableBlockedUsers === false) {
 					await interaction.reply({
 						content: "Blocked users are currently disabled.",
-						ephemeral: interaction.inGuild(),
+						flags: interaction.inGuild() ? MessageFlags.Ephemeral : undefined,
 					});
 				} else if (interaction.inGuild()) {
 					if (
@@ -210,7 +218,9 @@ const chatInputCommand: SavedChatInputCommand = {
 						blockedUsers.guilds[interaction.guildId]!.length !== 0
 					) {
 						await interaction.reply(
-							list(blockedUsers.guilds[interaction.guildId]!.map((userId) => userMention(userId))),
+							unorderedList(
+								blockedUsers.guilds[interaction.guildId]!.map((userId) => userMention(userId)),
+							),
 						);
 					} else {
 						await interaction.reply({
@@ -222,7 +232,9 @@ const chatInputCommand: SavedChatInputCommand = {
 					if (blockedUsers.global.length === 0) {
 						await interaction.reply("No users are currently blocked from interacting with me.");
 					} else {
-						await interaction.reply(list(blockedUsers.global.map((userId) => userMention(userId))));
+						await interaction.reply(
+							unorderedList(blockedUsers.global.map((userId) => userMention(userId))),
+						);
 					}
 				}
 
@@ -248,14 +260,14 @@ const chatInputCommand: SavedChatInputCommand = {
 							content: `${userMention(
 								userToUnblock.id,
 							)} has been unblocked from interacting with me on this server.`,
-							ephemeral: true,
+							flags: MessageFlags.Ephemeral,
 						});
 					} else {
 						await interaction.reply({
 							content: `${userMention(
 								userToUnblock.id,
 							)} is not blocked from interacting with me on this server and therefore can't be unblocked.`,
-							ephemeral: true,
+							flags: MessageFlags.Ephemeral,
 						});
 					}
 				} else {
@@ -281,25 +293,24 @@ const chatInputCommand: SavedChatInputCommand = {
 			default:
 				await interaction.reply({
 					content: `The subcommand '${interaction.options.getSubcommand()}' does not exist.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				notify(
-					"ERROR",
 					`Unknown subcommand '${interaction.options.getSubcommand()}' used with 'blocked_users' chat input command`,
-					interaction.client,
+					"ERROR",
 					`${userMention(
 						interaction.user.id,
-					)} used an unknown subcommand '${interaction.options.getSubcommand()}' with ${commandMention(
-						interaction,
+					)} used an unknown subcommand '${interaction.options.getSubcommand()}' with ${chatInputApplicationCommandMention(
+						interaction.commandName,
+						interaction.commandId,
 					)}.`,
-					2,
+					4,
 				);
 
 				return;
 		}
 
-		// Update blocked users file if a change was made
 		if (["BLOCK", "CLEAR", "UNBLOCK"].includes(interaction.options.getSubcommand().toUpperCase())) {
 			fs.writeFileSync(
 				relativePath(configuration.paths.blockedUsersPath),

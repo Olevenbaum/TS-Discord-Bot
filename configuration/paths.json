@@ -8,8 +8,9 @@
 	"discordConfigurationsPath": "./configuration/discordConfiguration.json",
 	"eventTypesPath": "./application/eventTypes",
 	"interactionTypesPath": "./application/eventTypes/interactionTypes",
+	"logPath": "./logs",
 	"messageCommandsPath": "./resources/applicationCommands/messageCommands",
-	"messageComponentTypesPath": "./application/eventTypes/interactionTypes/messageComponentTypes",
+	"componentTypesPath": "./application/eventTypes/interactionTypes/componentTypes",
 	"modalsPath": "./resources/modals",
 	"userCommandsPath": "./resources/applicationCommands/userCommands"
 }

@@ -1,10 +1,14 @@
-// Global imports
-import "../../globals/applicationCommandTypeUpdate";
-import { applicationCommandTypes } from "../../globals/variables";
+// Class & type imports
+import { ConsoleCommand } from "../../types/consoleCommands";
 
-// Type imports
+// Data imports
+import { applicationCommandTypes } from "../../resources/variables";
+
+// External libraries imports
 import { ApplicationCommandType } from "discord.js";
-import { ConsoleCommand } from "../../types/others";
+
+// Module imports
+import { updateApplicationCommandTypes } from "../../modules/update";
 
 /** Console command to update application command types */
 const consoleCommand: ConsoleCommand = {

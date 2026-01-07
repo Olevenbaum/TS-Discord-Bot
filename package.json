@@ -8,11 +8,16 @@
 		"@types/bun": "latest"
 	},
 	"dependencies": {
+		"@opentui/core": "^0.1.67",
 		"@sequelize/postgres": "^7.0.0-alpha.47",
-		"discord.js": "^14.24.2",
+		"discord.js": "^14.25.1",
 		"sequelize": "^6.37.7"
 	},
 	"displayName": "Typescript Discord Bot",
+	"imports": {
+		"#application": "./application/index.ts",
+		"#variables": "./resources/variables.ts"
+	},
 	"license": "BSD-3-Clause",
 	"main": "start.ts",
 	"name": "ts-discord-bot",

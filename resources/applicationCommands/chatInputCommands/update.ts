@@ -1,27 +1,22 @@
-// Global imports
-import "../../../globals/applicationCommandUpdate";
-import "../../../globals/applicationCommandTypeUpdate";
-import "../../../globals/discordTextFormat";
-import "../../../globals/eventTypeUpdate";
-import "../../../globals/fileUpdate";
-import "../../../globals/interactionTypeUpdate";
-import {
-	applicationCommands,
-	applicationCommandTypes,
-	configuration,
-	interactionTypes,
-} from "../../../globals/variables";
+// Class & type imports
+import { SavedApplicationCommand, SavedChatInputCommand } from "../../../types";
 
-// Type imports
+// Data imports
+import { applicationCommands, applicationCommandTypes, configuration, interactionTypes } from "#variables";
+
+// External libraries imports
 import {
 	ApplicationCommandType,
 	ApplicationIntegrationType,
+	bold,
+	chatInputApplicationCommandMention,
 	ClientEvents,
 	InteractionType,
 	SlashCommandBuilder,
 } from "discord.js";
-import { SavedApplicationCommand, SavedChatInputCommand } from "../../../types/applicationCommands";
-import { FileInclude } from "../../../types/others";
+
+// Module imports
+import { FileInclude, updateFiles } from "../../../modules/update";
 
 /** Chat input command to update files of the bot */
 const chatInputCommand: SavedChatInputCommand = {
@@ -110,7 +105,7 @@ const chatInputCommand: SavedChatInputCommand = {
 		const option = interaction.options.getFocused().toUpperCase();
 
 		/** Results to be shown as autocomplete suggestions */
-		const results: { name: string; value: string }[] = [];
+		const results: { name: string; value: string | number }[] = [];
 
 		switch (interaction.options.getSubcommand().toUpperCase()) {
 			case "COMMANDS":
@@ -142,9 +137,11 @@ const chatInputCommand: SavedChatInputCommand = {
 			case "COMMAND_TYPES":
 				results.push(
 					...applicationCommandTypes
-						.filter((_, applicationCommandType) => applicationCommandType.toUpperCase().includes(option))
+						.filter((_, applicationCommandType) =>
+							ApplicationCommandType[applicationCommandType].toUpperCase().includes(option),
+						)
 						.map((_, applicationCommandType) => ({
-							name: applicationCommandType,
+							name: ApplicationCommandType[applicationCommandType],
 							value: applicationCommandType,
 						}))
 						.sort((a, b) => (a.name < b.name ? -1 : 1)),
@@ -207,7 +204,7 @@ const chatInputCommand: SavedChatInputCommand = {
 				await interaction.reply(
 					`Updating application command${
 						commandName && type
-							? ` ${commandMention(
+							? ` ${chatInputApplicationCommandMention(
 									commandName,
 									(
 										await interaction.client.application.commands.fetch()
@@ -239,9 +236,7 @@ const chatInputCommand: SavedChatInputCommand = {
 					`Updating application command type${
 						Array.isArray(include.applicationCommandTypes)
 							? ` ${include.applicationCommandTypes
-									.map((applicationCommandType) =>
-										bold(ApplicationCommandType[applicationCommandType]),
-									)
+									.map((applicationCommandType) => bold(applicationCommandType))
 									.join(", ")}`
 							: "s"
 					}...`,
@@ -280,9 +275,7 @@ const chatInputCommand: SavedChatInputCommand = {
 				await interaction.reply({
 					content: `Updating application command type${
 						Array.isArray(include.interactionTypes)
-							? ` ${include.interactionTypes
-									.map((interactionType) => bold(InteractionType[interactionType]))
-									.join(", ")}`
+							? ` ${include.interactionTypes.map((interactionType) => bold(interactionType)).join(", ")}`
 							: "s"
 					}...`,
 					ephemeral: true,
@@ -296,14 +289,17 @@ const chatInputCommand: SavedChatInputCommand = {
 
 			default:
 				interaction.reply({
-					content: `The subcommand ${commandMention(interaction)} is not implemented by now.`,
+					content: `The subcommand ${chatInputApplicationCommandMention(
+						interaction.commandName,
+						interaction.commandId,
+					)} is not implemented by now.`,
 					ephemeral: true,
 				});
 
 				return;
 		}
 
-		await updateFiles(interaction.client, include);
+		await updateFiles(include);
 
 		interaction.editReply("Update finished");
 	},

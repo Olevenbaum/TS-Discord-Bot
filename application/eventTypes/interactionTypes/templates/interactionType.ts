@@ -1,6 +1,8 @@
-// Type imports
-import { InteractionType } from "discord.js";
-import { SavedInteractionType } from "../../../../types/others";
+// Class & type imports
+import type { SavedInteractionType } from "../../../../types";
+
+// External libraries imports
+import { BaseInteraction, InteractionType } from "discord.js";
 
 /** Template for interaction handler */
 const interactionType: SavedInteractionType = {
@@ -11,7 +13,7 @@ const interactionType: SavedInteractionType = {
 		InteractionType.ModalSubmit ||
 		InteractionType.Ping,
 
-	async execute(interaction) {},
+	async execute(interaction: BaseInteraction) {},
 };
 
 export default interactionType;

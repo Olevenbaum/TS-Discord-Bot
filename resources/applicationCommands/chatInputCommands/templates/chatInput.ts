@@ -1,6 +1,8 @@
-// Type imports
+// Class & type imports
+import { SavedChatInputCommand } from "../../../../types";
+
+// External libraries imports
 import { ApplicationCommandType, SlashCommandBuilder } from "discord.js";
-import { SavedChatInputCommand } from "../../../../types/applicationCommands";
 
 /** Template for chat input command */
 const chatInputCommand: SavedChatInputCommand = {

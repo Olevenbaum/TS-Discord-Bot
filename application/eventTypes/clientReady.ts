@@ -1,10 +1,15 @@
-// Global imports
-import "../../globals/fileUpdate";
-import "../../globals/notifications";
+// Class & type imports
+import type { SavedEventType } from "../../types";
 
-// Type imports
+// Data imports
+import { cli } from "#application";
+
+// External libraries imports
 import { Client, Events } from "discord.js";
-import { SavedEventType } from "../../types/others";
+
+// Module imports
+import notify from "../../modules/notification";
+import { updateFiles } from "../../modules/update";
 
 /** Client ready event handler */
 const clientReady: SavedEventType = {
@@ -12,9 +17,13 @@ const clientReady: SavedEventType = {
 	type: Events.ClientReady,
 
 	async execute(client: Client<true>) {
-		notify("SUCCESS", `Client logged in as '${client.user.username}'`, client, `I've awaken, @member!`, 5);
+		notify(`Client logged in as '${client.user.username}'`, "SUCCESS", `I've awaken, @member!`, 6);
 
 		updateFiles(client, ["configuration", "eventTypes"], false);
+
+		if (cli.focusColor === "auto") {
+			cli.focusColor = "auto";
+		}
 	},
 };
 

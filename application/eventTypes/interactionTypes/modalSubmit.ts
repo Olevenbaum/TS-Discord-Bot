@@ -1,14 +1,17 @@
-// Global imports
-import "../../../globals/cooldownValidator";
-import "../../../globals/discordTextFormat";
-import "../../../globals/notifications";
-import { modals } from "../../../globals/variables";
+// Class & type imports
+import type { SavedInteractionType } from "../../../types";
 
-// Type imports
-import { InteractionType, ModalSubmitInteraction } from "discord.js";
-import { SavedInteractionType } from "../../../types/others";
+// Data imports
+import { modals } from "#variables";
 
-/** Template for interaction handler */
+// External libraries imports
+import { bold, codeBlock, InteractionType, ModalSubmitInteraction, MessageFlags, underline } from "discord.js";
+
+// Module imports
+import notify from "../../../modules/notification";
+import { updateCooldown, validateCooldown } from "../../../modules/utilities";
+
+/** Modal submit interaction handler */
 const interactionType: SavedInteractionType = {
 	type: InteractionType.ModalSubmit,
 
@@ -19,15 +22,14 @@ const interactionType: SavedInteractionType = {
 		if (!modal) {
 			interaction.reply({
 				content: `I'm sorry, but it seems like submissions of the modal you just interacted with can't be processed at the moment.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			notify(
-				"ERROR",
 				`Found no file handling modal '${interaction.customId}'`,
-				interaction.client,
+				"ERROR",
 				`I couldn't find any file handling the modal ${bold(interaction.customId)}.`,
-				4,
+				5,
 			);
 
 			return;
@@ -41,8 +43,8 @@ const interactionType: SavedInteractionType = {
 		// TODO: Add title of modal received from interaction, not name of modal file
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
-				content: `You need to wait ${underlined(
-					cooldownValidation,
+				content: `You need to wait ${underline(
+					cooldownValidation.toString(),
 				)} more seconds before submitting the modal ${bold(modal.name)} again. Please be patient.`,
 				ephemeral: true,
 			});
@@ -59,17 +61,16 @@ const interactionType: SavedInteractionType = {
 					content: `I'm sorry, but there was an error handling your interaction with the modal ${bold(
 						modal.name,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				notify(
-					"ERROR",
-					`Failed to execute modal '${modal.name}':\n${error}`,
-					interaction.client,
-					`I failed to execute the modal ${bold(modal.name)}:\n${code(
+					`Failed to execute modal '${modal.name}':`,
+					error,
+					`I failed to execute the modal ${bold(modal.name)}:\n${codeBlock(
 						error.message,
 					)}\nHave a look at the logs for more information.`,
-					3,
+					4,
 				);
 			});
 	},

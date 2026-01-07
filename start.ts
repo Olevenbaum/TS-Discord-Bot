@@ -1,11 +1,8 @@
 // Module imports
-import { main } from "./application/application";
+import main from "./application";
 
-// Type imports
-import { GatewayIntentBits } from "discord.js";
-
-/** Gateway intents your bot needs */
-const gatewayIntents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent];
+/** Index of the bot intended to start */
+const botIndex = 0;
 
 // Start bot
-main(gatewayIntents, 0);
+main(botIndex);

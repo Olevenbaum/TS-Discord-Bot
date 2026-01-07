@@ -1,19 +1,26 @@
-// Global imports
-import "../../../../../globals/cooldownValidator";
-import "../../../../../globals/discordTextFormat";
-import "../../../../../globals/notifications";
-import { applicationCommands } from "../../../../../globals/variables";
+// Class & type imports
+import type { SavedApplicationCommandType } from "../../../../../types";
 
-// Type imports
+// Data imports
+import { applicationCommands } from "#variables";
+
+// External libraries imports
 import {
 	ApplicationCommandType,
+	bold,
 	ChatInputCommandInteraction,
+	codeBlock,
 	MessageContextMenuCommandInteraction,
+	MessageFlags,
 	Team,
+	underline,
 	User,
 	UserContextMenuCommandInteraction,
 } from "discord.js";
-import { SavedApplicationCommandType } from "../../../../../types/applicationCommands";
+
+// Module imports
+import notify from "../../../../../modules/notification";
+import { updateCooldown, validateCooldown } from "../../../../../modules/utilities";
 
 /** Template for application command type handler */
 const applicationCommandInteraction: SavedApplicationCommandType = {
@@ -26,24 +33,21 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
 			| UserContextMenuCommandInteraction,
 	) {
 		/** Application command that was interacted with */
-		const applicationCommand = applicationCommands[
-			ApplicationCommandType[this.type] as keyof typeof ApplicationCommandType
-		]?.get(interaction.commandName);
+		const applicationCommand = applicationCommands[this.type]?.get(interaction.commandName);
 
 		if (!applicationCommand) {
 			interaction.reply({
 				content: `I'm sorry, but it seems like interactions with the command ${bold(
 					interaction.commandName,
 				)} can't be processed at the moment.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			notify(
-				"ERROR",
 				`Found no file handling application command '${interaction.commandName}'`,
-				interaction.client,
+				"ERROR",
 				`I couldn't find any file handling the application command ${bold(interaction.commandName)}.`,
-				4,
+				5,
 			);
 
 			return;
@@ -62,7 +66,7 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
 					content: `I'm sorry, but you don't have permission to use the command ${bold(
 						interaction.commandName,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				return;
@@ -70,17 +74,17 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
 		}
 
 		/**
-		 * Whether the cooldown expired or the time (in ms) a user has to wait untill they can use the application
+		 * Whether the cooldown expired or the time (in ms) a user has to wait until they can use the application
 		 * command again
 		 */
 		const cooldownValidation = await validateCooldown(applicationCommand, interaction);
 
 		if (typeof cooldownValidation === "number") {
 			interaction.reply({
-				content: `You need to wait ${underlined(
-					cooldownValidation,
+				content: `You need to wait ${underline(
+					cooldownValidation.toString(),
 				)} more seconds before using the command ${bold(interaction.commandName)} again. Please be patient.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 			return;
@@ -94,17 +98,16 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
 					content: `I'm sorry, but there was an error handling your interaction with the command ${bold(
 						interaction.commandName,
 					)}.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 				notify(
-					"ERROR",
-					`Failed to execute application command '${interaction.commandName}':\n${error}`,
-					interaction.client,
-					`I failed to execute the application command ${bold(interaction.commandName)}:\n${code(
+					`Failed to execute application command '${interaction.commandName}':`,
+					error,
+					`I failed to execute the application command ${bold(interaction.commandName)}:\n${codeBlock(
 						error.message,
 					)}\nHave a look at the logs for more information.`,
-					3,
+					4,
 				);
 			});
 	},

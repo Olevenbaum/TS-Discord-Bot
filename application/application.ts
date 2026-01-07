@@ -1,38 +1,49 @@
-// Global imports
-import "../globals/consoleCommandHandler";
-import "../globals/fileReader";
-import "../globals/fileUpdate";
-import "../globals/notifications";
-import { configuration, database } from "../globals/variables";
+// Class & type imports
+import { ConsoleHandler } from "../classes";
 
-// Type imports
-import "../extensions/array.extensions";
+// Data imports
+import { configuration } from "#variables";
+
+// External libraries imports
+import { createCliRenderer } from "@opentui/core";
 import { Client, DiscordAPIError, GatewayIntentBits } from "discord.js";
+import { Sequelize } from "sequelize";
+
+// Module imports
+import "../extensions/Array";
+import notify from "../modules/notification";
+import { updateFiles } from "../modules/update";
 
 /**
- * Starts the Discord bot and handles login. Then starts the console command handler.
- * @param intents Gateway intents your bot needs
- * @param botIndex Index of the bot to use when multiple bots are configured. Defaults to `0`
- * @see {@link GatewayIntentBits}
+ * CLI to see the logs and interact with the bot directly
+ * @see {@linkcode ConsoleHandler}
  */
-const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise<void> => {
-	/**  Discord bot client */
-	const client = new Client({ intents });
+export const cli = new ConsoleHandler();
 
-	if (database) {
-		await database
-			.authenticate()
-			.then(() => {
-				notify("SUCCESS", "Established connection to database");
-			})
-			.catch((error: Error) => {
-				notify("ERROR", `Unable to connect to the database:\n${error}`);
-			});
-	}
+/**
+ * Discord bot client
+ * @see {@linkcode Client} | {@linkcode GatewayIntentBits}
+ */
+export const client = new Client({
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+});
 
-	notify("INFO", "Bot is starting...");
+/**
+ * Database connection instance
+ * @see {@link Sequelize}
+ */
+export const database: Sequelize | null = configuration.database ? new Sequelize(configuration.database) : null;
 
-	await updateFiles(client, ["eventTypes"]);
+/**
+ * Starts the Discord bot and handles login as well as starting the CLI.
+ * @param botIndex Index of the bot to use when multiple bots are configured. Defaults to `0`
+ */
+export default async function main(botIndex?: number): Promise<void>;
+
+export default async function main(botIndex: number = 0): Promise<void> {
+	notify("Bot is starting...", "INFORMATION");
+
+	await updateFiles(["eventTypes"]);
 
 	if (Array.isArray(configuration.bot.botData)) {
 		configuration.bot.botData.rotate(botIndex);
@@ -47,7 +58,7 @@ const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise
 					})
 					.catch((error: Error) => {
 						if (error instanceof DiscordAPIError) {
-							notify("ERROR", String(error));
+							notify(error);
 
 							return Boolean(configuration.bot.enableBotIteration);
 						} else {
@@ -56,25 +67,34 @@ const main = async (intents: GatewayIntentBits[], botIndex: number = 0): Promise
 					});
 			}
 
-			notify("WARNING", `Invalid token provided for bot with ID '${bot.applicationId}'`);
+			notify(`Invalid token provided for bot with ID '${bot.applicationId}'`, "WARNING");
 
 			return Boolean(configuration.bot.enableBotIteration);
 		});
 
 		if (!success && configuration.bot.enableBotIteration) {
-			notify("WARNING", "No bot with valid token was found");
+			notify("No bot with valid token was found", "WARNING");
 		}
 	} else {
 		await client.login(configuration.bot.botData.token).catch((error: Error) => {
 			if (error instanceof DiscordAPIError) {
-				notify("ERROR", String(error));
+				notify(error);
 			} else {
 				throw error;
 			}
 		});
 	}
 
-	consoleCommandHandler(client);
-};
+	if (database) {
+		await database
+			.authenticate()
+			.then(() => {
+				notify("Established connection to database", "SUCCESS");
+			})
+			.catch((error: Error) => {
+				notify(`Unable to connect to the database:\n${error}`, "ERROR");
+			});
+	}
 
-export { main };
+	cli.initialize(await createCliRenderer());
+}

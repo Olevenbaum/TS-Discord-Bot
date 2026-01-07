@@ -1,7 +1,10 @@
-// Type imports
+// Class & type imports
+import { LogLevel, LogType } from "../modules/notification";
+
+// External libraries imports
 import { Snowflake, TeamMemberRole } from "discord.js";
+import { Path } from "typescript";
 import { Options } from "@sequelize/core";
-import { NotificationImportance, NotificationType } from "./others";
 
 /**
  * Required individual data of any Discord bot to function.
@@ -43,12 +46,6 @@ interface BotConfiguration {
 	 * @see {@link BotData}
 	 */
 	botData: BotData | BotData[];
-
-	/**
-	 * Database configuration data
-	 * @see {@link DatabaseConfiguration}
-	 */
-	database?: DatabaseConfiguration;
 
 	/**
 	 * Whether commands should be updated automatically
@@ -146,7 +143,7 @@ interface DatabaseConfiguration {
 interface DiscordConstants {
 	/**
 	 * Maximal number of autocomplete results Discord can show
-	 * 
+	 *
 	 * See on the {@link https://discord.com/developers/docs/interactions/application-commands#autocomplete-structure-autocomplete-choices | Discord Documentation}.
 	 */
 	maximalAutocompleteResults: number;
@@ -157,7 +154,7 @@ interface DiscordConstants {
 
 /**
  * Notification preferences
- * 
+ *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface NotificationPreferences {
@@ -178,63 +175,66 @@ interface NotificationPreferences {
 	 * @defaultValue `0`
 	 * @see {@link NotificationImportance}
 	 */
-	minImportance?: NotificationImportance;
+	minImportance?: LogLevel;
 
 	/**
 	 * Team members and their chosen minimal importance of notifications to receive
 	 * @see {@link Snowflake} | {@link NotificationImportance}
 	 */
-	restrictedMembers?: { [key: Snowflake]: NotificationImportance };
+	restrictedMembers?: { [key: Snowflake]: LogLevel };
 
 	/**
 	 * Types of notifications to enable
 	 * @see {@link NotificationType}
 	 */
-	types?: NotificationType[];
+	types?: LogType[];
 }
 
 /**
  * Paths of various files and directories used in the project
- * 
+ *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface Paths {
-	/** Path(s) of application command types directory/directories */
+	/** Path(s) of application command types directory / directories */
 	applicationCommandTypesPath: string | string[];
 
 	/** Path of blocked users file */
 	blockedUsersPath: string;
 
-	/** Paths of chat input commands directory/directories */
+	/** Paths of chat input commands directory / directories */
 	chatInputCommandsPath: string | string[];
 
-	/** Path(s) of (message) components directory/directories */
+	/** Path(s) of (message) components directory / directories */
 	componentsPath: string | string[];
 
 	/** Path of configuration data file */
 	configurationPath: string;
 
-	/** Path(s) of console commands directory/directories */
+	/** Path(s) of console commands directory / directories */
 	consoleCommandsPath: string | string[];
 
 	/** Path of Discord data file */
-	discordConfigurationsPath: string;
+	discordConfigurationsPath: Path;
 
-	/** Path(s) of event types directory/directories */
-	eventTypesPath: string | string[];
+	/** Path(s) of event types directory / directories */
+	eventTypesPath: Path | Path[];
 
-	/** Path(s) of interactions types directory/directories */
-	interactionTypesPath: string | string[];
+	/** Path(s) of interactions types directory / directories */
+	interactionTypesPath: Path | Path[];
 
-	/** Path(s) of message commands directory/directories */
+	/** Path to a directory to save log files to */
+	logPath: Path;
+
+	/** Path(s) of message commands directory / directories */
 	messageCommandsPath: string | string[];
 
-	/** Path(s) of message component types directory/directories */
-	messageComponentTypesPath: string | string[];
+	/** Path(s) of component types directory / directories */
+	componentTypesPath: string | string[];
 
-	/** Path(s) of modals directory/directories */
+	/** Path(s) of modals directory / directories */
 	modalsPath: string | string[];
 
-	/** Path(s) of user commands directory/directories */
+	/** Path(s) of user commands directory / directories */
 	userCommandsPath: string | string[];
 }

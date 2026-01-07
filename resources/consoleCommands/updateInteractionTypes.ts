@@ -1,10 +1,14 @@
-// Global imports
-import "../../globals/interactionTypeUpdate";
-import { interactionTypes } from "../../globals/variables";
+// Class & type imports
+import { ConsoleCommand } from "../../types/consoleCommands";
 
-// Type imports
+// Data imports
+import { interactionTypes } from "../../resources/variables";
+
+// External libraries imports
 import { InteractionType } from "discord.js";
-import { ConsoleCommand } from "../../types/others";
+
+// Module imports
+import { updateInteractionTypes } from "../../modules/update";
 
 /** Console command to update interaction types */
 const consoleCommand: ConsoleCommand = {
@@ -26,7 +30,7 @@ const consoleCommand: ConsoleCommand = {
 		],
 	],
 
-	async execute(_, ___, ...parameters: (keyof typeof InteractionType)[] | [boolean]) {
+	async execute(...parameters: (keyof typeof InteractionType)[] | [boolean]) {
 		// Call matching overload to update interaction types
 		if (parameters.length > 0) {
 			if (typeof parameters[0] === "boolean") {

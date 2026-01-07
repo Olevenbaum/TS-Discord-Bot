@@ -1,6 +1,8 @@
-// Type imports
+// Class & type imports
+import type { SavedEventType } from "../../../types";
+
+// External libraries imports
 import { Events } from "discord.js";
-import { SavedEventType } from "../../../types/others";
 
 /** Template for event handler */
 const eventType: SavedEventType = {
@@ -86,7 +88,7 @@ const eventType: SavedEventType = {
 		Events.Warn ||
 		Events.WebhooksUpdate,
 
-	async execute(configuration) {},
+	async execute() {},
 };
 
 export default eventType;

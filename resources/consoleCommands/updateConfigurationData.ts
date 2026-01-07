@@ -1,8 +1,8 @@
-// Global imports
-import "../../globals/fileUpdate";
+// Class & type imports
+import { ConsoleCommand } from "../../types/consoleCommands";
 
-// Type imports
-import { ConsoleCommand } from "../../types/others";
+// Module imports
+import updateFiles from "../../modules/update";
 
 /** Console command to update the configuration data */
 const consoleCommand: ConsoleCommand = {
@@ -11,7 +11,7 @@ const consoleCommand: ConsoleCommand = {
 	name: "UPDATECONFIGURATIONDATA",
 
 	async execute() {
-		updateFiles(undefined, ["configuration"]);
+		updateFiles(["configuration"]);
 	},
 };
 

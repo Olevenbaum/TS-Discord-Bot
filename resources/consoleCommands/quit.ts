@@ -1,10 +1,11 @@
-// Global imports
-import "../../globals/notifications";
-import { database } from "../../globals/variables";
+// Class & type imports
+import { ConsoleCommand } from "../../types/consoleCommands";
 
-// Type imports
-import { Client } from "discord.js";
-import { ConsoleCommand } from "../../types/others";
+// Data imports
+import { cli, client } from "#application";
+
+// Module imports
+import notify from "../../modules/notification";
 
 /** Console command to terminate the bot and exit the console */
 const consoleCommand: ConsoleCommand = {
@@ -12,16 +13,12 @@ const consoleCommand: ConsoleCommand = {
 	description: "Terminates the bot and exits the console",
 	name: "QUIT",
 
-	async execute(client: Client<true>, rlInterface) {
-		await notify("INFO", "Shutting down...", client, `I'm tired and need to rest... See you! ZzZzZz...`, 5);
+	async execute() {
+		await notify("Shutting down...", "INFORMATION", `I'm tired and need to rest... See you! ZzZzZz...`, 6);
 
 		await client.destroy();
 
-		if (database) {
-			await database.close();
-		}
-
-		rlInterface.close();
+		cli.destroy();
 	},
 };
 

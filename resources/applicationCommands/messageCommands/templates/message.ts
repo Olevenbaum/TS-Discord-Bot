@@ -1,6 +1,8 @@
-// Type imports
+// Class & type imports
+import { SavedMessageCommand } from "../../../../types";
+
+// External libraries imports
 import { ApplicationCommandType, ContextMenuCommandBuilder } from "discord.js";
-import { SavedMessageCommand } from "../../../../types/applicationCommands";
 
 /** Template for message command */
 const messageCommand: SavedMessageCommand = {

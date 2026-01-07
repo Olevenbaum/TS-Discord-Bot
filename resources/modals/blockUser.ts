@@ -1,12 +1,13 @@
-// Global imports
-import { components } from "../../globals/variables";
+// Class & type imports
+import { SavedModal, SavedModalComponent } from "../../types";
 
-// Type imports
+// Data imports
+import { components } from "#variables";
+
+// External libraries imports
 import { ActionRowBuilder, ComponentType, ModalActionRowComponentBuilder, ModalBuilder } from "discord.js";
-import { SavedModalComponent } from "../../types/components";
-import { SavedModal } from "../../types/modals";
 
-/** Template for modal */
+/** Modal to manage blocked users */
 const modal: SavedModal = {
 	includedComponents: [],
 	name: "blockUser",
@@ -17,9 +18,9 @@ const modal: SavedModal = {
 
 		for (const includedComponent of this.includedComponents) {
 			/** Text input component that should be added */
-			const modalComponent = components[
-				ComponentType[includedComponent.type as ComponentType] as keyof typeof components
-			]?.get(includedComponent.name) as SavedModalComponent | undefined;
+			const modalComponent = components[includedComponent.type as ComponentType]?.get(includedComponent.name) as
+				| SavedModalComponent
+				| undefined;
 
 			if (!modalComponent) {
 				throw Error(`Found no modal action row component with name '${includedComponent.name}'`);
