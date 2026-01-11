@@ -1,17 +1,17 @@
 // Class & type imports
-import { ConsoleCommand, ConsoleCommandParameter, NestedArray } from "../../types";
+import type { ConsoleCommand, ConsoleCommandParameter, NestedArray } from "../../types";
 
 // Data imports
 import { configuration } from "#variables";
 
 // External libraries imports
 import {
-	BoxOptions,
+	type BoxOptions,
 	BoxRenderable,
 	InputRenderable,
 	InputRenderableEvents,
-	RenderContext,
-	SelectOption,
+	type RenderContext,
+	type SelectOption,
 	SelectRenderable,
 	SelectRenderableEvents,
 } from "@opentui/core";
@@ -23,27 +23,37 @@ import { ConsoleHandler } from "./ConsoleHandler";
 import readFiles from "../../modules/fileReader";
 
 /**
+ * A renderable component that provides an interactive command-line interface for executing console commands. It
+ * combines an input field for command entry with an autocomplete dropdown for command suggestions. This class handles
+ * command parsing, parameter validation, and execution, integrating with the bot's console system.
  * @see {@linkcode BoxRenderable}
  */
 export class CommandInputRenderable extends BoxRenderable {
 	/**
+	 * Collection of available console commands loaded from the file system. These commands can be executed through the
+	 * command input interface.
 	 * @see {@linkcode ConsoleCommand}
 	 */
 	protected _commands: ConsoleCommand[] = [];
 
 	/**
-	 * The command input to enter console commands into
+	 * The input field where users enter console commands. Handles text input and command submission via Enter key.
 	 * @see {@linkcode InputRenderable}
 	 */
 	protected commandInput: InputRenderable;
 
 	/**
-	 * The autocomplete display to suggest console commands
+	 * The autocomplete dropdown that displays command suggestions based on user input. Shows matching commands and
+	 * aliases as the user types.
 	 * @see {@linkcode SelectRenderable}
 	 */
 	protected autocompleteInput: SelectRenderable;
 
 	/**
+	 * Creates a new command input renderable with the specified rendering context and options. Initializes the input
+	 * field and autocomplete dropdown, sets up event handlers for command execution and autocomplete suggestions.
+	 * @param ctx - The rendering context for the component.
+	 * @param options - Optional configuration options for the box container.
 	 * @see {@linkcode BoxOptions}
 	 * @see {@linkcode RenderContext}
 	 */
@@ -115,6 +125,8 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
+	 * Gets the current list of loaded console commands.
+	 * @returns An array of available console commands.
 	 * @see {@linkcode ConsoleCommand}
 	 */
 	public get commands(): ConsoleCommand[] {
@@ -122,8 +134,9 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Handles the command execution.
-	 * @param input Raw string entered by the user
+	 * Processes and executes a console command entered by the user. Parses the input, validates parameters, and ´
+	 * invokes the appropriate command handler.
+	 * @param input - The raw command string entered by the user.
 	 */
 	protected handleCommand(input: string): void {
 		const transformedInput = this.handleInput(input) || [];
@@ -138,9 +151,10 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Handles the input from the command line
-	 * @param input Raw string entered by the user
-	 * @returns The command and parameters extracted from the input, if any
+	 * Parses the user input to identify the command and extract parameters. Searches for matching commands by name or
+	 * alias and returns the command with its parameters if found.
+	 * @param input - The raw command string entered by the user.
+	 * @returns The matched command, or a tuple of command and parameters, or undefined if no match.
 	 * @see {@linkcode ConsoleCommand}
 	 * @see {@linkcode NestedArray}
 	 */
@@ -166,9 +180,10 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Transforms raw input into command name and parameters
-	 * @param input Raw string entered by the user
-	 * @returns The command name and parameters extracted from the input
+	 * Parses the raw input string to extract the command name and prepare for parameter processing. Converts the
+	 * command name to uppercase for case-insensitive matching.
+	 * @param input - The raw command string entered by the user.
+	 * @returns A tuple containing the uppercase command name and optionally parsed parameters.
 	 * @see {@linkcode NestedArray}
 	 */
 	protected transformInput(input: string): [string, NestedArray<string | number | boolean>?] {
@@ -181,11 +196,13 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Tests whether a single parameter is valid according to provided parameter data
-	 * @param parameter A single parameter entered by the user
-	 * @param parameterData The data to compare the parameter against
-	 * @returns Whether the parameter is valid
-	 * @see {@linkcode ConsoleCommandParameter} | {@linkcode NestedArray}
+	 * Validates a single parameter against its expected type and constraints. Checks type compatibility, range limits
+	 * for numbers, and pattern matching for strings and arrays.
+	 * @param parameter - The parameter value to validate.
+	 * @param parameterData - The parameter definition containing validation rules.
+	 * @returns `true` if the parameter is valid according to the definition, `false` otherwise.
+	 * @see {@linkcode ConsoleCommandParameter}
+	 * @see {@linkcode NestedArray}
 	 */
 	protected testParameter(
 		parameter: boolean | number | string | NestedArray<boolean | number | string>,
@@ -254,11 +271,13 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Tests whether given parameters are valid according to provided parameter data
-	 * @param parameters The already transformed parameters entered by the user
-	 * @param parameterData The data to compare the parameters against
-	 * @returns Whether the parameters are valid
-	 * @see {@linkcode ConsoleCommandParameter} | {@linkcode NestedArray}
+	 * Validates a set of parameters against their expected structure and types. Handles both simple parameter arrays
+	 * and complex nested parameter definitions.
+	 * @param parameters - The transformed parameters to validate.
+	 * @param parameterData - The parameter definition(s) to validate against.
+	 * @returns True if all parameters are valid, false otherwise.
+	 * @see {@linkcode ConsoleCommandParameter}
+	 * @see {@linkcode NestedArray}
 	 */
 	protected testParameters(
 		parameters: NestedArray<boolean | number | string>,
@@ -295,11 +314,14 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Transforms a string of parameters into a nested array of values
-	 * @param parameters The string of parameters to transform
-	 * @param parameterData The data of the parameters the console command takes to validate against
-	 * @returns A nested array of values
-	 * @see {@linkcode ConsoleCommandParameter} | {@linkcode NestedArray}
+	 * Parses a string of parameters into a properly typed nested array structure. Handles quoted strings, arrays,
+	 * booleans, numbers, and validates against parameter definitions if provided.
+	 * @param parameters - The raw parameter string to parse.
+	 * @param parameterData - Optional parameter definitions for validation during parsing.
+	 * @returns A nested array of parsed and validated parameter values.
+	 * @throws {TypeError} If parameters are invalid or malformed.
+	 * @see {@linkcode ConsoleCommandParameter}
+	 * @see {@linkcode NestedArray}
 	 */
 	protected transformParameters(
 		parameters: string,
@@ -359,7 +381,11 @@ export class CommandInputRenderable extends BoxRenderable {
 		return transformedParameters;
 	}
 
-	/** Updates the loaded console commands from local files */
+	/**
+	 * Reloads the console commands from the file system. Updates the internal command list with the latest commands
+	 * available in the configured console commands directory.
+	 * @returns A promise that resolves when commands have been updated.
+	 */
 	public async updateCommands(): Promise<void> {
 		this._commands = await readFiles<ConsoleCommand>(configuration.paths.consoleCommandsPath);
 	}

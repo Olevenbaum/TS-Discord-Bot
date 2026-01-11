@@ -3,20 +3,24 @@ import { type BoxOptions, BoxRenderable, type RenderContext, RGBA } from "@opent
 import { color, type ColorInput } from "bun";
 
 /**
+ * A renderable component that arranges child BoxRenderable elements vertically in a column layout. Provides focus
+ * management and common styling options for all children. Extends BoxRenderable with vertical flex direction and tab
+ * based navigation between children.
  * @see {@linkcode BoxRenderable}
  */
 export class VerticalSplitBoxRenderable extends BoxRenderable {
-	/** All children this box contains */
+	/** All children BoxRenderable elements contained within this vertical split box */
 	protected children: BoxRenderable[];
 
-	/** Common options applied to all children */
-	protected commonOptions: Omit<BoxOptions, "position" | "visible" | "width" | "zIndex">;
+	/** Common styling options applied to all child elements */
+	protected commonOptions: Exclude<BoxOptions, "position" | "visible" | "width" | "zIndex">;
 
 	/**
-	 * @param ctx - CLI renderer
-	 * @param options - Options to alter the split box
-	 * @param children - Children to add to the split box
-	 * @param commonOptions - Options to alter every child
+	 * Creates a new VerticalSplitBoxRenderable instance for arranging child elements vertically.
+	 * @param ctx - The CLI renderer context used for rendering the component.
+	 * @param options - Options to customize the split box appearance and behavior.
+	 * @param children - Initial child BoxRenderable elements to add to the split box.
+	 * @param commonOptions - Styling options to apply to all child elements.
 	 */
 	constructor(
 		ctx: RenderContext,
@@ -45,6 +49,9 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 	}
 
 	/**
+	 * Gets the focus color of the first child element. This represents the focused border color used when a child is
+	 * active.
+	 * @returns The focus color of the first child element.
 	 * @see {@linkcode ColorInput}
 	 */
 	get focusColor(): ColorInput {
@@ -52,6 +59,8 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 	}
 
 	/**
+	 * Sets the focus color for all child elements. Updates the focused border color for every child.
+	 * @param focusColor - The new focus color to apply to all children.
 	 * @see {@linkcode ColorInput}
 	 */
 	set focusColor(focusColor: ColorInput) {
@@ -61,10 +70,11 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Adds multiple children to the box at a specific index or at the end
-	 * @param startIndex The index after which to add the children
-	 * @param children The children to add
-	 * @returns The parent box for chaining
+	 * Adds multiple children to the vertical split box at a specific index or at the end. Applies common styling
+	 * options to each new child and updates the internal children array.
+	 * @param startIndex - The index after which to add the children, or the first child if not a number.
+	 * @param children - The child BoxRenderable elements to add.
+	 * @returns The parent box instance for method chaining.
 	 */
 	addChildren(...children: BoxRenderable[]): VerticalSplitBoxRenderable;
 	addChildren(startIndex: number, ...children: BoxRenderable[]): VerticalSplitBoxRenderable;
@@ -93,15 +103,14 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Switches focus between children
-	 * @param x The number of items to switch focus by. Defaults to `1`
-	 * @param direction The direction the focus is sent. Defaults to `down`
-	 * @returns The newly focused child
+	 * Switches focus between child elements in the vertical split box. Supports moving focus by a specified number of
+	 * positions in either direction. If no child is currently focused, focuses the first child.
+	 * @param x - The number of positions to move focus by, or the direction string. Defaults to `1`.
+	 * @param direction - The direction to move focus (`"up"` or `"down"`). Defaults to `"down"`.
+	 * @returns The newly focused child element.
 	 */
-	switchFocus(): BoxRenderable;
-	switchFocus(direction: "up" | "down"): BoxRenderable;
-	switchFocus(x: number): BoxRenderable;
-	switchFocus(x: number, direction: "up" | "down"): BoxRenderable;
+	switchFocus(direction?: "up" | "down"): BoxRenderable;
+	switchFocus(x?: number, direction?: "up" | "down"): BoxRenderable;
 	switchFocus(x: number | "up" | "down" = 1, direction: "up" | "down" = "down"): BoxRenderable {
 		/** Index of the currently focused child */
 		const focusedIndex = this.children.findIndex((child) => child.focused);

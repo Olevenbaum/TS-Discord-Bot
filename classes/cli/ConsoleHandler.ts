@@ -1,65 +1,68 @@
 // Data imports
 import { client } from "#application";
-import { configuration } from "#variables";
 
 // External libraries imports
 import { BoxRenderable, CliRenderer, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 import { Colors } from "discord.js";
-import { Path } from "typescript";
+import type { Path } from "typescript";
 
 // Internal class & type imports
 import { CommandInputRenderable } from "./CommandInputRenderable";
 import { LogRenderable } from "./LogRenderable";
 import { VerticalSplitBoxRenderable } from "./VerticalSplitBoxRenderable";
 
-/** Handles console commands via a CLI interface */
+/**
+ * Manages the console-based user interface for the Discord bot, providing a terminal-like experience for executing
+ * commands and viewing logs. It creates a split-screen layout with command input at the top and log output below,
+ * handling user interactions and system feedback.
+ */
 export class ConsoleHandler {
 	/**
-	 * Color of focused children
+	 * The color used for borders of focused UI elements. Can be a specific color or `"auto"` to use the bot's accent
+	 * color.
 	 * @see {@linkcode ColorInput}
 	 */
 	protected _focusColor: ColorInput | "auto";
 
 	/**
+	 * The command input component that handles user command entry and execution.
 	 * @see {@linkcode CommandInputRenderable}
 	 */
 	protected commandInput?: CommandInputRenderable;
 
 	/**
-	 * The default color ({@linkcode Colors.LuminousVividPink}) focused children have if no other color was chosen
+	 * The default focus color used when "auto" is selected but the bot's accent color is unavailable.
 	 * @see {@linkcode ColorInput}
 	 */
 	protected defaultFocusColor: ColorInput = Colors.LuminousVividPink;
 
-	/** Whether each log messages timestamp includes the current date */
+	/** Whether log messages should include the current date in their timestamps. */
 	protected includeDate: boolean;
 
 	/**
-	 * Area for all log messages to be displayed
+	 * The log display area where system messages and command outputs are shown.
 	 * @see {@linkcode LogRenderable}
 	 */
 	protected logs?: LogRenderable;
 
 	/**
-	 * CLI Renderer
+	 * The CLI renderer responsible for drawing the interface and handling user input.
 	 * @see {@linkcode CliRenderer}
 	 */
 	protected renderer?: CliRenderer;
 
 	/**
-	 * The top level box splitted into command and log sections
+	 * The main container that splits the interface into command input and log sections.
 	 * @see {@linkcode VerticalSplitBoxRenderable}
 	 */
 	protected splitBox?: VerticalSplitBoxRenderable;
 
 	/**
-	 * Creates a new console handler. The function {@linkcode ConsoleHandler.initialize | initialize()} needs to be
-	 * called first for the console handler to function.
-	 * @param focusColor - A color for the borders of focused elements. "auto" selects the accent color of the Discord
-	 * bot
-	 * @param includeDate - Whether to print the current date in front of every log message
-	 * @see {@link ColorInput}
+	 * Creates a new console handler instance. The handler must be initialized with a renderer before use.
+	 * @param focusColor - The color for focused UI elements, or "auto" to use the bot's accent color.
+	 * @param includeDate - Whether to include dates in log timestamps.
+	 * @see {@linkcode ColorInput}
 	 */
 	constructor(focusColor: ColorInput | "auto" = "auto", includeDate: boolean = false) {
 		this._focusColor = focusColor;
@@ -67,7 +70,8 @@ export class ConsoleHandler {
 	}
 
 	/**
-	 * The color the border of both the command and log boxes switch to on focus
+	 * Gets the current focus color used for UI element borders.
+	 * @returns The current focus color.
 	 * @see {@linkcode ColorInput}
 	 */
 	public get focusColor(): ColorInput {
@@ -75,7 +79,8 @@ export class ConsoleHandler {
 	}
 
 	/**
-	 * The color the border of both the command and log boxes switch to on focus
+	 * Sets the focus color for UI element borders. Updates the interface if already initialized.
+	 * @param focusColor - The new focus color, or "auto" to use the bot's accent color.
 	 * @see {@linkcode ColorInput}
 	 */
 	public set focusColor(focusColor: ColorInput | "auto") {
@@ -94,7 +99,10 @@ export class ConsoleHandler {
 		}
 	}
 
-	/** Sets the focus color to the bots accent color. */
+	/**
+	 * Automatically sets the focus color to the bot's accent color from Discord. Falls back to the default color if
+	 * the accent color is unavailable.
+	 */
 	private async autoFocusColor(): Promise<void> {
 		await client.user!.fetch();
 
@@ -105,29 +113,41 @@ export class ConsoleHandler {
 		}
 	}
 
-	/** Prints a debug message to the log box. */
+	/**
+	 * Prints a debug message to the log display area.
+	 * @param messages - The messages to log.
+	 */
 	public debug(...messages: any[]): void {
 		this.logs?.debug(...messages);
 	}
 
-	/** Destroys the CLI renderer and closes the console handler. */
+	/**
+	 * Destroys the CLI renderer and cleans up the console interface.
+	 */
 	public destroy(): void {
 		this.renderer?.destroy();
 	}
 
-	/** Prints an error message to the log box. */
+	/**
+	 * Prints an error message to the log display area.
+	 * @param messages - The error messages to log.
+	 */
 	public error(...messages: any[]): void {
 		this.logs?.error(...messages);
 	}
 
-	/** Prints an informational message to the log box */
+	/**
+	 * Prints an informational message to the log display area.
+	 * @param messages - The informational messages to log.
+	 */
 	public info(...messages: any[]): void {
 		this.logs?.info(...messages);
 	}
 
 	/**
-	 * Initializes the console handler. Child components / boxes are created.
-	 * @param renderer The CLI renderer from {@link https://github.com/sst/opentui | opentui}
+	 * Initializes the console handler with a CLI renderer. Creates and arranges all UI components including command
+	 * input, log display, and the split layout.
+	 * @param ctx - The CLI renderer instance to use for the interface.
 	 */
 	public initialize(ctx: CliRenderer): void {
 		this.renderer = ctx;
@@ -172,25 +192,33 @@ export class ConsoleHandler {
 	}
 
 	/**
-	 * Saves the logs to the specified directory or the default directory defined in
-	 * {@linkcode configuration.paths.logPath}.
-	 * @param path - The path to save the log file at
+	 * Saves the current log contents to a file. Uses the specified path or falls back to the configured log directory.
+	 * @param path - Optional path where to save the log file.
 	 */
 	public saveLogs(path?: Path) {
 		this.logs?.saveLogs(path);
 	}
 
-	/** Prints a message of success to the log box */
+	/**
+	 * Logs a success message to the console and updates the UI accordingly.
+	 * @param messages - The success messages to log.
+	 */
 	public success(...messages: any[]): void {
 		this.logs?.success(...messages);
 	}
 
-	/** Updates the loaded console commands from local files */
+	/**
+	 * Updates the loaded console commands from local files. This method refreshes the command input with the latest
+	 * available commands from the filesystem.
+	 */
 	public async updateCommands(): Promise<void> {
 		await this.commandInput?.updateCommands();
 	}
 
-	/** Prints awarning to the log box */
+	/**
+	 * Logs a warning message to the console and updates the UI accordingly.
+	 * @param messages - The warning messages to log.
+	 */
 	public warn(...messages: any[]): void {
 		this.logs?.warn(...messages);
 	}

@@ -1,5 +1,5 @@
 // Class & type imports
-import { ActionRowCreateOptions, ComponentCreateOptions } from "../components";
+import type { ActionRowCreateOptions, ComponentCreateOptions } from "../components";
 
 /**
  * Options for customizing modal dialogs during creation. Modals are popup forms that can contain multiple components

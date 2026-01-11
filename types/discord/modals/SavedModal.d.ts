@@ -1,11 +1,11 @@
 // Class & type imports
-import { CooldownObject } from "../../others";
+import type { CooldownObject } from "../../others";
 
 // External libraries imports
-import { ComponentType, MessageComponentType, ModalBuilder, ModalSubmitInteraction } from "discord.js";
+import { ComponentType, type MessageComponentType, ModalBuilder, ModalSubmitInteraction } from "discord.js";
 
-// Internal type imports
-import { ModalCreateOptions } from "./CreateOptions";
+// Internal class & type imports
+import type { ModalCreateOptions } from "./CreateOptions";
 
 /**
  * Represents a Discord modal dialog loaded from a local file. Modals are popup forms that collect user input through
@@ -52,7 +52,7 @@ interface SavedModal {
 	 * @see {@linkcode ModalBuilder}
 	 * @see {@linkcode ModalCreateOptions}
 	 */
-	create(options: ModalCreateOptions): ModalBuilder;
+	create(options?: ModalCreateOptions): ModalBuilder;
 
 	/**
 	 * Executes the modal's logic when a user submits it. Processes the submitted data and handles the response.

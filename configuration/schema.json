@@ -105,7 +105,7 @@
 				"minImportance": {
 					"description": "Minimal importance of notifications that should be received",
 					"minimum": 0,
-					"maximum": 5,
+					"maximum": 6,
 					"type": "integer"
 				},
 				"restrictedMembers": {
@@ -115,7 +115,7 @@
 						"^([0-9]{18})$": {
 							"description": "Minimal importance level of notifications the team member wants or is supposed to receive",
 							"minimum": 0,
-							"maximum": 5,
+							"maximum": 6,
 							"type": "integer"
 						}
 					},
@@ -133,6 +133,11 @@
 				}
 			},
 			"type": ["boolean", "number", "object"]
+		},
+		"saveLogs": {
+			"default": true,
+			"description": "Whether to save the log messages at least once a day and before the bot shuts down",
+			"type": "boolean"
 		}
 	},
 	"required": ["botData"],

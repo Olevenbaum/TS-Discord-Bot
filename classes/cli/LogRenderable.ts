@@ -19,22 +19,27 @@ import type { Path } from "typescript";
 
 // Module imports
 import { relativePath } from "../../modules/fileReader";
-import { getTime } from "../../modules/time";
+import getTime from "../../modules/time";
 
 /**
+ * A renderable component for displaying console logs with timestamped messages in different colors based on log levels.
+ * Extends TextRenderable to provide logging functionality with automatic file saving capabilities.
  * @see {@linkcode TextRenderable}
  */
 export class LogRenderable extends TextRenderable {
-	/** Whether each log messages timestamp includes the current date */
+	/** Whether each log message's timestamp includes the current date */
 	protected includeDate: boolean;
 
-	/** Timestamp only including the date (year, month and day of the month) of last printed log message */
+	/** Timestamp only including the date (year, month and day of the month) of the last printed log message */
 	protected lastMessageDate?: Date;
 
 	/**
-	 * @param ctx - CLI renderer
-	 * @param options - Options to alter the text
-	 * @see {@linkcode RenderContext} | {@linkcode TextOptions}
+	 * Creates a new LogRenderable instance for displaying timestamped console logs.
+	 * @param ctx - The CLI renderer context used for rendering the log component.
+	 * @param includeDate - Whether to include the date in log timestamps (default: `false`).
+	 * @param options - Additional options to customize the text rendering.
+	 * @see {@linkcode RenderContext}
+	 * @see {@linkcode TextOptions}
 	 */
 	constructor(ctx: RenderContext, includeDate: boolean = false, options: TextOptions = {}) {
 		super(ctx, options);
@@ -43,8 +48,9 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Prints a debugging message to the log.
-	 * @param messages - Message fragments to add to the log box
+	 * Prints a debugging message to the log in white color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param messages - Message fragments to add to the log box.
 	 */
 	public debug(...messages: any[]) {
 		this.add(
@@ -58,9 +64,9 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Prints an error message to the log. Error objects are highlighted in bright red, text messages are
-	 * printed in red.
-	 * @param messages - Message fragments to add to the log box
+	 * Prints an error message to the log. Error objects are highlighted in bright red, while text messages are printed
+	 * in red. Messages are timestamped and automatically trigger a potential log save based on date changes.
+	 * @param messages - Message fragments to add to the log box.
 	 */
 	public error(...messages: any[]) {
 		this.add(
@@ -80,8 +86,9 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Prints an informational message to the log. The message is printed in blue.
-	 * @param messages - Message fragments to add to the log box
+	 * Prints an informational message to the log in blue color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param messages - Message fragments to add to the log box.
 	 */
 	public info(...messages: any[]) {
 		this.add(
@@ -95,17 +102,20 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Saves the logs to the specified directory or the default directory defined in
-	 * {@linkcode configuration.paths.logPath}.
-	 * @param path - The path to save the log file at
+	 * Saves the current log contents to a file. Uses the specified path or falls back to the configured log directory.
+	 * The filename includes a timestamp for uniqueness.
+	 * @param path - Optional path where to save the log file.
 	 */
 	public saveLogs(path?: Path) {
+		if (configuration.bot.saveLogs === false) {
+			return;
+		}
+
 		/** Absolute path to the log file */
 		const absolutePath = relativePath(
 			`${path ?? configuration.paths.logPath}/${getTime(undefined, true)
 				.replaceAll("/", "-")
 				.split("")
-				.reverse()
 				.join("")}.log`,
 		);
 
@@ -128,8 +138,9 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Prints a message of success to the log. The message is printed in green.
-	 * @param messages - Message fragments to add to the log box
+	 * Prints a success message to the log in green color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param messages - Message fragments to add to the log box.
 	 */
 	public success(...messages: any[]) {
 		this.add(
@@ -143,8 +154,9 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Prints a warning to the log box. The warning is printed in yellow.
-	 * @param messages - Message fragments to add to the log box
+	 * Prints a warning message to the log in yellow color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param messages - Message fragments to add to the log box.
 	 */
 	public warn(...messages: any[]) {
 		this.add(
@@ -158,8 +170,8 @@ export class LogRenderable extends TextRenderable {
 	}
 
 	/**
-	 * Triggers a save if the current date differs from the date of the last sent message and updates the date
-	 * of the last sent message.
+	 * Triggers a log save operation if the current date differs from the date of the last logged message. This ensures
+	 * logs are saved daily. Updates the last message date after checking.
 	 */
 	public triggerSave(): void {
 		/** Current date and time */

@@ -88,6 +88,12 @@ interface BotConfiguration {
 	 * @see {@link NotificationPreferences}
 	 */
 	notifications?: boolean | number | NotificationPreferences;
+
+	/**
+	 * Whether to save the log messages at least once a day and before the bot shuts down.
+	 * @defaultValue `true`
+	 */
+	saveLogs: boolean;
 }
 
 /**
