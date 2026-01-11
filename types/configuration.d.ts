@@ -1,14 +1,16 @@
 // Class & type imports
-import { LogLevel, LogType } from "../modules/notification";
+import { type LogLevel, LogType } from "../modules/notification";
 
 // External libraries imports
-import { Snowflake, TeamMemberRole } from "discord.js";
-import { Path } from "typescript";
-import { Options } from "@sequelize/core";
+import { type Snowflake, TeamMemberRole } from "discord.js";
+import type { Path } from "typescript";
+import type { Options } from "@sequelize/core";
 
 /**
- * Required individual data of any Discord bot to function.
- * Can be extracted from {@link https://discord.com/developers/applications | Discord Developer Portal} for each bot.
+ * Represents the essential configuration data required for a Discord bot to function properly. This includes
+ * credentials and identifiers obtained from the
+ * {@link https://discord.com/developers/applications | Discord Developer Portal} that authenticate the bot with
+ * Discord's API.
  *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
@@ -30,7 +32,8 @@ interface BotData {
 }
 
 /**
- * Configuration data imported from JSON file to specify the bots behavior.
+ * Represents the configuration data imported from a JSON file that specifies the bot's behavior and operational
+ * parameters. This includes settings for interactions, notifications, updates, and various bot features.
  *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
@@ -67,7 +70,7 @@ interface BotConfiguration {
 
 	/**
 	 * Whether blocked users can interact with the bot
-	 * @defaultValue `false`
+	 * @defaultValue `true`
 	 */
 	enableBlockedUsers?: boolean;
 
@@ -88,7 +91,8 @@ interface BotConfiguration {
 }
 
 /**
- * Configuration data specifying the bots behavior and project structure
+ * Represents the comprehensive configuration data that specifies the bot's behavior, project structure, and external
+ * service integrations. This is the root configuration object that encompasses all bot settings.
  *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
@@ -130,30 +134,43 @@ interface Configuration {
 }
 
 /**
- * Database configuration data
+ * Represents the configuration data required to connect to and interact with the bot's database. This includes
+ * connection parameters and database identification details.
  */
 interface DatabaseConfiguration {
-	/** Host of the database */
+	/** The hostname or IP address of the database server. */
 	host: string;
 
-	/** Name of the database */
+	/** The name of the database to connect to on the server. */
 	name: string;
 }
 
+/**
+ * Represents constants defined by the Discord API that affect bot behavior and limitations. These values are
+ * fixed by Discord and should be used to ensure compliance with API constraints.
+ *
+ * More documentation can be found on the
+ * {@link https://github.com/Olevenbaum/TS-Discord-Bot/wiki | GitHub wiki}.
+ */
 interface DiscordConstants {
 	/**
-	 * Maximal number of autocomplete results Discord can show
+	 * The maximum number of autocomplete results that Discord can display in a single autocomplete interaction.
+	 * Bots should limit their autocomplete responses to this number to ensure proper display.
 	 *
-	 * See on the {@link https://discord.com/developers/docs/interactions/application-commands#autocomplete-structure-autocomplete-choices | Discord Documentation}.
+	 * See the {@link https://discord.com/developers/docs/interactions/application-commands#autocomplete-structure-autocomplete-choices | Discord Documentation}.
 	 */
 	maximalAutocompleteResults: number;
 
-	/** Regular expression to test the token against */
+	/**
+	 * Regular expression pattern used to validate Discord bot tokens. Ensures tokens conform to Discord's expected
+	 * format before attempting authentication.
+	 */
 	tokenRegex: RegExp;
 }
 
 /**
- * Notification preferences
+ * Represents the preferences for controlling bot notifications, including recipient filtering and importance levels.
+ * This allows fine-grained control over who receives notifications and what types of events trigger them.
  *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
@@ -191,50 +208,51 @@ interface NotificationPreferences {
 }
 
 /**
- * Paths of various files and directories used in the project
+ * Represents the file and directory paths used throughout the project for loading various bot components and
+ * resources. These paths define the project structure and where different types of files are located.
  *
  * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface Paths {
-	/** Path(s) of application command types directory / directories */
+	/** Path(s) to the directory or directories containing application command type definitions. */
 	applicationCommandTypesPath: string | string[];
 
-	/** Path of blocked users file */
+	/** Path to the file containing the list of blocked users who cannot interact with the bot. */
 	blockedUsersPath: string;
 
-	/** Paths of chat input commands directory / directories */
+	/** Path(s) to the directory or directories containing chat input (slash) command definitions. */
 	chatInputCommandsPath: string | string[];
 
-	/** Path(s) of (message) components directory / directories */
+	/** Path(s) to the directory or directories containing message component definitions. */
 	componentsPath: string | string[];
 
-	/** Path of configuration data file */
+	/** Path to the configuration data file containing bot settings and parameters. */
 	configurationPath: string;
 
-	/** Path(s) of console commands directory / directories */
+	/** Path(s) to the directory or directories containing console command definitions. */
 	consoleCommandsPath: string | string[];
 
-	/** Path of Discord data file */
+	/** Path to the Discord configuration data file containing API-related constants and settings. */
 	discordConfigurationsPath: Path;
 
-	/** Path(s) of event types directory / directories */
+	/** Path(s) to the directory or directories containing event type definitions. */
 	eventTypesPath: Path | Path[];
 
-	/** Path(s) of interactions types directory / directories */
+	/** Path(s) to the directory or directories containing interaction type definitions. */
 	interactionTypesPath: Path | Path[];
 
-	/** Path to a directory to save log files to */
+	/** Path to the directory where log files should be saved for debugging and monitoring. */
 	logPath: Path;
 
-	/** Path(s) of message commands directory / directories */
+	/** Path(s) to the directory or directories containing message context menu command definitions. */
 	messageCommandsPath: string | string[];
 
-	/** Path(s) of component types directory / directories */
+	/** Path(s) to the directory or directories containing message component type definitions. */
 	componentTypesPath: string | string[];
 
-	/** Path(s) of modals directory / directories */
+	/** Path(s) to the directory or directories containing modal dialog definitions. */
 	modalsPath: string | string[];
 
-	/** Path(s) of user commands directory / directories */
+	/** Path(s) to the directory or directories containing user context menu command definitions. */
 	userCommandsPath: string | string[];
 }

@@ -1,14 +1,24 @@
-// Type imports
-import { MessageComponentInteraction, MessageComponentType } from "discord.js";
+// External libraries imports
+import { MessageComponentInteraction, type MessageComponentType } from "discord.js";
 
-/** Message component type imported from local file */
+/**
+ * Represents a handler for a specific type of Discord message component interaction. Message component type handlers
+ * provide generic processing for all components of a particular type before delegating to specific component handlers.
+ * @see {@linkcode SavedMessageComponent}
+ */
 interface SavedMessageComponentType {
-	/** Message component type */
+	/**
+	 * The message component type this handler processes. Determines which category of components this handler will
+	 * intercept.
+	 * @see {@linkcode MessageComponentType}
+	 */
 	type: MessageComponentType;
 
 	/**
-	 * Handles the interaction with the message component type
-	 * @param interaction The interaction to response to
+	 * Executes type-specific logic for message component interactions. This may include logging, permission checks,
+	 * or preprocessing before passing to individual component handlers.
+	 * @param interaction - The message component interaction to process.
+	 * @see {@linkcode MessageComponentInteraction}
 	 */
 	execute(interaction: MessageComponentInteraction): Promise<void>;
 }

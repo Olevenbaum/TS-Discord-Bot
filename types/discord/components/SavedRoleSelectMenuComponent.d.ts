@@ -1,31 +1,39 @@
-// Internal type imports
-import { SavedMessageComponent } from ".";
-import { RoleSelectMenuComponentCreateOptions } from "../CreateOptions";
+// Internal class & type imports
+import type { SavedMessageComponent } from "./SavedMessageComponent";
+import type { RoleSelectMenuComponentCreateOptions } from "./CreateOptions";
 
-// Type imports
+// External libraries imports
 import { ComponentType, RoleSelectMenuBuilder, RoleSelectMenuInteraction } from "discord.js";
 
-/** Role select component imported from local file */
+/**
+ * Represents a Discord role select menu component loaded from a local file. Role select menus allow users to choose
+ * from available roles in a guild, enabling role-based interactions and selections.
+ * @see {@linkcode SavedMessageComponent}
+ */
 interface SavedRoleSelectMenuComponent extends SavedMessageComponent {
-	/** Type of the role select component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.RoleSelect} for role select menus.
+	 * @see {@linkcode ComponentType.RoleSelect}
+	 */
 	type: ComponentType.RoleSelect;
 
 	/**
-	 * Creates the role select component
-	 * @returns The role select builder
-	 */
-	create(): RoleSelectMenuBuilder;
-
-	/**
-	 * Creates the role select component
-	 * @param options The options to modify the roles select component
-	 * @returns The role select builder
+	 * Creates a new instance of the role select menu component with custom options. Allows modification of the
+	 * menu's appearance or behavior at creation time.
+	 * @param options - Optional configuration to customize the role select menu instance.
+	 * @returns The configured role select menu builder with applied options.
+	 * @override
+	 * @see {@linkcode RoleSelectMenuBuilder}
+	 * @see {@linkcode RoleSelectMenuComponentCreateOptions}
 	 */
 	create(options?: RoleSelectMenuComponentCreateOptions): RoleSelectMenuBuilder;
 
 	/**
-	 * Handles the response to the role select component interaction
-	 * @param interaction The role select component interaction to response to
+	 * Executes the role select menu's logic when a user interacts with it. Handles the interaction and responds
+	 * appropriately.
+	 * @param interaction - The role select menu interaction to process.
+	 * @override
+	 * @see {@linkcode RoleSelectMenuInteraction}
 	 */
 	execute(interaction: RoleSelectMenuInteraction): Promise<void>;
 }

@@ -1,1 +1,2 @@
-export * from "./ConsoleHandler";
+// Class & type exports
+export * from "./cli";

@@ -1,18 +1,23 @@
-// Type imports
+// External libraries imports
 import { ApplicationCommandType, CommandInteraction } from "discord.js";
 
-/** Application command type imported from local file */
-interface SavedApplicationCommandType {
+/**
+ * Represents a handler for a specific type of Discord application command. Application command type handlers provide
+ * generic processing for all commands of a particular type before delegating to specific command handlers.
+ */
+export interface SavedApplicationCommandType {
 	/**
-	 * Application command type
-	 * @see {@link ApplicationCommandType}
+	 * The application command type this handler processes. Determines which category of commands this handler will
+	 * intercept.
+	 * @see {@linkcode ApplicationCommandType}
 	 */
 	type: ApplicationCommandType;
 
 	/**
-	 * Handles the interaction with the application command type
-	 * @param interaction The interaction to be handled
-	 * @see {@link CommandInteraction}
+	 * Executes type-specific logic for application command interactions. This may include logging, permission checks,
+	 * or preprocessing before passing to individual command handlers.
+	 * @param interaction - The command interaction to process.
+	 * @see {@linkcode CommandInteraction}
 	 */
 	execute(interaction: CommandInteraction): Promise<void>;
 }

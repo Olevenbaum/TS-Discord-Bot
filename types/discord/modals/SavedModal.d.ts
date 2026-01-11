@@ -1,39 +1,63 @@
+// Class & type imports
+import { CooldownObject } from "../../others";
+
+// External libraries imports
+import { ComponentType, MessageComponentType, ModalBuilder, ModalSubmitInteraction } from "discord.js";
+
 // Internal type imports
 import { ModalCreateOptions } from "./CreateOptions";
 
-// Type imports
-import { ComponentType, MessageComponentType, ModalBuilder, ModalSubmitInteraction } from "discord.js";
-
-/** Modal imported from local file */
+/**
+ * Represents a Discord modal dialog loaded from a local file. Modals are popup forms that collect user input through
+ * text fields and other components. They are triggered by interactions and allow structured data collection.
+ */
 interface SavedModal {
-	/** The time any or a specific user has to wait to submit the same modal again */
+	/**
+	 * Cooldown configuration for the modal to prevent spam submissions. Can specify global cooldowns or per-user
+	 * cooldowns with custom durations.
+	 * @see {@linkcode CooldownObject}
+	 */
 	cooldown?: CooldownObject;
 
-	/** Modal action row components that are included in the modal */
+	/**
+	 * Definition of the components included in the modal's action rows. Specifies which components are part of the
+	 * modal and their configuration. Used to validate and build the modal structure.
+	 */
 	includedComponents: {
-		/** Number of components included in the action row */
+		/** Number of instances of this component type in the action row. */
 		count: number;
 
-		/** Name of the component */
+		/** Unique name identifier for the component. */
 		name: string;
 
-		/** Type of the component */
+		/**
+		 * The component type, excluding message component types.
+		 * @see {@linkcode ComponentType}
+		 * @see {@linkcode MessageComponentType}
+		 */
 		type: Omit<ComponentType, MessageComponentType>;
 	}[];
 
-	/** Name of the modal */
+	/**
+	 * A unique identifier for the modal, used for registration and lookup. Should be descriptive and unique within the
+	 * modal collection.
+	 */
 	name: string;
 
 	/**
-	 * Creates the modal
-	 * @param options The options to modify the modal
-	 * @returns The modal builder
+	 * Creates a new instance of the modal with the specified options. Builds the modal structure with components and
+	 * applies customizations.
+	 * @param options - Configuration options to customize the modal instance.
+	 * @returns The configured modal builder ready for display.
+	 * @see {@linkcode ModalBuilder}
+	 * @see {@linkcode ModalCreateOptions}
 	 */
 	create(options: ModalCreateOptions): ModalBuilder;
 
 	/**
-	 * Handles the response to the modal submit interaction
-	 * @param interaction The modal submit interaction to response to
+	 * Executes the modal's logic when a user submits it. Processes the submitted data and handles the response.
+	 * @param interaction - The modal submit interaction containing form data.
+	 * @see {@linkcode ModalSubmitInteraction}
 	 */
 	execute(interaction: ModalSubmitInteraction): Promise<void>;
 }

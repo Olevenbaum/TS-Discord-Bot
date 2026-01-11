@@ -18,11 +18,12 @@ import { updateFiles } from "../modules/update";
  * CLI to see the logs and interact with the bot directly
  * @see {@linkcode ConsoleHandler}
  */
-export const cli = new ConsoleHandler();
+export const cli = new ConsoleHandler("auto");
 
 /**
  * Discord bot client
- * @see {@linkcode Client} | {@linkcode GatewayIntentBits}
+ * @see {@linkcode Client}
+ * @see {@linkcode GatewayIntentBits}
  */
 export const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
@@ -42,6 +43,8 @@ export default async function main(botIndex?: number): Promise<void>;
 
 export default async function main(botIndex: number = 0): Promise<void> {
 	notify("Bot is starting...", "INFORMATION");
+
+	cli.initialize(await createCliRenderer({ openConsoleOnError: false }));
 
 	await updateFiles(["eventTypes"]);
 
@@ -95,6 +98,4 @@ export default async function main(botIndex: number = 0): Promise<void> {
 				notify(`Unable to connect to the database:\n${error}`, "ERROR");
 			});
 	}
-
-	cli.initialize(await createCliRenderer());
 }

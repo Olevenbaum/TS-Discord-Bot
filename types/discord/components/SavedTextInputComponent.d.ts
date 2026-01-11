@@ -1,25 +1,30 @@
-// Internal type imports
-import { SavedMessageComponent } from ".";
-import { TextInputComponentCreateOptions } from "./CreateOptions";
-
-// Type imports
+// External libraries imports
 import { ComponentType, TextInputBuilder } from "discord.js";
 
-/** Text input component imported from local file */
+// Internal class & type imports
+import type { SavedModalComponent } from "./SavedModalComponent";
+import type { TextInputComponentCreateOptions } from "./CreateOptions";
+
+/**
+ * Represents a Discord text input component loaded from a local file. Text inputs are form fields used in modal
+ * dialogs to collect text input from users. They extend modal components with text-specific creation capabilities.
+ * @see {@linkcode SavedModalComponent}
+ */
 interface SavedTextInputComponent extends SavedModalComponent {
-	/** Type of the text input component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.TextInput} for text input components.
+	 * @see {@linkcode ComponentType.TextInput}
+	 */
 	type: ComponentType.TextInput;
 
 	/**
-	 * Creates the text input component
-	 * @returns The text input component builder
-	 */
-	create(): TextInputBuilder;
-
-	/**
-	 * Creates the text input component
-	 * @param options The options to modify the text input component
-	 * @returns The text input component builder
+	 * Creates a new instance of the text input component with custom options. Allows modification of the text input's
+	 * appearance or behavior at creation time.
+	 * @param options - Optional configuration to customize the text input instance.
+	 * @returns The configured text input builder with applied options.
+	 * @override
+	 * @see {@linkcode TextInputBuilder}
+	 * @see {@linkcode TextInputComponentCreateOptions}
 	 */
 	create(options?: TextInputComponentCreateOptions): TextInputBuilder;
 }

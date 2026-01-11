@@ -14,11 +14,12 @@ import {
 	white,
 	yellow,
 } from "@opentui/core";
-import { writeFile } from "fs";
+import { appendFile } from "fs";
 import type { Path } from "typescript";
 
 // Module imports
-import { getTime } from "../modules/time";
+import { relativePath } from "../../modules/fileReader";
+import { getTime } from "../../modules/time";
 
 /**
  * @see {@linkcode TextRenderable}
@@ -33,7 +34,7 @@ export class LogRenderable extends TextRenderable {
 	/**
 	 * @param ctx - CLI renderer
 	 * @param options - Options to alter the text
-	 * @see {@linkcode TextOptions}
+	 * @see {@linkcode RenderContext} | {@linkcode TextOptions}
 	 */
 	constructor(ctx: RenderContext, includeDate: boolean = false, options: TextOptions = {}) {
 		super(ctx, options);
@@ -45,8 +46,13 @@ export class LogRenderable extends TextRenderable {
 	 * Prints a debugging message to the log.
 	 * @param messages - Message fragments to add to the log box
 	 */
-	debug(...messages: any[]) {
-		this.add(new StyledText([white(`[${getTime()}]`), ...messages.map((message) => white(message.toString()))]));
+	public debug(...messages: any[]) {
+		this.add(
+			new StyledText([
+				white(`[${getTime(!this.includeDate)}]: `),
+				...messages.map((message) => white(`${message.toString()}\n`)),
+			]),
+		);
 
 		this.triggerSave();
 	}
@@ -56,16 +62,16 @@ export class LogRenderable extends TextRenderable {
 	 * printed in red.
 	 * @param messages - Message fragments to add to the log box
 	 */
-	error(...messages: any[]) {
+	public error(...messages: any[]) {
 		this.add(
 			new StyledText([
-				white(`[${getTime()}]`),
+				white(`[${getTime(!this.includeDate)}]: `),
 				...messages.map((message) => {
 					if (message instanceof Error) {
-						return brightRed(message.toString());
+						return brightRed(`${message.toString()}\n`);
 					}
 
-					return red(message.toString());
+					return red(`${message.toString()}\n`);
 				}),
 			]),
 		);
@@ -77,32 +83,61 @@ export class LogRenderable extends TextRenderable {
 	 * Prints an informational message to the log. The message is printed in blue.
 	 * @param messages - Message fragments to add to the log box
 	 */
-	info(...messages: any[]) {
-		this.add(new StyledText([white(`[${getTime()}]`), ...messages.map((message) => blue(message.toString()))]));
+	public info(...messages: any[]) {
+		this.add(
+			new StyledText([
+				white(`[${getTime(!this.includeDate)}]: `),
+				...messages.map((message) => blue(`${message.toString()}\n`)),
+			]),
+		);
 
 		this.triggerSave();
 	}
 
 	/**
-	 * Saves all message currently present in the log to a file and clears the log.
-	 * @param path - Path to save the log file to
+	 * Saves the logs to the specified directory or the default directory defined in
+	 * {@linkcode configuration.paths.logPath}.
+	 * @param path - The path to save the log file at
 	 */
-	saveLogs(path?: Path) {
-		writeFile(
-			`${path ?? configuration.paths.logPath}${getTime(undefined, true)}.log`,
-			this.content.chunks.join("\n"),
-			(error) => this.error(error),
+	public saveLogs(path?: Path) {
+		/** Absolute path to the log file */
+		const absolutePath = relativePath(
+			`${path ?? configuration.paths.logPath}/${getTime(undefined, true)
+				.replaceAll("/", "-")
+				.split("")
+				.reverse()
+				.join("")}.log`,
 		);
 
-		this.content.chunks = [];
+		appendFile(
+			absolutePath,
+			this.rootTextNode
+				.toChunks()
+				.map((chunk) => chunk.text)
+				.join(""),
+			(error) => {
+				if (error) {
+					this.error(error);
+				} else {
+					// this.clear();
+
+					this.info(`Logs saved to '${absolutePath}'`);
+				}
+			},
+		);
 	}
 
 	/**
 	 * Prints a message of success to the log. The message is printed in green.
 	 * @param messages - Message fragments to add to the log box
 	 */
-	success(...messages: any[]) {
-		this.add(new StyledText([white(`[${getTime()}]`), ...messages.map((message) => green(message.toString()))]));
+	public success(...messages: any[]) {
+		this.add(
+			new StyledText([
+				white(`[${getTime(!this.includeDate)}]: `),
+				...messages.map((message) => green(`${message.toString()}\n`)),
+			]),
+		);
 
 		this.triggerSave();
 	}
@@ -111,8 +146,13 @@ export class LogRenderable extends TextRenderable {
 	 * Prints a warning to the log box. The warning is printed in yellow.
 	 * @param messages - Message fragments to add to the log box
 	 */
-	warn(...messages: any[]) {
-		this.add(new StyledText([white(`[${getTime()}]`), ...messages.map((message) => yellow(message.toString()))]));
+	public warn(...messages: any[]) {
+		this.add(
+			new StyledText([
+				white(`[${getTime(!this.includeDate)}]: `),
+				...messages.map((message) => yellow(`${message.toString()}\n`)),
+			]),
+		);
 
 		this.triggerSave();
 	}
@@ -121,7 +161,7 @@ export class LogRenderable extends TextRenderable {
 	 * Triggers a save if the current date differs from the date of the last sent message and updates the date
 	 * of the last sent message.
 	 */
-	triggerSave(): void {
+	public triggerSave(): void {
 		/** Current date and time */
 		const now = new Date();
 

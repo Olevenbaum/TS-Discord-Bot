@@ -1,31 +1,39 @@
-// Internal type imports
-import { SavedMessageComponent } from ".";
-import { UserSelectComponentCreateOptions } from "./CreateOptions";
-
-// Type imports
+// External libraries imports
 import { ComponentType, UserSelectMenuBuilder, UserSelectMenuInteraction } from "discord.js";
 
-/** User select component imported from local file */
+// Internal class & type imports
+import type { SavedMessageComponent } from "./SavedMessageComponent";
+import type { UserSelectMenuComponentCreateOptions } from "./CreateOptions";
+
+/**
+ * Represents a Discord user select menu component loaded from a local file. User select menus allow selecting Discord
+ * users from the current context, enabling user-targeted interactions.
+ * @see {@linkcode SavedMessageComponent}
+ */
 interface SavedUserSelectMenuComponent extends SavedMessageComponent {
-	/** Type of the user select component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.UserSelect} for user select menus.
+	 * @see {@linkcode ComponentType.UserSelect}
+	 */
 	type: ComponentType.UserSelect;
 
 	/**
-	 * Creates the user select component
-	 * @returns The user select builder
+	 * Creates a new instance of the user select menu component with custom options. Allows modification of the
+	 * menu's appearance or behavior at creation time.
+	 * @param options - Optional configuration to customize the user select menu instance.
+	 * @returns The configured user select menu builder with applied options.
+	 * @override
+	 * @see {@linkcode UserSelectMenuBuilder}
+	 * @see {@linkcode UserSelectMenuComponentCreateOptions}
 	 */
-	create(): UserSelectMenuBuilder;
+	create(options?: UserSelectMenuComponentCreateOptions): UserSelectMenuBuilder;
 
 	/**
-	 * Creates the user select component
-	 * @param options The options to modify the user select component
-	 * @returns The user select builder
-	 */
-	create(options?: UserSelectComponentCreateOptions): UserSelectMenuBuilder;
-
-	/**
-	 * Handles the response to the user select component interaction
-	 * @param interaction The user select component interaction to respond to
+	 * Executes the user select menu's logic when a user interacts with it. Handles the interaction and responds
+	 * appropriately.
+	 * @param interaction - The user select menu interaction to process.
+	 * @override
+	 * @see {@linkcode UserSelectMenuInteraction}
 	 */
 	execute(interaction: UserSelectMenuInteraction): Promise<void>;
 }

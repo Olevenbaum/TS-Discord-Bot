@@ -1,6 +1,6 @@
-export * from "./applicationCommands";
-export * from "./components";
-export * from "./modals";
-
-export { SavedEventType } from "./SavedEventType";
-export { SavedInteractionType } from "./SavedInteractionType";
+// Discord class & type exports
+export type * from "./applicationCommands";
+export type * from "./components";
+export type * from "./modals";
+export type { SavedEventType } from "./SavedEventType";
+export type { SavedInteractionType } from "./SavedInteractionType";

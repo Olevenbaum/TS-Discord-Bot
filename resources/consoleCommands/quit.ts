@@ -18,6 +18,8 @@ const consoleCommand: ConsoleCommand = {
 
 		await client.destroy();
 
+		cli.saveLogs();
+
 		cli.destroy();
 	},
 };

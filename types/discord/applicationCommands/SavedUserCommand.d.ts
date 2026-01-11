@@ -1,30 +1,36 @@
-// Internal type imports
-import { SavedApplicationCommand } from ".";
-
-// Type imports
+// External libraries imports
 import { ApplicationCommandType, ContextMenuCommandBuilder, UserContextMenuCommandInteraction } from "discord.js";
 
-/** User command imported from local file */
-interface SavedUserCommand extends SavedApplicationCommand {
+// Internal class & type imports
+import type { SavedApplicationCommand } from "./SavedApplicationCommand";
+
+/**
+ * Represents a Discord user context menu command loaded from a local file. User commands appear in the context menu
+ * when right-clicking on users and allow actions on specific users.
+ * @see {@linkcode SavedApplicationCommand}
+ */
+export interface SavedUserCommand extends SavedApplicationCommand {
 	/**
-	 * Data of the user command
+	 * The context menu command definition data used to register the command. Contains the command name and other
+	 * metadata specific to user context menus.
 	 * @override
-	 * @see {@link ContextMenuCommandBuilder}
+	 * @see {@linkcode ContextMenuCommandBuilder}
 	 */
 	data: ContextMenuCommandBuilder;
 
 	/**
-	 * Type of the user command
+	 * The command type, fixed to {@linkcode ApplicationCommandType.User} for user context menu commands.
 	 * @override
-	 * @see {@link ApplicationCommandType.User}
+	 * @see {@linkcode ApplicationCommandType.User}
 	 */
 	type: ApplicationCommandType.User;
 
 	/**
-	 * Handles the response to the user command interaction
-	 * @param interaction The user context menu interaction to respond to
+	 * Executes the user command logic when a user selects it from the context menu. Receives the interaction with the
+	 * target user and handles the response.
+	 * @param interaction - The user context menu command interaction to process.
 	 * @override
-	 * @see {@link UserContextMenuCommandInteraction}
+	 * @see {@linkcode UserContextMenuCommandInteraction}
 	 */
 	execute(interaction: UserContextMenuCommandInteraction): Promise<void>;
 }

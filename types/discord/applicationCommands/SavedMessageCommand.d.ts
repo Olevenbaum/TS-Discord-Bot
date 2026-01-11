@@ -1,30 +1,37 @@
-// Internal type imports
-import { SavedApplicationCommand } from ".";
-
-// Type imports
+// External libraries imports
 import { ApplicationCommandType, MessageContextMenuCommandInteraction, ContextMenuCommandBuilder } from "discord.js";
 
-/** Message command imported from local file */
-interface SavedMessageCommand extends SavedApplicationCommand {
+// Internal class & type imports
+import type { SavedApplicationCommand } from "./SavedApplicationCommand";
+
+/**
+ * Represents a Discord message context menu command loaded from a local file. Message commands appear in the context
+ * menu when right-clicking on messages and allow users to perform actions on specific messages.
+ * @see {@linkcode SavedApplicationCommand}
+ */
+export interface SavedMessageCommand extends SavedApplicationCommand {
 	/**
-	 * Data of the message command
+	 * The context menu command definition data used to register the command. Contains the command name and other
+	 * metadata specific to message context menus.
 	 * @override
-	 * @see {@link ContextMenuCommandBuilder}
+	 * @see {@linkcode ContextMenuCommandBuilder}
 	 */
 	data: ContextMenuCommandBuilder;
 
 	/**
-	 * Type of the message command
+	 * The command type, fixed to {@linkcode ApplicationCommandType.Message} for message context menu
+	 * commands.
 	 * @override
-	 * @see {@link ApplicationCommandType.Message}
+	 * @see {@linkcode ApplicationCommandType.Message}
 	 */
 	type: ApplicationCommandType.Message;
 
 	/**
-	 * Handles the response to the message command interaction
-	 * @param interaction The message command interaction to respond to
+	 * Executes the message command logic when a user selects it from the context menu. Receives the interaction with
+	 * the target message and handles the response.
+	 * @param interaction - The message context menu command interaction to process.
 	 * @override
-	 * @see {@link MessageContextMenuCommandInteraction}
+	 * @see {@linkcode MessageContextMenuCommandInteraction}
 	 */
 	execute(interaction: MessageContextMenuCommandInteraction): Promise<void>;
 }

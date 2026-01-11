@@ -1,18 +1,24 @@
-// Type imports
+// External libraries imports
 import { BaseInteraction, InteractionType } from "discord.js";
 
-/** Interaction type imported from local file */
+/**
+ * Represents a Discord interaction handler loaded from a local file. Interaction handlers process various types of user
+ * interactions with the bot, such as slash commands, button clicks, or modal submissions. These handlers are registered
+ * and called when interactions occur.
+ */
 interface SavedInteractionType {
 	/**
-	 * Type of the interaction
-	 * @see {@link InteractionType}
+	 * The specific type of Discord interaction this handler processes. Determines which interaction events will
+	 * trigger this handler.
+	 * @see {@linkcode InteractionType}
 	 */
 	type: InteractionType;
 
 	/**
-	 * Forwards the interaction to be handled or handles it by itself
-	 * @param interaction The interaction to respond to
-	 * @see {@link BaseInteraction}
+	 * Executes the interaction handler logic when an interaction of the specified type occurs. Receives the
+	 * interaction object and performs the necessary response or processing.
+	 * @param interaction - The Discord interaction object to handle, containing all relevant data.
+	 * @see {@linkcode BaseInteraction}
 	 */
 	execute(interaction: BaseInteraction): Promise<void>;
 }

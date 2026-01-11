@@ -2,10 +2,10 @@
 import type { SavedEventType } from "../../types";
 
 // Data imports
-import { cli } from "#application";
+import { cli, client } from "#application";
 
 // External libraries imports
-import { Client, Events } from "discord.js";
+import { Events } from "discord.js";
 
 // Module imports
 import notify from "../../modules/notification";
@@ -16,14 +16,12 @@ const clientReady: SavedEventType = {
 	once: true,
 	type: Events.ClientReady,
 
-	async execute(client: Client<true>) {
-		notify(`Client logged in as '${client.user.username}'`, "SUCCESS", `I've awaken, @member!`, 6);
+	async execute(): Promise<void> {
+		notify(`Client logged in as '${client.user!.username}'`, "SUCCESS", `I've awaken, @member!`, 6);
 
-		updateFiles(client, ["configuration", "eventTypes"], false);
+		updateFiles(["configuration", "eventTypes"], true);
 
-		if (cli.focusColor === "auto") {
-			cli.focusColor = "auto";
-		}
+		cli.focusColor = cli.focusColor;
 	},
 };
 

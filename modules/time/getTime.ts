@@ -6,12 +6,6 @@ import { Month, Weekday } from "./classes";
 import { BlanckTimestampString, ISO8601FormatString, TimestampString } from "./types";
 
 /**
- * Returns the current time formatted as `DD/MM/YYYY, hh:mm:ss`.
- * @returns The current tims as string
- */
-export default function getTime(): string;
-
-/**
  * Returns the current time, date or both formatted as `DD/MM/YYYY, hh:mm:ss`.
  * @param timeOnly - Whether to only return the time
  * @param dateOnly - Whether to only return the date

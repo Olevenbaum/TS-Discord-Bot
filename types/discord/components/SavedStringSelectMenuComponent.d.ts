@@ -1,34 +1,45 @@
-// Internal type imports
-import { SavedMessageComponent } from ".";
-import { StringSelectMenuComponentCreateOptions } from "./CreateOptions";
-
-// Type imports
+// External libraries imports
 import { ComponentType, StringSelectMenuBuilder, StringSelectMenuInteraction } from "discord.js";
 
-/** String select component imported from local file */
+// Internal class & type imports
+import type { SavedMessageComponent } from "./SavedMessageComponent";
+import type { StringSelectMenuComponentCreateOptions } from "./CreateOptions";
+
+/**
+ * Represents a Discord string select menu component loaded from a local file. String select menus present a list of
+ * predefined text options for user selection, allowing structured choice inputs.
+ * @see {@linkcode SavedMessageComponent}
+ */
 interface SavedStringSelectMenuComponent extends SavedMessageComponent {
-	/** Options of the string select component */
+	/**
+	 * Array of string options to display in the select menu. These represent the available choices users can select
+	 * from when interacting with the component.
+	 */
 	options: string[];
 
-	/** Type of the string select component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.StringSelect} for string select menus.
+	 * @see {@linkcode ComponentType.StringSelect}
+	 */
 	type: ComponentType.StringSelect;
 
 	/**
-	 * Creates the string select component
-	 * @returns The string select builder
-	 */
-	create(): StringSelectMenuBuilder;
-
-	/**
-	 * Creates the string select component
-	 * @param options The options to modify the string select component
-	 * @returns The string select builder
+	 * Creates a new instance of the string select menu component with custom options. Allows modification of the
+	 * menu's appearance or behavior at creation time.
+	 * @param options - Optional configuration to customize the string select menu instance.
+	 * @returns The configured string select menu builder with applied options.
+	 * @override
+	 * @see {@linkcode StringSelectMenuBuilder}
+	 * @see {@linkcode StringSelectMenuComponentCreateOptions}
 	 */
 	create(options?: StringSelectMenuComponentCreateOptions): StringSelectMenuBuilder;
 
 	/**
-	 * Handles the response to the string select component interaction
-	 * @param interaction The string select component interaction to response to
+	 * Executes the string select menu's logic when a user interacts with it. Handles the interaction and responds
+	 * appropriately.
+	 * @param interaction - The string select menu interaction to process.
+	 * @override
+	 * @see {@linkcode StringSelectMenuInteraction}
 	 */
 	execute(interaction: StringSelectMenuInteraction): Promise<void>;
 }

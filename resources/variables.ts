@@ -21,7 +21,6 @@ import {
 	SavedUserCommand,
 	SavedUserSelectMenuComponent,
 } from "../types";
-import { ConsoleCommand } from "../types/consoleCommands";
 
 // Data imports
 import botConfiguration from "../configuration/configuration.json";
@@ -150,12 +149,6 @@ export const configuration: Configuration = {
 	),
 	paths,
 };
-
-/**
- * Console commands for usage in the console
- * @see {@link ConsoleCommand}
- */
-export const consoleCommands: ConsoleCommand[] = [];
 
 /**
  * Collection of cooldowns for servers and users

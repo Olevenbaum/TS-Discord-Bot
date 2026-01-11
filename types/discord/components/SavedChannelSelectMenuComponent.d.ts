@@ -1,31 +1,39 @@
-// Internal type imports
-import { SavedMessageComponent } from ".";
-import { ChannelSelectMenuComponentCreateOptions } from "./CreateOptions";
-
-// Type imports
+// External libraries imports
 import { ChannelSelectMenuBuilder, ChannelSelectMenuInteraction, ComponentType } from "discord.js";
 
-/** Channel select component imported from local file */
+// Internal class & type imports
+import type { SavedMessageComponent } from "./SavedMessageComponent";
+import type { ChannelSelectMenuComponentCreateOptions } from "./CreateOptions";
+
+/**
+ * Represents a Discord channel select menu component loaded from a local file. Channel select menus allow users to
+ * choose from available channels in a guild, facilitating channel-specific interactions.
+ * @see {@linkcode SavedMessageComponent}
+ */
 interface SavedChannelSelectMenuComponent extends SavedMessageComponent {
-	/** Type of the channel select component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.ChannelSelect} for channel select menus.
+	 * @see {@linkcode ComponentType.ChannelSelect}
+	 */
 	type: ComponentType.ChannelSelect;
 
 	/**
-	 * Creates the channel select component
-	 * @returns The channel select builder
-	 */
-	create(): ChannelSelectMenuBuilder;
-
-	/**
-	 * Creates the channel select component
-	 * @param options The options that modify the channel select component
-	 * @returns The channel select builder
+	 * Creates a new instance of the channel select menu component with custom options. Allows modification of the
+	 * menu's appearance or behavior at creation time.
+	 * @param options - Optional configuration to customize the channel select menu instance.
+	 * @returns The configured channel select menu builder with applied options.
+	 * @override
+	 * @see {@linkcode ChannelSelectMenuBuilder}
+	 * @see {@linkcode ChannelSelectMenuComponentCreateOptions}
 	 */
 	create(options?: ChannelSelectMenuComponentCreateOptions): ChannelSelectMenuBuilder;
 
 	/**
-	 * Handles the response to the channel select component interaction
-	 * @param interaction The channel select component interaction to response to
+	 * Executes the channel select menu's logic when a user interacts with it. Handles the interaction and responds
+	 * appropriately.
+	 * @param interaction - The channel select menu interaction to process.
+	 * @override
+	 * @see {@linkcode ChannelSelectMenuInteraction}
 	 */
 	execute(interaction: ChannelSelectMenuInteraction): Promise<void>;
 }

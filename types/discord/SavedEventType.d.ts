@@ -1,20 +1,28 @@
-// Type imports
-import { ClientEvents, Events } from "discord.js";
+// External libraries imports
+import { ClientEvents } from "discord.js";
 
-/** Event type imported from local file */
+/**
+ * Represents a Discord event handler loaded from a local file. Event handlers are used to respond to various Discord.js
+ * client events, such as message creation, guild member updates, or bot readiness. These are typically loaded
+ * dynamically and registered with the client.
+ */
 interface SavedEventType {
-	/** Whether the event is called once */
+	/**
+	 * Whether this event handler should only be called once. If true, the handler will be removed after the first
+	 * execution. Useful for one-time initialization events like 'ready'.
+	 */
 	once?: boolean;
 
 	/**
-	 * Type of the event
-	 * @see {@link Events}
+	 * The specific Discord event type this handler responds to. Determines which client event will trigger this
+	 * handler's execution.
+	 * @see {@linkcode ClientEvents}
 	 */
-	type: Events;
+	type: keyof ClientEvents;
 
 	/**
-	 * Forwards the prompt to response to the event or handles it by itself
-	 * @param args The needed arguments to response to an interaction or the emitted event
+	 * Executes the event handler logic when the associated event is emitted. Receives the event arguments specific to the event type and performs the necessary actions.
+	 * @param args - The arguments emitted with the event, typed according to the event type.
 	 */
-	execute(...args: ClientEvents[Event]): Promise<void>;
+	execute(...args: any): Promise<void>;
 }

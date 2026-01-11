@@ -2,7 +2,7 @@
 import { ConsoleCommand } from "../../types/consoleCommands";
 
 // Data imports
-import { consoleCommands } from "#variables";
+import { cli } from "#application";
 
 // Module imports
 import notify from "../../modules/notification";
@@ -14,23 +14,21 @@ const consoleCommand: ConsoleCommand = {
 	parameters: {
 		description: "Name of the command to get help for",
 		name: "command",
-		options: () => consoleCommands.map((command) => command.name.toLowerCase()),
+		options: () => cli.commands.map((command) => command.name.toLowerCase()),
 		type: "string",
 	},
 
 	async execute(_, ...parameters: [string] | []) {
 		if (parameters.length === 0) {
 			notify(
-				`Available commands:\n${consoleCommands
+				`Available commands:\n${cli.commands
 					.map((command) => `- ${command.name}: ${command.description}`)
 					.join("\n")}\n\nUse HELP <command> to get more information about a specific command.`,
 				"INFORMATION",
 			);
 		} else {
 			/** Command to get help for */
-			const command = consoleCommands.find(
-				(consoleCommand) => consoleCommand.name === parameters[0].toUpperCase(),
-			);
+			const command = cli.commands.find((consoleCommand) => consoleCommand.name === parameters[0].toUpperCase());
 
 			if (command) {
 				notify(

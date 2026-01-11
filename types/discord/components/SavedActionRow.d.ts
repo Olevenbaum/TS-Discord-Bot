@@ -1,14 +1,15 @@
-// Internal type imports
-import { SavedComponent } from "./";
-import { ActionRowCreateOptions } from "./CreateOptions";
-
-// Module imports
-import readFiles from "../../../modules/fileReader";
-
-// Type imports
+// External libraries imports
 import { ActionRowBuilder, ComponentType } from "discord.js";
 
-/** Action row component imported from local file */
+// Internal class & type imports
+import type { SavedComponent } from "./SavedComponent";
+import type { ActionRowCreateOptions } from "./CreateOptions";
+
+/**
+ * Represents a Discord action row component loaded from a local file. Action rows are containers that hold multiple
+ * components in a horizontal layout, organizing interactive elements within messages or modals.
+ * @see {@linkcode SavedComponent}
+ */
 interface SavedActionRow extends SavedComponent {
 	/**
 	 * List of components inside the action row. Either only message components **or** only modal components can be
@@ -26,30 +27,26 @@ interface SavedActionRow extends SavedComponent {
 		name: string;
 
 		/**
-		 * Type of the component
+		 * The component type.
 		 * @see {@linkcode ComponentType}
 		 */
 		type: ComponentType;
 	}[];
 
-	/** Type of component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.ActionRow} for action row components.
+	 * @see {@linkcode ComponentType.ActionRow}
+	 */
 	type: ComponentType.ActionRow;
 
 	/**
-	 * Creates an action row including the components listed in
-	 * {@linkcode SavedActionRow.includedComponents | includedComponents}.
-	 * @returns The action row builder
+	 * Creates a new instance of the action row component with custom options. Builds the action row including the
+	 * components listed in {@linkcode includedComponents} and passes the options to the matching included components.
+	 * @param options - Configuration to customize the action row and its included components.
+	 * @returns The configured action row builder with applied options.
 	 * @override
-	 */
-	create(): ActionRowBuilder;
-
-	/**
-	 * Creates an action row including the components listed in
-	 * {@linkcode SavedActionRow.includedComponents | includedComponents} and passes the options to the matching
-	 * included components.
-	 * @param options Options that modify the included components
-	 * @returns The action row builder
-	 * @override
+	 * @see {@linkcode ActionRowBuilder}
+	 * @see {@linkcode ActionRowCreateOptions}
 	 */
 	create(options: ActionRowCreateOptions): ActionRowBuilder;
 }

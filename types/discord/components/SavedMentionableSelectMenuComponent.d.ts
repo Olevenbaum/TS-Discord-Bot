@@ -1,31 +1,39 @@
-// Internal type imports
-import { SavedMessageComponent } from ".";
-import { MentionableSelectMenuComponentCreateOptions } from "../CreateOptions";
-
-// Type imports
+// External libraries imports
 import { ComponentType, MentionableSelectMenuBuilder, MentionableSelectMenuInteraction } from "discord.js";
 
-/** Mentionable select component imported from local file */
+// Internal class & type imports
+import type { SavedMessageComponent } from "./SavedMessageComponent";
+import type { MentionableSelectMenuComponentCreateOptions } from "./CreateOptions";
+
+/**
+ * Represents a Discord mentionable select menu component loaded from a local file. Mentionable select menus allow
+ * users to select users, roles, or both that can be mentioned, facilitating targeted interactions.
+ * @see {@linkcode SavedMessageComponent}
+ */
 interface SavedMentionableSelectMenuComponent extends SavedMessageComponent {
-	/** Type of the mentionable select component */
+	/**
+	 * The component type, fixed to {@linkcode ComponentType.MentionableSelect} for mentionable select menus.
+	 * @see {@linkcode ComponentType.MentionableSelect}
+	 */
 	type: ComponentType.MentionableSelect;
 
 	/**
-	 * Creates the mentionable select component
-	 * @returns The mentionable select builder
+	 * Creates a new instance of the mentionable select menu component with custom options. Allows modification of the
+	 * menu's appearance or behavior at creation time.
+	 * @param options - Optional configuration to customize the mentionable select menu instance.
+	 * @returns The configured mentionable select menu builder with applied options.
+	 * @override
+	 * @see {@linkcode MentionableSelectMenuBuilder}
+	 * @see {@linkcode MentionableSelectMenuComponentCreateOptions}
 	 */
-	create(): MentionableSelectMenuBuilder;
+	create(options?: MentionableSelectMenuComponentCreateOptions): MentionableSelectMenuBuilder;
 
 	/**
-	 * Creates the mentionable select component
-	 * @param options The options that modify the mentionable select component
-	 * @returns The mentionable select builder
-	 */
-	create(options?: MentionableSelectComponentMenuCreateOptions): MentionableSelectMenuBuilder;
-
-	/**
-	 * Handles the response to the mentionable select component interaction.
-	 * @param interaction The mentionable select component interaction to respond to
+	 * Executes the mentionable select menu's logic when a user interacts with it. Handles the interaction and responds
+	 * appropriately.
+	 * @param interaction - The mentionable select menu interaction to process.
+	 * @override
+	 * @see {@linkcode MentionableSelectMenuInteraction}
 	 */
 	execute(interaction: MentionableSelectMenuInteraction): Promise<void>;
 }
