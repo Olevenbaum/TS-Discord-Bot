@@ -11,7 +11,10 @@ import { Events } from "discord.js";
 import notify from "../../modules/notification";
 import { updateFiles } from "../../modules/update";
 
-/** Client ready event handler */
+/**
+ * Client ready event handler
+ * @see {@linkcode SavedEventType}
+ */
 const clientReady: SavedEventType = {
 	once: true,
 	type: Events.ClientReady,

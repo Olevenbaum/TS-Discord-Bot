@@ -20,12 +20,18 @@ import {
 import notify from "../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
-/** Message command handler */
+/**
+ * Message command handler
+ * @see {@linkcode SavedApplicationCommandType}
+ */
 const userCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.Message,
 
 	async execute(interaction: MessageContextMenuCommandInteraction) {
-		/** Message application command that was interacted with */
+		/**
+		 * Message application command that was interacted with
+		 * @see {@linkcode SavedMessageCommand}
+		 */
 		const messageCommand = applicationCommands[this.type]?.get(interaction.commandName) as
 			| SavedMessageCommand
 			| undefined;

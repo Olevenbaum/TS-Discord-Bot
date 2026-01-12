@@ -1,5 +1,5 @@
 // Class & type imports
-import { ConsoleCommand } from "../../types/consoleCommands";
+import { ConsoleCommand } from "../../types";
 
 // Data imports
 import { applicationCommandTypes } from "../../resources/variables";
@@ -30,8 +30,7 @@ const consoleCommand: ConsoleCommand = {
 		],
 	],
 
-	async execute(_, __, ...parameters: (keyof typeof ApplicationCommandType)[] | [boolean]) {
-		// Call matching overload to update application command types
+	async execute(...parameters: (keyof typeof ApplicationCommandType)[] | [boolean]) {
 		if (parameters.length > 0) {
 			if (typeof parameters[0] === "boolean") {
 				updateApplicationCommandTypes(parameters[0]);

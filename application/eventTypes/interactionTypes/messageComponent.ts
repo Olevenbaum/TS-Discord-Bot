@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedInteractionType } from "../../../types";
+import type { SavedMessageComponentType, SavedInteractionType } from "../../../types";
 
 // Data imports
 import { componentTypes } from "#variables";
@@ -15,8 +15,11 @@ const interactionType: SavedInteractionType = {
 	type: InteractionType.MessageComponent,
 
 	async execute(interaction: MessageComponentInteraction) {
-		/** Message component type of the message component that was interacted with */
-		const messageComponentType = componentTypes.get(interaction.componentType);
+		/**
+		 * Message component type of the message component that was interacted with
+		 * @see {@linkcode SavedMessageComponentType}
+		 */
+		const messageComponentType: SavedMessageComponentType = componentTypes.get(interaction.componentType);
 
 		if (!messageComponentType) {
 			interaction.reply({

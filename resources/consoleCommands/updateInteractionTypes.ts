@@ -1,5 +1,5 @@
 // Class & type imports
-import { ConsoleCommand } from "../../types/consoleCommands";
+import { ConsoleCommand } from "../../types";
 
 // Data imports
 import { interactionTypes } from "../../resources/variables";
@@ -31,7 +31,6 @@ const consoleCommand: ConsoleCommand = {
 	],
 
 	async execute(...parameters: (keyof typeof InteractionType)[] | [boolean]) {
-		// Call matching overload to update interaction types
 		if (parameters.length > 0) {
 			if (typeof parameters[0] === "boolean") {
 				updateInteractionTypes(parameters[0]);

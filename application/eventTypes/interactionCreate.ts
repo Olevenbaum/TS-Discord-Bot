@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedEventType } from "../../types";
+import type { SavedEventType, SavedInteractionType } from "../../types";
 
 // Data imports
 import { blockedUsers, configuration, interactionTypes } from "#variables";
@@ -10,7 +10,10 @@ import { bold, codeBlock, Events, type Interaction, InteractionType, MessageFlag
 // Module imports
 import notify from "../../modules/notification";
 
-/** Interaction event handler */
+/**
+ * Interaction event handler
+ * @see {@linkcode SavedEventType}
+ */
 const interactionCreate: SavedEventType = {
 	type: Events.InteractionCreate,
 
@@ -34,7 +37,10 @@ const interactionCreate: SavedEventType = {
 			}
 		}
 
-		/** Interaction type handler matching the interaction type */
+		/**
+		 * Interaction type handler matching the interaction type
+		 * @see {@linkcode SavedInteractionType}
+		 */
 		const interactionType = interactionTypes.get(InteractionType[interaction.type] as keyof typeof InteractionType);
 
 		if (!interactionType) {

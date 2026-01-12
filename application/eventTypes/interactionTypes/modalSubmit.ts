@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedInteractionType } from "../../../types";
+import type { SavedInteractionType, SavedModal } from "../../../types";
 
 // Data imports
 import { modals } from "#variables";
@@ -11,12 +11,18 @@ import { bold, codeBlock, InteractionType, ModalSubmitInteraction, MessageFlags,
 import notify from "../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../modules/utilities";
 
-/** Modal submit interaction handler */
+/**
+ * Modal submit interaction handler
+ * @see {@linkcode SavedInteractionType}
+ */
 const interactionType: SavedInteractionType = {
 	type: InteractionType.ModalSubmit,
 
 	async execute(interaction: ModalSubmitInteraction) {
-		/** Modal that was interacted with */
+		/**
+		 * Modal that was interacted with
+		 * @see {@linkcode SavedModal}
+		 */
 		const modal = modals.get(interaction.customId);
 
 		if (!modal) {

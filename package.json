@@ -8,7 +8,7 @@
 		"@types/bun": "latest"
 	},
 	"dependencies": {
-		"@opentui/core": "^0.1.67",
+		"@opentui/core": "^0.1.72",
 		"@sequelize/postgres": "^7.0.0-alpha.47",
 		"discord.js": "^14.25.1",
 		"sequelize": "^6.37.7"

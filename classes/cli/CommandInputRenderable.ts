@@ -118,6 +118,29 @@ export class CommandInputRenderable extends BoxRenderable {
 			this.commandInput!.insertText(selection);
 		});
 
+		this.autocompleteInput.options = this._commands
+			.map((command) => {
+				/** Options of the autocomplete input based on every console command */
+				const options: SelectOption[] = [];
+
+				options.push({
+					name: command.name,
+					description: command.description,
+				});
+
+				if (command.aliases) {
+					command.aliases.forEach((alias) => {
+						options.push({
+							name: alias,
+							description: command.description,
+						});
+					});
+				}
+
+				return options;
+			})
+			.flat();
+
 		this.add(this.commandInput);
 		this.add(this.autocompleteInput);
 

@@ -4,9 +4,11 @@ import type { SavedEventType } from "../../../types";
 // External libraries imports
 import { Events } from "discord.js";
 
-/** Template for event handler */
+/**
+ * Template for event handler
+ * @see {@linkcode SavedEventType}
+ */
 const eventType: SavedEventType = {
-	once: false,
 	type:
 		Events.ApplicationCommandPermissionsUpdate ||
 		Events.AutoModerationActionExecution ||

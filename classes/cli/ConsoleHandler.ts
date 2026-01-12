@@ -1,3 +1,6 @@
+// Class & type imports
+import { ConsoleCommand } from "../../types";
+
 // Data imports
 import { client } from "#application";
 
@@ -70,8 +73,14 @@ export class ConsoleHandler {
 	}
 
 	/**
-	 * Gets the current focus color used for UI element borders.
-	 * @returns The current focus color.
+	 * @see {@linkcode ConsoleCommand}
+	 */
+	public get commands(): ConsoleCommand[] {
+		return this.commandInput!.commands;
+	}
+
+	/**
+	 * Current focus color used for UI element borders.
 	 * @see {@linkcode ColorInput}
 	 */
 	public get focusColor(): ColorInput {
@@ -79,8 +88,7 @@ export class ConsoleHandler {
 	}
 
 	/**
-	 * Sets the focus color for UI element borders. Updates the interface if already initialized.
-	 * @param focusColor - The new focus color, or "auto" to use the bot's accent color.
+	 * Current focus color used for UI element borders.
 	 * @see {@linkcode ColorInput}
 	 */
 	public set focusColor(focusColor: ColorInput | "auto") {

@@ -21,12 +21,18 @@ import {
 import notify from "../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
-/** Chat input command handler */
+/**
+ * Chat input command handler
+ * @see {@linkcode SavedApplicationCommandType}
+ */
 const chatInputCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.ChatInput,
 
 	async execute(interaction: ChatInputCommandInteraction) {
-		/** Chat input command that was interacted with */
+		/**
+		 * Chat input command that was interacted with
+		 * @see {@linkcode SavedChatInputCommand}
+		 */
 		const chatInputCommand = (applicationCommands[this.type] as Collection<string, SavedChatInputCommand>)?.get(
 			interaction.commandName,
 		);

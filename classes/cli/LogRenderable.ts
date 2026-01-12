@@ -14,7 +14,7 @@ import {
 	white,
 	yellow,
 } from "@opentui/core";
-import { appendFile } from "fs";
+import { access, appendFile, mkdirSync } from "fs";
 import type { Path } from "typescript";
 
 // Module imports
@@ -53,10 +53,15 @@ export class LogRenderable extends TextRenderable {
 	 * @param messages - Message fragments to add to the log box.
 	 */
 	public debug(...messages: any[]) {
+		/** Timestamp */
+		const timestamp = getTime(!this.includeDate);
+
 		this.add(
 			new StyledText([
-				white(`[${getTime(!this.includeDate)}]: `),
-				...messages.map((message) => white(`${message.toString()}\n`)),
+				white(`[${timestamp}]: `),
+				...messages.map((message) =>
+					white(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
+				),
 			]),
 		);
 
@@ -69,12 +74,17 @@ export class LogRenderable extends TextRenderable {
 	 * @param messages - Message fragments to add to the log box.
 	 */
 	public error(...messages: any[]) {
+		/** Timestamp */
+		const timestamp = getTime(!this.includeDate);
+
 		this.add(
 			new StyledText([
-				white(`[${getTime(!this.includeDate)}]: `),
+				white(`[${timestamp}]: `),
 				...messages.map((message) => {
 					if (message instanceof Error) {
-						return brightRed(`${message.toString()}\n`);
+						return brightRed(
+							`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " ")),
+						);
 					}
 
 					return red(`${message.toString()}\n`);
@@ -91,10 +101,15 @@ export class LogRenderable extends TextRenderable {
 	 * @param messages - Message fragments to add to the log box.
 	 */
 	public info(...messages: any[]) {
+		/** Timestamp */
+		const timestamp = getTime(!this.includeDate);
+
 		this.add(
 			new StyledText([
-				white(`[${getTime(!this.includeDate)}]: `),
-				...messages.map((message) => blue(`${message.toString()}\n`)),
+				white(`[${timestamp}]: `),
+				...messages.map((message) =>
+					blue(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
+				),
 			]),
 		);
 
@@ -110,6 +125,12 @@ export class LogRenderable extends TextRenderable {
 		if (configuration.bot.saveLogs === false) {
 			return;
 		}
+
+		this.debug(relativePath(path ?? configuration.paths.logPath));
+
+		access(relativePath(path ?? configuration.paths.logPath), () =>
+			mkdirSync(relativePath(path ?? configuration.paths.logPath)),
+		);
 
 		/** Absolute path to the log file */
 		const absolutePath = relativePath(
@@ -143,10 +164,15 @@ export class LogRenderable extends TextRenderable {
 	 * @param messages - Message fragments to add to the log box.
 	 */
 	public success(...messages: any[]) {
+		/** Timestamp */
+		const timestamp = getTime(!this.includeDate);
+
 		this.add(
 			new StyledText([
-				white(`[${getTime(!this.includeDate)}]: `),
-				...messages.map((message) => green(`${message.toString()}\n`)),
+				white(`[${timestamp}]: `),
+				...messages.map((message) =>
+					green(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
+				),
 			]),
 		);
 
@@ -159,10 +185,15 @@ export class LogRenderable extends TextRenderable {
 	 * @param messages - Message fragments to add to the log box.
 	 */
 	public warn(...messages: any[]) {
+		/** Timestamp */
+		const timestamp = getTime(!this.includeDate);
+
 		this.add(
 			new StyledText([
-				white(`[${getTime(!this.includeDate)}]: `),
-				...messages.map((message) => yellow(`${message.toString()}\n`)),
+				white(`[${timestamp}]: `),
+				...messages.map((message) =>
+					yellow(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
+				),
 			]),
 		);
 

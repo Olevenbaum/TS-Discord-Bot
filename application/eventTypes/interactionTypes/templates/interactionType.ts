@@ -4,7 +4,10 @@ import type { SavedInteractionType } from "../../../../types";
 // External libraries imports
 import { BaseInteraction, InteractionType } from "discord.js";
 
-/** Template for interaction handler */
+/**
+ * Template for interaction handler
+ * @see {@linkcode SavedInteractionType}
+ */
 const interactionType: SavedInteractionType = {
 	type:
 		InteractionType.ApplicationCommand ||

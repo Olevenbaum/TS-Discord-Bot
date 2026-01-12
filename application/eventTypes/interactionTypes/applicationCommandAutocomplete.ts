@@ -16,12 +16,18 @@ import {
 // Module imports
 import notify from "../../../modules/notification";
 
-/** Chat input command autocomplete interaction handler */
+/**
+ * Chat input command autocomplete interaction handler
+ * @see {@linkcode SavedInteractionType}
+ */
 const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
 	type: InteractionType.ApplicationCommandAutocomplete,
 
 	async execute(interaction: AutocompleteInteraction) {
-		/** Chat input command that the autocomplete was requested for */
+		/**
+		 * Chat input command that the autocomplete was requested for
+		 * @see {@linkcode SavedChatInputCommand}
+		 */
 		const chatInputCommand = applicationCommands[ApplicationCommandType.ChatInput]?.get(interaction.commandName) as
 			| SavedChatInputCommand
 			| undefined;
@@ -58,7 +64,7 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
 			return;
 		}
 
-		await chatInputCommand.autocomplete(interaction).catch((error: Error) => {
+		chatInputCommand.autocomplete(interaction).catch((error: Error) => {
 			/** Timestamp of the last notification sent */
 			const lastNotificationTimestamp = timestamps.get(
 				`${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,

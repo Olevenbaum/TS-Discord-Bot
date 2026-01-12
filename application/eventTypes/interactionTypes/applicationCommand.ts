@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedInteractionType } from "../../../types";
+import type { SavedApplicationCommandType, SavedInteractionType } from "../../../types";
 
 // Data imports
 import { applicationCommandTypes } from "#variables";
@@ -10,12 +10,18 @@ import { ApplicationCommandType, bold, codeBlock, CommandInteraction, Interactio
 // Module imports
 import notify from "../../../modules/notification";
 
-/** Application command interaction handler */
+/**
+ * Application command interaction handler
+ * @see {@linkcode SavedInteractionType}
+ */
 const interactionType: SavedInteractionType = {
 	type: InteractionType.ApplicationCommand,
 
 	async execute(interaction: CommandInteraction) {
-		/** Application command type of the application command that was interacted with */
+		/**
+		 * Application command type of the application command that was interacted with
+		 * @see {@linkcode SavedApplicationCommandType}
+		 */
 		const applicationCommandType = applicationCommandTypes.get(interaction.commandType);
 
 		if (!applicationCommandType) {

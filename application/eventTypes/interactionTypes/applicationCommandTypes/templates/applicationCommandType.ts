@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedApplicationCommandType } from "../../../../../types";
+import type { SavedApplicationCommand, SavedApplicationCommandType } from "../../../../../types";
 
 // Data imports
 import { applicationCommands } from "#variables";
@@ -22,7 +22,10 @@ import {
 import notify from "../../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../../modules/utilities";
 
-/** Template for application command type handler */
+/**
+ * Template for application command type handler
+ * @see {@linkcode SavedApplicationCommandType}
+ */
 const applicationCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.ChatInput | ApplicationCommandType.Message | ApplicationCommandType.User,
 
@@ -32,7 +35,10 @@ const applicationCommandInteraction: SavedApplicationCommandType = {
 			| MessageContextMenuCommandInteraction
 			| UserContextMenuCommandInteraction,
 	) {
-		/** Application command that was interacted with */
+		/**
+		 * Application command that was interacted with
+		 * @see {@linkcode SavedApplicationCommand}
+		 */
 		const applicationCommand = applicationCommands[this.type]?.get(interaction.commandName);
 
 		if (!applicationCommand) {

@@ -1,5 +1,5 @@
 // Class & type imports
-import { ConsoleCommand } from "../../types/consoleCommands";
+import { ConsoleCommand } from "../../types";
 
 // Module imports
 import updateFiles from "../../modules/update";

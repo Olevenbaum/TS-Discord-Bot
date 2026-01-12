@@ -1,5 +1,5 @@
 // Class & type imports
-import { ConsoleCommand } from "../../types/consoleCommands";
+import { ConsoleCommand } from "../../types";
 
 // Data imports
 import { cli } from "#application";
@@ -27,7 +27,10 @@ const consoleCommand: ConsoleCommand = {
 				"INFORMATION",
 			);
 		} else {
-			/** Command to get help for */
+			/**
+			 * Command to get help for
+			 * @see {@linkcode ConsoleCommand}
+			 */
 			const command = cli.commands.find((consoleCommand) => consoleCommand.name === parameters[0].toUpperCase());
 
 			if (command) {

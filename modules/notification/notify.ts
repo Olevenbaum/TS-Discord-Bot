@@ -127,9 +127,9 @@ export default async function notify(
 	}
 
 	if (
+		y &&
 		client.isReady() &&
 		configuration.bot.notifications &&
-		y &&
 		!(
 			typeof configuration.bot.notifications !== "boolean" &&
 			(typeof configuration.bot.notifications === "number"
@@ -139,16 +139,19 @@ export default async function notify(
 	) {
 		/** Message to send to bot owner or team members */
 		const discordMessage = (typeof y === "string" ? y : (message as string))
-			.replace("@bot", userMention(client.user.id))
-			.replace(
+			.replaceAll("@bot", userMention(client.user.id))
+			.replaceAll(
 				"@owner",
 				client.application.owner instanceof User
 					? userMention(client.application.owner.id)
 					: userMention(client.application.owner?.ownerId ?? ""),
 			)
-			.replace("@team", client.application.owner instanceof Team ? client.application.owner.name : "");
+			.replaceAll("@team", client.application.owner instanceof Team ? client.application.owner.name : "");
 
-		/** Discord users to receive the notification */
+		/**
+		 * Discord users to receive the notification
+		 * @see {@linkcode User}
+		 */
 		const receivers: User[] = [];
 
 		if (client.application.owner instanceof User) {
@@ -176,6 +179,8 @@ export default async function notify(
 			});
 		}
 
-		await Promise.all(receivers.map((user) => user.send(discordMessage.replace("@member", userMention(user.id)))));
+		await Promise.all(
+			receivers.map((user) => user.send(discordMessage.replaceAll("@member", userMention(user.id)))),
+		);
 	}
 }
