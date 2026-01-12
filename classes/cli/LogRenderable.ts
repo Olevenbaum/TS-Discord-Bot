@@ -1,3 +1,6 @@
+// Class & type imports
+import { LogType } from "../../modules/notification";
+
 // Data imports
 import { configuration } from "#variables";
 
@@ -52,20 +55,8 @@ export class LogRenderable extends TextRenderable {
 	 * potential log save based on date changes.
 	 * @param messages - Message fragments to add to the log box.
 	 */
-	public debug(...messages: any[]) {
-		/** Timestamp */
-		const timestamp = getTime(!this.includeDate);
-
-		this.add(
-			new StyledText([
-				white(`[${timestamp}]: `),
-				...messages.map((message) =>
-					white(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
-				),
-			]),
-		);
-
-		this.triggerSave();
+	public debug(...messages: any[]): void {
+		this.log(LogType.DEBUG, ...messages);
 	}
 
 	/**
@@ -73,26 +64,8 @@ export class LogRenderable extends TextRenderable {
 	 * in red. Messages are timestamped and automatically trigger a potential log save based on date changes.
 	 * @param messages - Message fragments to add to the log box.
 	 */
-	public error(...messages: any[]) {
-		/** Timestamp */
-		const timestamp = getTime(!this.includeDate);
-
-		this.add(
-			new StyledText([
-				white(`[${timestamp}]: `),
-				...messages.map((message) => {
-					if (message instanceof Error) {
-						return brightRed(
-							`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " ")),
-						);
-					}
-
-					return red(`${message.toString()}\n`);
-				}),
-			]),
-		);
-
-		this.triggerSave();
+	public error(...messages: any[]): void {
+		this.log(LogType.ERROR, ...messages);
 	}
 
 	/**
@@ -100,16 +73,54 @@ export class LogRenderable extends TextRenderable {
 	 * potential log save based on date changes.
 	 * @param messages - Message fragments to add to the log box.
 	 */
-	public info(...messages: any[]) {
+	public info(...messages: any[]): void {
+		this.log(LogType.INFORMATION, ...messages);
+	}
+
+	/**
+	 * Prints a log message to the log in the matching log type color. Messages are timstampted and automatically
+	 * trigger a potential log save based on date changes.
+	 * @param type - Type of the message fragments.
+	 * @param messages - Message fragments to add to the log box.
+	 * @see {@linkcode LogType}
+	 */
+	protected log(type: LogType, ...messages: any[]): void {
 		/** Timestamp */
-		const timestamp = getTime(!this.includeDate);
+		const timestamp = `[${getTime(!this.includeDate)}]: `;
 
 		this.add(
 			new StyledText([
-				white(`[${timestamp}]: `),
-				...messages.map((message) =>
-					blue(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
-				),
+				white(timestamp),
+				...messages
+					.map((message) => {
+						const splitMessages: string[] = message.toString().split("\n");
+
+						switch (type) {
+							case LogType.DEBUG:
+								return splitMessages.map((splitMessage) => white(splitMessage));
+
+							case LogType.ERROR:
+								return message instanceof Error
+									? splitMessages.map((splitMessage) => brightRed(splitMessage))
+									: splitMessages.map((splitMessage) => red(splitMessage));
+
+							case LogType.INFORMATION:
+								return splitMessages.map((splitMessage) => blue(splitMessage));
+
+							case LogType.SUCCESS:
+								return splitMessages.map((splitMessage) => green(splitMessage));
+
+							case LogType.WARNING:
+								return splitMessages.map((splitMessage) => yellow(splitMessage));
+						}
+					})
+					.flat()
+					.map((message, index, splitMessages) =>
+						splitMessages.length > 1 && index < splitMessages.length - 1
+							? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
+							: [message, white("\n")],
+					)
+					.flat(),
 			]),
 		);
 
@@ -121,7 +132,7 @@ export class LogRenderable extends TextRenderable {
 	 * The filename includes a timestamp for uniqueness.
 	 * @param path - Optional path where to save the log file.
 	 */
-	public saveLogs(path?: Path) {
+	public saveLogs(path?: Path): void {
 		if (configuration.bot.saveLogs === false) {
 			return;
 		}
@@ -163,20 +174,8 @@ export class LogRenderable extends TextRenderable {
 	 * potential log save based on date changes.
 	 * @param messages - Message fragments to add to the log box.
 	 */
-	public success(...messages: any[]) {
-		/** Timestamp */
-		const timestamp = getTime(!this.includeDate);
-
-		this.add(
-			new StyledText([
-				white(`[${timestamp}]: `),
-				...messages.map((message) =>
-					green(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
-				),
-			]),
-		);
-
-		this.triggerSave();
+	public success(...messages: any[]): void {
+		this.log(LogType.SUCCESS, ...messages);
 	}
 
 	/**
@@ -184,20 +183,8 @@ export class LogRenderable extends TextRenderable {
 	 * potential log save based on date changes.
 	 * @param messages - Message fragments to add to the log box.
 	 */
-	public warn(...messages: any[]) {
-		/** Timestamp */
-		const timestamp = getTime(!this.includeDate);
-
-		this.add(
-			new StyledText([
-				white(`[${timestamp}]: `),
-				...messages.map((message) =>
-					yellow(`${message.toString()}\n`.replaceAll("\n", "\n".padStart(timestamp.length, " "))),
-				),
-			]),
-		);
-
-		this.triggerSave();
+	public warn(...messages: any[]): void {
+		this.log(LogType.WARNING, ...messages);
 	}
 
 	/**

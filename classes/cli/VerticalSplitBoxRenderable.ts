@@ -70,14 +70,26 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Adds multiple children to the vertical split box at a specific index or at the end. Applies common styling
-	 * options to each new child and updates the internal children array.
+	 * Adds multiple children to the vertical split box at the end. Applies common styling options to each new child
+	 * and updates the internal children array.
+	 * @param children - The child BoxRenderable elements to add.
+	 * @returns The parent box instance for method chaining.
+	 * @see {@linkcode BoxRenderable}
+	 * @see {@linkcode VerticalSplitBoxRenderable}
+	 */
+	addChildren(...children: BoxRenderable[]): VerticalSplitBoxRenderable;
+
+	/**
+	 * Adds multiple children to the vertical split box at a specific index. Applies common styling options to each new
+	 * child and updates the internal children array.
 	 * @param startIndex - The index after which to add the children, or the first child if not a number.
 	 * @param children - The child BoxRenderable elements to add.
 	 * @returns The parent box instance for method chaining.
+	 * @see {@linkcode BoxRenderable}
+	 * @see {@linkcode VerticalSplitBoxRenderable}
 	 */
-	addChildren(...children: BoxRenderable[]): VerticalSplitBoxRenderable;
 	addChildren(startIndex: number, ...children: BoxRenderable[]): VerticalSplitBoxRenderable;
+
 	addChildren(startIndex: number | BoxRenderable, ...children: BoxRenderable[]): VerticalSplitBoxRenderable {
 		if (typeof startIndex !== "number") {
 			children.unshift(startIndex);

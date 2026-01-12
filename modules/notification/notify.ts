@@ -96,6 +96,11 @@ export default async function notify(
 	const type = x instanceof Error ? LogType.ERROR : typeof x === "string" ? LogType[x] : x;
 
 	switch (type) {
+		case LogType.DEBUG:
+			cli.debug(message);
+
+			break;
+
 		case LogType.ERROR:
 			if (x instanceof Error) {
 				cli.error(message, x);
@@ -121,9 +126,6 @@ export default async function notify(
 			cli.success(message);
 
 			break;
-
-		default:
-			cli.debug(message);
 	}
 
 	if (

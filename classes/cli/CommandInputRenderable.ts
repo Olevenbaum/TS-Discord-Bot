@@ -10,6 +10,7 @@ import {
 	BoxRenderable,
 	InputRenderable,
 	InputRenderableEvents,
+	KeyEvent,
 	type RenderContext,
 	type SelectOption,
 	SelectRenderable,
@@ -112,6 +113,10 @@ export class CommandInputRenderable extends BoxRenderable {
 			});
 
 		this.autocompleteInput = new SelectRenderable(ctx, {
+			keyBindings: [
+				{ name: "up", action: "move-up" },
+				{ name: "down", action: "move-down" },
+			],
 			minWidth: 40,
 			width: "40%",
 		}).on(SelectRenderableEvents.ITEM_SELECTED, (selection) => {
@@ -145,6 +150,14 @@ export class CommandInputRenderable extends BoxRenderable {
 		this.add(this.autocompleteInput);
 
 		this.updateCommands();
+
+		this.onKeyDown = (key: KeyEvent) => {
+			if (key.name === "up") {
+				this.autocompleteInput.selectedIndex += 1;
+			} else if (key.name === "down") {
+				this.autocompleteInput.selectedIndex -= 1;
+			}
+		};
 	}
 
 	/**
