@@ -11,6 +11,7 @@ import {
 	InputRenderable,
 	InputRenderableEvents,
 	KeyEvent,
+	Renderable,
 	type RenderContext,
 	type SelectOption,
 	SelectRenderable,
@@ -38,12 +39,6 @@ export class CommandInputRenderable extends BoxRenderable {
 	protected _commands: ConsoleCommand[] = [];
 
 	/**
-	 * The input field where users enter console commands. Handles text input and command submission via Enter key.
-	 * @see {@linkcode InputRenderable}
-	 */
-	protected commandInput: InputRenderable;
-
-	/**
 	 * The autocomplete dropdown that displays command suggestions based on user input. Shows matching commands and
 	 * aliases as the user types.
 	 * @see {@linkcode SelectRenderable}
@@ -51,20 +46,34 @@ export class CommandInputRenderable extends BoxRenderable {
 	protected autocompleteInput: SelectRenderable;
 
 	/**
+	 * The input field where users enter console commands. Handles text input and command submission via Enter key.
+	 * @see {@linkcode InputRenderable}
+	 */
+	protected commandInput: InputRenderable;
+
+	/**
 	 * Creates a new command input renderable with the specified rendering context and options. Initializes the input
 	 * field and autocomplete dropdown, sets up event handlers for command execution and autocomplete suggestions.
-	 * @param ctx - The rendering context for the component.
+	 * @param parent - The parent this renderable was added to or the base CLI renderer.
 	 * @param options - Optional configuration options for the box container.
 	 * @see {@linkcode BoxOptions}
+	 * @see {@linkcode Renderable}
 	 * @see {@linkcode RenderContext}
 	 */
-	constructor(ctx: RenderContext, options: BoxOptions = {}) {
-		super(ctx, options);
+	constructor(parent: Renderable | RenderContext, options: BoxOptions = {}) {
+		super(parent instanceof Renderable ? parent.ctx : parent, options);
 
-		this.commandInput = new InputRenderable(ctx, {
-			placeholder: "Enter command...",
-			width: "60%",
-		})
+		if (parent instanceof Renderable) {
+			this.parent = parent;
+		}
+
+		this.commandInput = new InputRenderable(
+			this.parent instanceof Renderable ? this.parent.ctx : (parent as RenderContext),
+			{
+				placeholder: "Enter command...",
+				width: "60%",
+			},
+		)
 			.on(InputRenderableEvents.ENTER, (input: string) => {
 				try {
 					this.handleCommand(input);
@@ -76,7 +85,10 @@ export class CommandInputRenderable extends BoxRenderable {
 				}
 			})
 			.on(InputRenderableEvents.INPUT, (input: string) => {
-				/** Options the user might choose from */
+				/**
+				 * Options the user might choose from
+				 * @see {@linkcode SelectOption}
+				 */
 				const options: SelectOption[] = [];
 
 				if (input.includes(" ")) {
@@ -112,20 +124,26 @@ export class CommandInputRenderable extends BoxRenderable {
 				this.autocompleteInput.options = options;
 			});
 
-		this.autocompleteInput = new SelectRenderable(ctx, {
-			keyBindings: [
-				{ name: "up", action: "move-up" },
-				{ name: "down", action: "move-down" },
-			],
-			minWidth: 40,
-			width: "40%",
-		}).on(SelectRenderableEvents.ITEM_SELECTED, (selection) => {
+		this.autocompleteInput = new SelectRenderable(
+			this.parent instanceof Renderable ? this.parent.ctx : (parent as RenderContext),
+			{
+				keyBindings: [
+					{ name: "up", action: "move-up" },
+					{ name: "down", action: "move-down" },
+				],
+				minWidth: 40,
+				width: "40%",
+			},
+		).on(SelectRenderableEvents.ITEM_SELECTED, (selection) => {
 			this.commandInput!.insertText(selection);
 		});
 
 		this.autocompleteInput.options = this._commands
 			.map((command) => {
-				/** Options of the autocomplete input based on every console command */
+				/**
+				 * Options of the autocomplete input based on every console command
+				 * @see {@linkcode SelectOption}
+				 */
 				const options: SelectOption[] = [];
 
 				options.push({

@@ -154,10 +154,13 @@ export class ConsoleHandler {
 
 	/**
 	 * Initializes the console handler with a CLI renderer. Creates and arranges all UI components including command
-	 * input, log display, and the split layout.
+	 * input, log display, and the split layout. If wanted, common console methods , {@linkcode console.debug},
+	 * {@linkcode console.error}, {@linkcode console.info} and {@linkcode console.warn} can be replaced by matching
+	 * intern console handler methods {@linkcode debug}, {@linkcode error}, {@linkcode info} and {@linkcode warn}.
 	 * @param ctx - The CLI renderer instance to use for the interface.
+	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
 	 */
-	public initialize(ctx: CliRenderer): void {
+	public initialize(ctx: CliRenderer, overwriteConsole: boolean = true): void {
 		this.renderer = ctx;
 
 		/** Container for the command input area */
@@ -197,6 +200,13 @@ export class ConsoleHandler {
 		this.renderer.root.add(this.splitBox);
 
 		this.renderer.start();
+
+		if (overwriteConsole) {
+			console.error = this.error;
+			console.debug = this.debug;
+			console.info = this.info;
+			console.warn = this.warn;
+		}
 	}
 
 	/**

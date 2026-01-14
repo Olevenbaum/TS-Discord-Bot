@@ -1,5 +1,5 @@
 // External libraries imports
-import { type BoxOptions, BoxRenderable, type RenderContext, RGBA } from "@opentui/core";
+import { type BoxOptions, BoxRenderable, Renderable, type RenderContext, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 
 /**
@@ -17,18 +17,22 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 
 	/**
 	 * Creates a new VerticalSplitBoxRenderable instance for arranging child elements vertically.
-	 * @param ctx - The CLI renderer context used for rendering the component.
+	 * @param parent - The parent this renderable was added to or the base CLI renderer.
 	 * @param options - Options to customize the split box appearance and behavior.
 	 * @param children - Initial child BoxRenderable elements to add to the split box.
 	 * @param commonOptions - Styling options to apply to all child elements.
 	 */
 	constructor(
-		ctx: RenderContext,
+		parent: Renderable | RenderContext,
 		options?: BoxOptions,
 		children: BoxRenderable[] = [],
 		commonOptions: Omit<BoxOptions, "position" | "visible" | "width" | "zIndex"> = {},
 	) {
-		super(ctx, { ...options, flexDirection: "column" });
+		super(parent instanceof Renderable ? parent.ctx : parent, { ...options, flexDirection: "column" });
+
+		if (parent instanceof Renderable) {
+			this.parent = parent;
+		}
 
 		this.children = children;
 		this.commonOptions = commonOptions;

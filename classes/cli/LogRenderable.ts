@@ -10,6 +10,7 @@ import {
 	brightRed,
 	green,
 	red,
+	Renderable,
 	type RenderContext,
 	StyledText,
 	type TextOptions,
@@ -38,14 +39,19 @@ export class LogRenderable extends TextRenderable {
 
 	/**
 	 * Creates a new LogRenderable instance for displaying timestamped console logs.
-	 * @param ctx - The CLI renderer context used for rendering the log component.
+	 * @param parent - The parent this renderable was added to or the base CLI renderer.
 	 * @param includeDate - Whether to include the date in log timestamps (default: `false`).
 	 * @param options - Additional options to customize the text rendering.
+	 * @see {@linkcode Renderable}
 	 * @see {@linkcode RenderContext}
 	 * @see {@linkcode TextOptions}
 	 */
-	constructor(ctx: RenderContext, includeDate: boolean = false, options: TextOptions = {}) {
-		super(ctx, options);
+	constructor(parent: Renderable | RenderContext, includeDate: boolean = false, options: TextOptions = {}) {
+		super(parent instanceof Renderable ? parent.ctx : parent, options);
+
+		if (parent instanceof Renderable) {
+			this.parent = parent;
+		}
 
 		this.includeDate = includeDate;
 	}
@@ -93,7 +99,7 @@ export class LogRenderable extends TextRenderable {
 				white(timestamp),
 				...messages
 					.map((message) => {
-						const splitMessages: string[] = message.toString().split("\n");
+						const splitMessages = String(message.toString()).split("\n");
 
 						switch (type) {
 							case LogType.DEBUG:
@@ -116,7 +122,7 @@ export class LogRenderable extends TextRenderable {
 					})
 					.flat()
 					.map((message, index, splitMessages) =>
-						splitMessages.length > 1 && index < splitMessages.length - 1
+						index < splitMessages.length - 1
 							? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
 							: [message, white("\n")],
 					)
