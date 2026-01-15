@@ -26,7 +26,7 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 		parent: Renderable | RenderContext,
 		options?: BoxOptions,
 		children: BoxRenderable[] = [],
-		commonOptions: Omit<BoxOptions, "position" | "visible" | "width" | "zIndex"> = {},
+		commonOptions: Exclude<BoxOptions, "position" | "visible" | "width" | "zIndex"> = {},
 	) {
 		super(parent instanceof Renderable ? parent.ctx : parent, { ...options, flexDirection: "column" });
 

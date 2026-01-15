@@ -159,6 +159,7 @@ export class ConsoleHandler {
 	 * intern console handler methods {@linkcode debug}, {@linkcode error}, {@linkcode info} and {@linkcode warn}.
 	 * @param ctx - The CLI renderer instance to use for the interface.
 	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
+	 * Defaults to `true`
 	 */
 	public initialize(ctx: CliRenderer, overwriteConsole: boolean = true): void {
 		this.renderer = ctx;

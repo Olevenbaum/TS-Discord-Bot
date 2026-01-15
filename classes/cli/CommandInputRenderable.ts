@@ -11,6 +11,7 @@ import {
 	InputRenderable,
 	InputRenderableEvents,
 	KeyEvent,
+	MouseEvent,
 	Renderable,
 	type RenderContext,
 	type SelectOption,
@@ -134,8 +135,8 @@ export class CommandInputRenderable extends BoxRenderable {
 				minWidth: 40,
 				width: "40%",
 			},
-		).on(SelectRenderableEvents.ITEM_SELECTED, (selection) => {
-			this.commandInput!.insertText(selection);
+		).on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
+			this.commandInput.insertText((option.value ?? option.name).substring(this.commandInput.value.length));
 		});
 
 		this.autocompleteInput.options = this._commands
@@ -169,11 +170,25 @@ export class CommandInputRenderable extends BoxRenderable {
 
 		this.updateCommands();
 
+		this.onMouseScroll = (event: MouseEvent) => {
+			if (event.scroll!.direction === "up") {
+				this.autocompleteInput.moveUp();
+			} else if (event.scroll!.direction === "down") {
+				this.autocompleteInput.moveDown();
+			}
+		};
+
 		this.onKeyDown = (key: KeyEvent) => {
-			if (key.name === "up") {
-				this.autocompleteInput.selectedIndex += 1;
+			if (key.name === "tab") {
+				this.autocompleteInput.selectCurrent();
+			} else if (key.name === "up") {
+				this.autocompleteInput.moveUp();
 			} else if (key.name === "down") {
-				this.autocompleteInput.selectedIndex -= 1;
+				this.autocompleteInput.moveDown();
+			}
+
+			if (this.parent instanceof ConsoleHandler) {
+				this.parent.debug(key.name);
 			}
 		};
 	}
@@ -188,7 +203,7 @@ export class CommandInputRenderable extends BoxRenderable {
 	}
 
 	/**
-	 * Processes and executes a console command entered by the user. Parses the input, validates parameters, and ´
+	 * Processes and executes a console command entered by the user. Parses the input, validates parameters, and
 	 * invokes the appropriate command handler.
 	 * @param input - The raw command string entered by the user.
 	 */
@@ -199,6 +214,10 @@ export class CommandInputRenderable extends BoxRenderable {
 			const [command, parameters] = transformedInput;
 			command!.execute(parameters ? parameters : []);
 		} else {
+			/**
+			 * Command that was interacted with
+			 * @see {@linkcode ConsoleCommand}
+			 */
 			const command = transformedInput;
 			command.execute();
 		}

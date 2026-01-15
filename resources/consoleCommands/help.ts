@@ -18,7 +18,7 @@ const consoleCommand: ConsoleCommand = {
 		type: "string",
 	},
 
-	async execute(_, ...parameters: [string] | []) {
+	execute(_, ...parameters: [string] | []) {
 		if (parameters.length === 0) {
 			notify(
 				`Available commands:\n${cli.commands
