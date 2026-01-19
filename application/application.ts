@@ -37,14 +37,18 @@ export const database: Sequelize | null = configuration.database ? new Sequelize
 
 /**
  * Starts the Discord bot and handles login as well as starting the CLI.
- * @param botIndex Index of the bot to use when multiple bots are configured. Defaults to `0`
+ * @param botIndex - Index of the bot to use when multiple bots are configured. Defaults to `0`
+ * @param debugging - Whether to run in debugging mode. The CLI is disabled during debugging mode. Defaults to `false`.
  */
-export default async function main(botIndex?: number): Promise<void>;
+export default async function main(botIndex?: number, debugging?: boolean ): Promise<void>;
 
-export default async function main(botIndex: number = 0): Promise<void> {
+export default async function main(
+	botIndex: number = 0,
+	debugging: boolean = false,
+): Promise<void> {
+	cli.initialize(await createCliRenderer({ openConsoleOnError: false }), debugging);
+
 	notify("Bot is starting...", "INFORMATION");
-
-	cli.initialize(await createCliRenderer({ openConsoleOnError: false }));
 
 	await updateFiles(["eventTypes"]);
 

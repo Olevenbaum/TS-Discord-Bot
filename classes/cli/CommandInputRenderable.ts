@@ -13,6 +13,7 @@ import {
 	KeyEvent,
 	MouseEvent,
 	Renderable,
+	RenderableEvents,
 	type RenderContext,
 	type SelectOption,
 	SelectRenderable,
@@ -101,7 +102,7 @@ export class CommandInputRenderable extends BoxRenderable {
 						}
 					}
 				} else {
-					this._commands.forEach((command) => {
+					this.commands.forEach((command) => {
 						if (command.name.startsWith(input.toUpperCase())) {
 							options.push({
 								name: command.name,
@@ -138,6 +139,8 @@ export class CommandInputRenderable extends BoxRenderable {
 		).on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
 			this.commandInput.insertText((option.value ?? option.name).substring(this.commandInput.value.length));
 		});
+
+		this.on(RenderableEvents.FOCUSED, () => this.commandInput.focus());
 
 		this.autocompleteInput.options = this._commands
 			.map((command) => {
@@ -372,11 +375,11 @@ export class CommandInputRenderable extends BoxRenderable {
 								parameters.slice(parameterData.length - 1),
 								singleparameterData as ConsoleCommandParameter,
 							),
-				  )
+					)
 				: this.testParameter(
 						parameters.slice(parameterData.length - 1),
 						parameterData[parameterData.length - 1] as ConsoleCommandParameter,
-				  );
+					);
 		}
 
 		if (parameters.length > 1) {

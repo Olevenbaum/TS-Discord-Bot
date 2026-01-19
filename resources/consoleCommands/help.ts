@@ -18,7 +18,7 @@ const consoleCommand: ConsoleCommand = {
 		type: "string",
 	},
 
-	execute(_, ...parameters: [string] | []) {
+	execute(...parameters: [string] | []) {
 		if (parameters.length === 0) {
 			notify(
 				`Available commands:\n${cli.commands
@@ -42,7 +42,7 @@ const consoleCommand: ConsoleCommand = {
 										.map((parameter) =>
 											Array.isArray(parameter)
 												? "One of the following:\n" +
-												  parameter
+													parameter
 														.map(
 															(singleParameter) =>
 																`  - ${singleParameter.required ? "[REQUIRED]" : ""} ${
@@ -54,12 +54,12 @@ const consoleCommand: ConsoleCommand = {
 														.join("\n")
 												: `- ${parameter.required ? "[REQUIRED]" : ""} ${parameter.name} (${
 														parameter.type
-												  }): ${parameter.description}`,
+													}): ${parameter.description}`,
 										)
 										.join("\n")
 								: `- ${command.parameters.required ? "[REQUIRED]" : ""} ${command.parameters.name} (${
 										command.parameters.type
-								  }): ${command.parameters.description}`
+									}): ${command.parameters.description}`
 							: "None"
 					}`,
 					"INFORMATION",

@@ -123,11 +123,11 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 	 * positions in either direction. If no child is currently focused, focuses the first child.
 	 * @param x - The number of positions to move focus by, or the direction string. Defaults to `1`.
 	 * @param direction - The direction to move focus (`"up"` or `"down"`). Defaults to `"down"`.
-	 * @returns The newly focused child element.
+	 * @returns The newly focused child element if existent.
 	 */
-	switchFocus(direction?: "up" | "down"): BoxRenderable;
-	switchFocus(x?: number, direction?: "up" | "down"): BoxRenderable;
-	switchFocus(x: number | "up" | "down" = 1, direction: "up" | "down" = "down"): BoxRenderable {
+	switchFocus(direction?: "up" | "down"): BoxRenderable | undefined;
+	switchFocus(x?: number, direction?: "up" | "down"): BoxRenderable | undefined;
+	switchFocus(x: number | "up" | "down" = 1, direction: "up" | "down" = "down"): BoxRenderable | undefined {
 		/** Index of the currently focused child */
 		const focusedIndex = this.children.findIndex((child) => child.focused);
 
@@ -137,14 +137,14 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 		}
 
 		if (focusedIndex !== -1) {
-			this.children[focusedIndex]!.blur();
-			this.children[(focusedIndex + (direction === "up" ? -x : x)) % this.children.length]!.focus();
+			this.children[focusedIndex]?.blur();
+			this.children[(focusedIndex + (direction === "up" ? -x : x)) % this.children.length]?.focus();
 
 			return this.children[(focusedIndex + (direction === "up" ? -x : x)) % this.children.length]!;
 		}
 
-		this.children[0]!.focus();
+		this.children[0]?.focus();
 
-		return this.children[0]!;
+		return this.children[0];
 	}
 }

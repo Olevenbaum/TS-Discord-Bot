@@ -35,6 +35,11 @@ export class ConsoleHandler {
 	protected commandInput?: CommandInputRenderable;
 
 	/**
+	 * Whether the whole application is running in debugging mode. In that case, the CLI is disabled.
+	 */
+	protected debuggingMode: boolean = false;
+
+	/**
 	 * The default focus color used when "auto" is selected but the bot's accent color is unavailable.
 	 * @see {@linkcode ColorInput}
 	 */
@@ -126,7 +131,11 @@ export class ConsoleHandler {
 	 * @param messages - The messages to log.
 	 */
 	public debug(...messages: any[]): void {
-		this.logs?.debug(...messages);
+		if (this.debuggingMode) {
+			console.debug(...messages);
+		} else {
+			this.logs?.debug(...messages);
+		}
 	}
 
 	/**
@@ -141,7 +150,11 @@ export class ConsoleHandler {
 	 * @param messages - The error messages to log.
 	 */
 	public error(...messages: any[]): void {
-		this.logs?.error(...messages);
+		if (this.debuggingMode) {
+			console.error(...messages);
+		} else {
+			this.logs?.error(...messages);
+		}
 	}
 
 	/**
@@ -149,7 +162,11 @@ export class ConsoleHandler {
 	 * @param messages - The informational messages to log.
 	 */
 	public info(...messages: any[]): void {
-		this.logs?.info(...messages);
+		if (this.debuggingMode) {
+			console.info(...messages);
+		} else {
+			this.logs?.info(...messages);
+		}
 	}
 
 	/**
@@ -158,55 +175,66 @@ export class ConsoleHandler {
 	 * {@linkcode console.error}, {@linkcode console.info} and {@linkcode console.warn} can be replaced by matching
 	 * intern console handler methods {@linkcode debug}, {@linkcode error}, {@linkcode info} and {@linkcode warn}.
 	 * @param ctx - The CLI renderer instance to use for the interface.
+	 * @param debugging - Whether the application runs in debugging mode.
 	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
 	 * Defaults to `true`
 	 */
-	public initialize(ctx: CliRenderer, overwriteConsole: boolean = true): void {
-		this.renderer = ctx;
+	public initialize(
+		ctx: CliRenderer,
+		debugging: boolean = !process.stdin.isTTY,
+		overwriteConsole: boolean = true,
+	): void {
+		if (!this.debuggingMode) {
+			this.renderer = ctx;
+			this.debuggingMode = debugging;
 
-		/** Container for the command input area */
-		const commandBox = new CommandInputRenderable(this.renderer, {
-			flexDirection: "row",
-			height: "20%",
-			minHeight: 4,
-			title: "Commands",
-		});
+			/** Container for the command input area */
+			const commandBox = new CommandInputRenderable(this.renderer, {
+				flexDirection: "row",
+				height: "20%",
+				minHeight: 4,
+				title: "Commands",
+			});
 
-		/** Container for the log output area */
-		const logBox = new BoxRenderable(this.renderer, {
-			height: "80%",
-			title: "Logs",
-		});
+			/** Container for the log output area */
+			const logBox = new BoxRenderable(this.renderer, {
+				height: "80%",
+				title: "Logs",
+			});
 
-		this.logs = new LogRenderable(this.renderer, this.includeDate, {});
+			this.logs = new LogRenderable(this.renderer, this.includeDate, {});
 
-		logBox.add(this.logs);
+			logBox.add(this.logs);
 
-		this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [commandBox, logBox], {
-			border: true,
-			borderStyle: "rounded",
-			focusedBorderColor: RGBA.fromHex(
-				this._focusColor === "auto" ? color(this.defaultFocusColor, "HEX")! : (this._focusColor as string),
-			),
-			onMouseOut() {
-				this.borderColor = this._defaultOptions.borderColor;
-				this.getChildren().every((child) => child.blur());
-			},
-			onMouseOver() {
-				this.borderColor = this.focusedBorderColor;
-				this.getChildren().every((child) => child.focus());
-			},
-		});
+			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [commandBox, logBox], {
+				border: true,
+				borderStyle: "rounded",
+				focusedBorderColor: RGBA.fromHex(
+					this._focusColor === "auto" ? color(this.defaultFocusColor, "HEX")! : (this._focusColor as string),
+				),
+				onMouseOut() {
+					this.borderColor = this._defaultOptions.borderColor;
+					this.blur();
+				},
+				onMouseOver() {
+					this.borderColor = this.focusedBorderColor;
+					this.focus();
+				},
+			});
 
-		this.renderer.root.add(this.splitBox);
+			this.renderer.root.add(this.splitBox);
 
-		this.renderer.start();
+			this.splitBox.switchFocus();
 
-		if (overwriteConsole) {
-			console.error = this.error;
-			console.debug = this.debug;
-			console.info = this.info;
-			console.warn = this.warn;
+			this.renderer.start();
+
+			if (overwriteConsole) {
+				console.error = this.error;
+				console.debug = this.debug;
+				console.info = this.info;
+				console.warn = this.warn;
+			}
+		} else {
 		}
 	}
 
@@ -223,7 +251,11 @@ export class ConsoleHandler {
 	 * @param messages - The success messages to log.
 	 */
 	public success(...messages: any[]): void {
-		this.logs?.success(...messages);
+		if (this.debuggingMode) {
+			console.log(...messages);
+		} else {
+			this.logs?.success(...messages);
+		}
 	}
 
 	/**
@@ -239,6 +271,10 @@ export class ConsoleHandler {
 	 * @param messages - The warning messages to log.
 	 */
 	public warn(...messages: any[]): void {
-		this.logs?.warn(...messages);
+		if (this.debuggingMode) {
+			console.warn(...messages);
+		} else {
+			this.logs?.warn(...messages);
+		}
 	}
 }
