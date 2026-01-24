@@ -8,6 +8,7 @@ import { client } from "#application";
 import { BoxRenderable, CliRenderer, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 import { Colors } from "discord.js";
+import { createInterface } from "readline";
 import type { Path } from "typescript";
 
 // Internal class & type imports
@@ -26,7 +27,7 @@ export class ConsoleHandler {
 	 * color.
 	 * @see {@linkcode ColorInput}
 	 */
-	protected _focusColor: ColorInput | "auto";
+	protected _focusColor: ColorInput | "auto" = "auto";
 
 	/**
 	 * The command input component that handles user command entry and execution.
@@ -46,7 +47,7 @@ export class ConsoleHandler {
 	protected defaultFocusColor: ColorInput = Colors.LuminousVividPink;
 
 	/** Whether log messages should include the current date in their timestamps. */
-	protected includeDate: boolean;
+	protected includeDate: boolean = false;
 
 	/**
 	 * The log display area where system messages and command outputs are shown.
@@ -78,6 +79,7 @@ export class ConsoleHandler {
 	}
 
 	/**
+	 * Console commands of the command handler
 	 * @see {@linkcode ConsoleCommand}
 	 */
 	public get commands(): ConsoleCommand[] {
@@ -177,19 +179,19 @@ export class ConsoleHandler {
 	 * @param ctx - The CLI renderer instance to use for the interface.
 	 * @param debugging - Whether the application runs in debugging mode.
 	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
-	 * Defaults to `true`
+	 * Defaults to `true`. Ignored if {@linkcode debuggingMode} is `true`.
 	 */
 	public initialize(
 		ctx: CliRenderer,
 		debugging: boolean = !process.stdin.isTTY,
 		overwriteConsole: boolean = true,
 	): void {
+		this.debuggingMode = debugging;
+
 		if (!this.debuggingMode) {
 			this.renderer = ctx;
-			this.debuggingMode = debugging;
 
-			/** Container for the command input area */
-			const commandBox = new CommandInputRenderable(this.renderer, {
+			this.commandInput = new CommandInputRenderable(this.renderer, {
 				flexDirection: "row",
 				height: "20%",
 				minHeight: 4,
@@ -206,7 +208,7 @@ export class ConsoleHandler {
 
 			logBox.add(this.logs);
 
-			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [commandBox, logBox], {
+			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandInput, logBox], {
 				border: true,
 				borderStyle: "rounded",
 				focusedBorderColor: RGBA.fromHex(
@@ -235,6 +237,42 @@ export class ConsoleHandler {
 				console.warn = this.warn;
 			}
 		} else {
+			this.commandInput = new CommandInputRenderable();
+
+			this.updateCommands();
+
+			const rl = createInterface({
+				completer: (input: string) => {
+					const options: string[] = [];
+
+					this.commands.forEach((command) => {
+						if (command.name.startsWith(input.toUpperCase())) {
+							options.push(command.name);
+						}
+
+						if (command.aliases) {
+							command.aliases.forEach((alias) => {
+								if (alias.startsWith(input.toUpperCase())) {
+									options.push(alias);
+								}
+							});
+						}
+					});
+
+					return [options, input];
+				},
+				input: process.stdin,
+				output: process.stdout,
+				prompt: "Enter command",
+				removeHistoryDuplicates: true,
+				terminal: true,
+			});
+
+			rl.once("close", () => process.exit());
+
+			rl.on("line", (input: string) => this.commandInput?.handleCommand(input));
+
+			rl.prompt();
 		}
 	}
 

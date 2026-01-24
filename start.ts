@@ -5,7 +5,7 @@ import main from "#application";
 const botIndex = 0;
 
 /** Whether to run the application in debugging mode */
-const debugging = true
+const debugging = false;
 
 // Start bot
 main(botIndex, debugging);

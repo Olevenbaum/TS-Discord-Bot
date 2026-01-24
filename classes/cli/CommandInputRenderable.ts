@@ -45,13 +45,13 @@ export class CommandInputRenderable extends BoxRenderable {
 	 * aliases as the user types.
 	 * @see {@linkcode SelectRenderable}
 	 */
-	protected autocompleteInput: SelectRenderable;
+	protected autocompleteInput?: SelectRenderable;
 
 	/**
 	 * The input field where users enter console commands. Handles text input and command submission via Enter key.
 	 * @see {@linkcode InputRenderable}
 	 */
-	protected commandInput: InputRenderable;
+	protected commandInput?: InputRenderable;
 
 	/**
 	 * Creates a new command input renderable with the specified rendering context and options. Initializes the input
@@ -62,138 +62,146 @@ export class CommandInputRenderable extends BoxRenderable {
 	 * @see {@linkcode Renderable}
 	 * @see {@linkcode RenderContext}
 	 */
-	constructor(parent: Renderable | RenderContext, options: BoxOptions = {}) {
-		super(parent instanceof Renderable ? parent.ctx : parent, options);
+	constructor(parent: Renderable | RenderContext, options?: BoxOptions);
 
-		if (parent instanceof Renderable) {
-			this.parent = parent;
-		}
+	/**
+	 * Creates a new command input renderable without adding the CLI renderer. This mode can be used for debugging mode
+	 * to use all intern functions to handle commands with a more simple console input.
+	 */
+	constructor();
 
-		this.commandInput = new InputRenderable(
-			this.parent instanceof Renderable ? this.parent.ctx : (parent as RenderContext),
-			{
-				placeholder: "Enter command...",
-				width: "60%",
-			},
-		)
-			.on(InputRenderableEvents.ENTER, (input: string) => {
-				try {
-					this.handleCommand(input);
-					this.commandInput!.value = "";
-				} catch (error) {
-					if (this.parent instanceof ConsoleHandler) {
-						this.parent.error(error);
-					}
-				}
-			})
-			.on(InputRenderableEvents.INPUT, (input: string) => {
-				/**
-				 * Options the user might choose from
-				 * @see {@linkcode SelectOption}
-				 */
-				const options: SelectOption[] = [];
+	constructor(x?: Renderable | RenderContext, options: BoxOptions = {}) {
+		if (x) {
+			super(x instanceof Renderable ? x.ctx : x, options);
 
-				if (input.includes(" ")) {
-					const transformedInput = this.handleInput(input);
+			if (x instanceof Renderable) {
+				this.parent = x;
+			}
 
-					if (Array.isArray(transformedInput)) {
-						const [command] = transformedInput;
-						if (command.parameters) {
+			this.commandInput = new InputRenderable(
+				this.parent instanceof Renderable ? this.parent.ctx : (x as RenderContext),
+				{
+					placeholder: "Enter command...",
+					width: "60%",
+				},
+			)
+				.on(InputRenderableEvents.ENTER, (input: string) => {
+					try {
+						this.handleCommand(input);
+						this.commandInput!.value = "";
+					} catch (error) {
+						if (this.parent instanceof ConsoleHandler) {
+							this.parent.error(error);
 						}
 					}
-				} else {
-					this.commands.forEach((command) => {
-						if (command.name.startsWith(input.toUpperCase())) {
-							options.push({
-								name: command.name,
-								description: command.description,
-							});
+				})
+				.on(InputRenderableEvents.INPUT, (input: string) => {
+					/**
+					 * Options the user might choose from
+					 * @see {@linkcode SelectOption}
+					 */
+					const options: SelectOption[] = [];
+
+					if (input.includes(" ")) {
+						const transformedInput = this.handleInput(input);
+
+						if (Array.isArray(transformedInput)) {
+							const [command] = transformedInput;
+							if (command.parameters) {
+							}
 						}
+					} else {
+						this.commands.forEach((command) => {
+							if (command.name.startsWith(input.toUpperCase())) {
+								options.push({
+									name: command.name,
+									description: command.description,
+								});
+							}
 
-						if (command.aliases) {
-							command.aliases.forEach((alias) => {
-								if (alias.startsWith(input.toUpperCase())) {
-									options.push({
-										name: alias,
-										description: command.description,
-									});
-								}
-							});
-						}
-					});
-				}
+							if (command.aliases) {
+								command.aliases.forEach((alias) => {
+									if (alias.startsWith(input.toUpperCase())) {
+										options.push({
+											name: alias,
+											description: command.description,
+										});
+									}
+								});
+							}
+						});
+					}
 
-				this.autocompleteInput.options = options;
-			});
-
-		this.autocompleteInput = new SelectRenderable(
-			this.parent instanceof Renderable ? this.parent.ctx : (parent as RenderContext),
-			{
-				keyBindings: [
-					{ name: "up", action: "move-up" },
-					{ name: "down", action: "move-down" },
-				],
-				minWidth: 40,
-				width: "40%",
-			},
-		).on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
-			this.commandInput.insertText((option.value ?? option.name).substring(this.commandInput.value.length));
-		});
-
-		this.on(RenderableEvents.FOCUSED, () => this.commandInput.focus());
-
-		this.autocompleteInput.options = this._commands
-			.map((command) => {
-				/**
-				 * Options of the autocomplete input based on every console command
-				 * @see {@linkcode SelectOption}
-				 */
-				const options: SelectOption[] = [];
-
-				options.push({
-					name: command.name,
-					description: command.description,
+					this.autocompleteInput!.options = options;
 				});
 
-				if (command.aliases) {
-					command.aliases.forEach((alias) => {
-						options.push({
-							name: alias,
-							description: command.description,
-						});
+			this.autocompleteInput = new SelectRenderable(
+				this.parent instanceof Renderable ? this.parent.ctx : (x as RenderContext),
+				{
+					keyBindings: [
+						{ name: "up", action: "move-up" },
+						{ name: "down", action: "move-down" },
+					],
+					minWidth: 40,
+					width: "40%",
+				},
+			).on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
+				this.commandInput!.insertText((option.value ?? option.name).substring(this.commandInput!.value.length));
+			});
+
+			this.on(RenderableEvents.FOCUSED, () => this.commandInput!.focus());
+
+			this.autocompleteInput.options = this._commands
+				.map((command) => {
+					/**
+					 * Options of the autocomplete input based on every console command
+					 * @see {@linkcode SelectOption}
+					 */
+					const options: SelectOption[] = [];
+
+					options.push({
+						name: command.name,
+						description: command.description,
 					});
+
+					if (command.aliases) {
+						command.aliases.forEach((alias) => {
+							options.push({
+								name: alias,
+								description: command.description,
+							});
+						});
+					}
+
+					return options;
+				})
+				.flat();
+
+			this.add(this.commandInput);
+			this.add(this.autocompleteInput);
+
+			this.onMouseScroll = (event: MouseEvent) => {
+				if (event.scroll!.direction === "up") {
+					this.autocompleteInput!.moveUp();
+				} else if (event.scroll!.direction === "down") {
+					this.autocompleteInput!.moveDown();
+				}
+			};
+
+			this.onKeyDown = (key: KeyEvent) => {
+				if (key.name === "tab") {
+					this.autocompleteInput!.selectCurrent();
+				} else if (key.name === "up") {
+					this.autocompleteInput!.moveUp();
+				} else if (key.name === "down") {
+					this.autocompleteInput!.moveDown();
 				}
 
-				return options;
-			})
-			.flat();
-
-		this.add(this.commandInput);
-		this.add(this.autocompleteInput);
-
-		this.updateCommands();
-
-		this.onMouseScroll = (event: MouseEvent) => {
-			if (event.scroll!.direction === "up") {
-				this.autocompleteInput.moveUp();
-			} else if (event.scroll!.direction === "down") {
-				this.autocompleteInput.moveDown();
-			}
-		};
-
-		this.onKeyDown = (key: KeyEvent) => {
-			if (key.name === "tab") {
-				this.autocompleteInput.selectCurrent();
-			} else if (key.name === "up") {
-				this.autocompleteInput.moveUp();
-			} else if (key.name === "down") {
-				this.autocompleteInput.moveDown();
-			}
-
-			if (this.parent instanceof ConsoleHandler) {
-				this.parent.debug(key.name);
-			}
-		};
+				if (this.parent instanceof ConsoleHandler) {
+					this.parent.debug(key.name);
+				}
+			};
+		}
 	}
 
 	/**
@@ -210,12 +218,12 @@ export class CommandInputRenderable extends BoxRenderable {
 	 * invokes the appropriate command handler.
 	 * @param input - The raw command string entered by the user.
 	 */
-	protected handleCommand(input: string): void {
+	public handleCommand(input: string): void {
 		const transformedInput = this.handleInput(input) || [];
 
 		if (Array.isArray(transformedInput)) {
 			const [command, parameters] = transformedInput;
-			command!.execute(parameters ? parameters : []);
+			command?.execute(parameters ? parameters : []);
 		} else {
 			/**
 			 * Command that was interacted with
@@ -234,7 +242,7 @@ export class CommandInputRenderable extends BoxRenderable {
 	 * @see {@linkcode ConsoleCommand}
 	 * @see {@linkcode NestedArray}
 	 */
-	protected handleInput(
+	public handleInput(
 		input: string,
 	): ConsoleCommand | [ConsoleCommand, NestedArray<string | number | boolean>?] | void {
 		const [commandName, parameters] = this.transformInput(input);
