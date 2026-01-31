@@ -158,10 +158,8 @@ export class ConsoleHandler {
 			/** Current timestamp to lead message */
 			const timestamp = getTime(!this.includeDate);
 
-			messages = messages.map((message, index) =>
-				typeof message === "string" && index < messages.length - 1
-					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
-					: message,
+			messages = messages.map((message) =>
+				typeof message === "string" ? message.replaceAll("\n", `\n\x1b[30m[${timestamp}] \x1b[0m`) : message,
 			);
 
 			clearLine(process.stdout, 0);
@@ -195,8 +193,11 @@ export class ConsoleHandler {
 			const timestamp = getTime(!this.includeDate);
 
 			messages = messages.map((message, index) =>
-				typeof message === "string" && index < messages.length - 1
-					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+				typeof message === "string"
+					? message.replaceAll(
+							"\n",
+							`\n\x1b[30m[${timestamp}] \x1b[${index < messages.length - 1 ? "0" : "31"}m`,
+						)
 					: message,
 			);
 
@@ -223,8 +224,11 @@ export class ConsoleHandler {
 			const timestamp = getTime(!this.includeDate);
 
 			messages = messages.map((message, index) =>
-				typeof message === "string" && index < messages.length - 1
-					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+				typeof message === "string"
+					? message.replaceAll(
+							"\n",
+							`\n\x1b[30m[${timestamp}] \x1b[${index < messages.length - 1 ? "0" : "34"}m`,
+						)
 					: message,
 			);
 
@@ -364,13 +368,11 @@ export class ConsoleHandler {
 				warn: console.warn,
 			};
 
-			console.error = this.error;
-			console.debug = this.debug;
-			console.info = this.info;
-			console.warn = this.warn;
+			console.error = this.error.bind(this);
+			console.debug = this.debug.bind(this);
+			console.info = this.info.bind(this);
+			console.warn = this.warn.bind(this);
 		}
-
-		console.debug(this.consoleMethods);
 	}
 
 	/**
@@ -391,8 +393,11 @@ export class ConsoleHandler {
 			const timestamp = getTime(!this.includeDate);
 
 			messages = messages.map((message, index) =>
-				typeof message === "string" && index < messages.length - 1
-					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+				typeof message === "string"
+					? message.replaceAll(
+							"\n",
+							`\n\x1b[30m[${timestamp}] \x1b[${index < messages.length - 1 ? "0" : "32"}m`,
+						)
 					: message,
 			);
 
@@ -400,9 +405,9 @@ export class ConsoleHandler {
 			cursorTo(process.stdout, 0);
 
 			if (this.consoleMethods) {
-				this.consoleMethods.log(`[${timestamp}]\x1b[32m`, ...messages, "\x1b[0m");
+				this.consoleMethods.info(`[${timestamp}]\x1b[32m`, ...messages, "\x1b[0m");
 			} else {
-				console.log(`[${timestamp}]\x1b[32m`, ...messages, "\x1b[0m");
+				console.info(`[${timestamp}]\x1b[32m`, ...messages, "\x1b[0m");
 			}
 		} else {
 			this.logs?.success(...messages);
@@ -427,8 +432,11 @@ export class ConsoleHandler {
 			const timestamp = getTime(!this.includeDate);
 
 			messages = messages.map((message, index) =>
-				typeof message === "string" && index < messages.length - 1
-					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+				typeof message === "string"
+					? message.replaceAll(
+							"\n",
+							`\n\x1b[30m[${timestamp}] \x1b[${index < messages.length - 1 ? "0" : "33"}m`,
+						)
 					: message,
 			);
 

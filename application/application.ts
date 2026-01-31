@@ -1,6 +1,6 @@
 // Class & type imports
 import { ConsoleHandler } from "../classes";
-import { BotData } from "../types";
+import type { BotData } from "../types";
 
 // Data imports
 import { configuration } from "#variables";
