@@ -4,7 +4,7 @@ import type { SavedApplicationCommandType, SavedUserCommand } from "../../../../
 // Data imports
 import { applicationCommands } from "#variables";
 
-// External libraries imports
+// External library imports
 import {
 	ApplicationCommandType,
 	bold,
@@ -21,13 +21,15 @@ import notify from "../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
 /**
- * User command handler
+ * Application command type handler for user context menu commands. Manages command execution for user-based
+ * interactions, owner permission checks, and cooldown validation. Provides user feedback for unhandled commands and
+ * manages error handling for command execution failures.
  * @see {@linkcode SavedApplicationCommandType}
  */
 const userCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.User,
 
-	async execute(interaction: UserContextMenuCommandInteraction) {
+	async execute(interaction: UserContextMenuCommandInteraction): Promise<void> {
 		/**
 		 * User command that was interacted with
 		 * @see {@linkcode SavedUserCommand}

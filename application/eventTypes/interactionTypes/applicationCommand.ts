@@ -4,14 +4,19 @@ import type { SavedApplicationCommandType, SavedInteractionType } from "../../..
 // Data imports
 import { applicationCommandTypes } from "#variables";
 
-// External libraries imports
+// External library imports
 import { ApplicationCommandType, bold, codeBlock, CommandInteraction, InteractionType, MessageFlags } from "discord.js";
 
 // Module imports
 import notify from "../../../modules/notification";
 
 /**
- * Application command interaction handler
+ * Interaction type handler for application commands. Routes interactions to the appropriate application command type
+ * handler based on command type. Provides user feedback for unhandled command types and manages error handling for
+ * command execution failures.
+ * 
+ * More information on application commands can be found on the
+ * {@link https://discord.com/developers/docs/interactions/application-commands | Discord Developer Portal}
  * @see {@linkcode SavedInteractionType}
  */
 const interactionType: SavedInteractionType = {

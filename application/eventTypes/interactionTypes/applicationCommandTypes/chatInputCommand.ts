@@ -4,7 +4,7 @@ import type { SavedApplicationCommandType, SavedChatInputCommand } from "../../.
 // Data imports
 import { applicationCommands } from "#variables";
 
-// External libraries imports
+// External library imports
 import {
 	ApplicationCommandType,
 	chatInputApplicationCommandMention,
@@ -22,13 +22,15 @@ import notify from "../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
 /**
- * Chat input command handler
+ * Application command type handler for chat input commands (slash commands). Manages command execution, owner
+ * permission checks, and cooldown validation. Provides user feedback for unhandled commands and manages error handling
+ * for command execution failures.
  * @see {@linkcode SavedApplicationCommandType}
  */
 const chatInputCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.ChatInput,
 
-	async execute(interaction: ChatInputCommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction): Promise<void> {
 		/**
 		 * Chat input command that was interacted with
 		 * @see {@linkcode SavedChatInputCommand}

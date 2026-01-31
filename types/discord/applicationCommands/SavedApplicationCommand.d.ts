@@ -1,17 +1,15 @@
 // Class & type imports
 import type { CooldownObject } from "../../others";
 
-// External libraries imports
+// External library imports
 import {
 	ApplicationCommandType,
-	ChatInputCommandInteraction,
+	CommandInteraction,
 	ContextMenuCommandBuilder,
-	MessageContextMenuCommandInteraction,
 	SlashCommandBuilder,
 	type SlashCommandOptionsOnlyBuilder,
 	SlashCommandSubcommandGroupBuilder,
 	type SlashCommandSubcommandsOnlyBuilder,
-	UserContextMenuCommandInteraction,
 } from "discord.js";
 
 /**
@@ -59,14 +57,7 @@ export interface SavedApplicationCommand {
 	 * Executes the command logic when a user invokes the application command. Receives the interaction object and
 	 * handles the response, which may include replying, editing, or performing other Discord API actions.
 	 * @param interaction - The Discord interaction object containing command details and context.
-	 * @see {@linkcode ChatInputCommandInteraction}
-	 * @see {@linkcode MessageContextMenuCommandInteraction}
-	 * @see {@linkcode UserContextMenuCommandInteraction}
+	 * @see {@linkcode CommandInteraction}
 	 */
-	execute(
-		interaction:
-			| ChatInputCommandInteraction
-			| MessageContextMenuCommandInteraction
-			| UserContextMenuCommandInteraction,
-	): Promise<void>;
+	execute(interaction: CommandInteraction): Promise<void>;
 }

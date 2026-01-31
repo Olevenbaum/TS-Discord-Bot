@@ -1,5 +1,5 @@
-// Main export
+// Console command export
 export type { ConsoleCommand } from "./ConsoleCommand";
 
-// Subdirectories exports
+// Console command parameters exports
 export type * from "./parameters";

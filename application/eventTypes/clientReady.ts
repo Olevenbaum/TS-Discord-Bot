@@ -4,7 +4,7 @@ import type { SavedEventType } from "../../types";
 // Data imports
 import { cli, client } from "#application";
 
-// External libraries imports
+// External library imports
 import { Events } from "discord.js";
 
 // Module imports
@@ -12,7 +12,9 @@ import notify from "../../modules/notification";
 import { updateFiles } from "../../modules/update";
 
 /**
- * Client ready event handler
+ * Event handler for the Discord {@linkcode Events.ClientReady} event. Triggered once when the bot successfully connects
+ * to Discord. Logs the bot's login status, updates all remaining files that were not loaded before and resets the CLI
+ * focus color.
  * @see {@linkcode SavedEventType}
  */
 const clientReady: SavedEventType = {

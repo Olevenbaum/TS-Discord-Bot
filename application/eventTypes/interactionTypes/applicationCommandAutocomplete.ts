@@ -4,7 +4,7 @@ import type { SavedChatInputCommand, SavedInteractionType } from "../../../types
 // Data imports
 import { applicationCommands, configuration, timestamps } from "#variables";
 
-// External libraries imports
+// External library imports
 import {
 	ApplicationCommandType,
 	AutocompleteInteraction,
@@ -17,13 +17,14 @@ import {
 import notify from "../../../modules/notification";
 
 /**
- * Chat input command autocomplete interaction handler
+ * Interaction type handler for chat input command autocomplete requests. Provides dynamic suggestion options
+ * to users while they type commands. Includes cooldown mechanisms to prevent spam and error notification flooding.
  * @see {@linkcode SavedInteractionType}
  */
 const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
 	type: InteractionType.ApplicationCommandAutocomplete,
 
-	async execute(interaction: AutocompleteInteraction) {
+	async execute(interaction: AutocompleteInteraction): Promise<void> {
 		/**
 		 * Chat input command that the autocomplete was requested for
 		 * @see {@linkcode SavedChatInputCommand}
@@ -35,7 +36,10 @@ const chatInputCommandAutocompleteInteraction: SavedInteractionType = {
 		if (!(chatInputCommand && chatInputCommand.autocomplete)) {
 			interaction.respond([]);
 
-			/** Timestamp of the last notification sent */
+			/**
+			 * Timestamp of the last notification sent
+			 * @see {@linkcode Date}
+			 */
 			const lastNotificationTimestamp = timestamps.get(
 				`${InteractionType[InteractionType.ApplicationCommandAutocomplete]}:${interaction.commandId}`,
 			);

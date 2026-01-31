@@ -4,18 +4,16 @@ import type { SavedApplicationCommand, SavedApplicationCommandType } from "../..
 // Data imports
 import { applicationCommands } from "#variables";
 
-// External libraries imports
+// External library imports
 import {
 	ApplicationCommandType,
 	bold,
-	ChatInputCommandInteraction,
 	codeBlock,
-	MessageContextMenuCommandInteraction,
+	CommandInteraction,
 	MessageFlags,
 	Team,
 	underline,
 	User,
-	UserContextMenuCommandInteraction,
 } from "discord.js";
 
 // Module imports
@@ -23,18 +21,17 @@ import notify from "../../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../../modules/utilities";
 
 /**
- * Template for application command type handler
+ * Template for application command type handlers. Copy this file, implement the
+ * {@linkcode SavedApplicationCommandType.execute} method for your specific
+ * application command type and modify the {@linkcode SavedApplicationCommandType.type} field to specify which
+ * application command type this handler responds to. Handles command routing, permission checks, cooldown validation,
+ * and error management.
  * @see {@linkcode SavedApplicationCommandType}
  */
 const applicationCommandInteraction: SavedApplicationCommandType = {
-	type: ApplicationCommandType.ChatInput | ApplicationCommandType.Message | ApplicationCommandType.User,
+	type: ApplicationCommandType.ChatInput,
 
-	async execute(
-		interaction:
-			| ChatInputCommandInteraction
-			| MessageContextMenuCommandInteraction
-			| UserContextMenuCommandInteraction,
-	) {
+	async execute(interaction: CommandInteraction): Promise<void> {
 		/**
 		 * Application command that was interacted with
 		 * @see {@linkcode SavedApplicationCommand}

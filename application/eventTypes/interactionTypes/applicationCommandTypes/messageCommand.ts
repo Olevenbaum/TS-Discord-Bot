@@ -4,7 +4,7 @@ import type { SavedApplicationCommandType, SavedMessageCommand } from "../../../
 // Data imports
 import { applicationCommands } from "#variables";
 
-// External libraries imports
+// External library imports
 import {
 	ApplicationCommandType,
 	bold,
@@ -21,13 +21,15 @@ import notify from "../../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
 
 /**
- * Message command handler
+ * Application command type handler for message context menu commands. Manages command execution for message-based
+ * interactions, owner permission checks, and cooldown validation. Provides user feedback for unhandled commands and
+ * manages error handling for command execution failures.
  * @see {@linkcode SavedApplicationCommandType}
  */
 const userCommandInteraction: SavedApplicationCommandType = {
 	type: ApplicationCommandType.Message,
 
-	async execute(interaction: MessageContextMenuCommandInteraction) {
+	async execute(interaction: MessageContextMenuCommandInteraction): Promise<void> {
 		/**
 		 * Message application command that was interacted with
 		 * @see {@linkcode SavedMessageCommand}

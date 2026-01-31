@@ -8,13 +8,17 @@ import { client } from "#application";
 import { BoxRenderable, CliRenderer, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 import { Colors } from "discord.js";
-import { createInterface } from "readline";
+import { clearLine, createInterface, cursorTo, Interface } from "readline";
 import type { Path } from "typescript";
 
 // Internal class & type imports
+import { CommandHandler } from "./CommandHandler";
 import { CommandInputRenderable } from "./CommandInputRenderable";
 import { LogRenderable } from "./LogRenderable";
 import { VerticalSplitBoxRenderable } from "./VerticalSplitBoxRenderable";
+
+// Module imports
+import getTime from "../../modules/time";
 
 /**
  * Manages the console-based user interface for the Discord bot, providing a terminal-like experience for executing
@@ -30,15 +34,21 @@ export class ConsoleHandler {
 	protected _focusColor: ColorInput | "auto" = "auto";
 
 	/**
-	 * The command input component that handles user command entry and execution.
+	 * The command handler that handles user command entry and execution.
+	 * @see {@linkcode CommandHandler}
 	 * @see {@linkcode CommandInputRenderable}
 	 */
-	protected commandInput?: CommandInputRenderable;
+	protected commandHandler?: CommandHandler | CommandInputRenderable;
+
+	/**
+	 * @see {@linkcode Console}
+	 */
+	protected consoleMethods?: Pick<Console, "debug" | "error" | "info" | "log" | "warn">;
 
 	/**
 	 * Whether the whole application is running in debugging mode. In that case, the CLI is disabled.
 	 */
-	protected debuggingMode: boolean = false;
+	protected _debuggingMode: boolean = false;
 
 	/**
 	 * The default focus color used when "auto" is selected but the bot's accent color is unavailable.
@@ -48,6 +58,12 @@ export class ConsoleHandler {
 
 	/** Whether log messages should include the current date in their timestamps. */
 	protected includeDate: boolean = false;
+
+	/**
+	 * Readline interface handling console input in debugging mode
+	 * @see {@linkcode Interface}
+	 */
+	protected interface?: Interface;
 
 	/**
 	 * The log display area where system messages and command outputs are shown.
@@ -83,7 +99,12 @@ export class ConsoleHandler {
 	 * @see {@linkcode ConsoleCommand}
 	 */
 	public get commands(): ConsoleCommand[] {
-		return this.commandInput!.commands;
+		return this.commandHandler!.commands;
+	}
+
+	/** Whether the CLI runs in debugging mode */
+	public get debuggingMode(): boolean {
+		return this._debuggingMode;
 	}
 
 	/**
@@ -133,8 +154,24 @@ export class ConsoleHandler {
 	 * @param messages - The messages to log.
 	 */
 	public debug(...messages: any[]): void {
-		if (this.debuggingMode) {
-			console.debug(...messages);
+		if (this._debuggingMode) {
+			/** Current timestamp to lead message */
+			const timestamp = getTime(!this.includeDate);
+
+			messages = messages.map((message, index) =>
+				typeof message === "string" && index < messages.length - 1
+					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+					: message,
+			);
+
+			clearLine(process.stdout, 0);
+			cursorTo(process.stdout, 0);
+
+			if (this.consoleMethods) {
+				this.consoleMethods.debug(`[${timestamp}]`, ...messages);
+			} else {
+				console.debug(`[${timestamp}]`, ...messages);
+			}
 		} else {
 			this.logs?.debug(...messages);
 		}
@@ -144,6 +181,7 @@ export class ConsoleHandler {
 	 * Destroys the CLI renderer and cleans up the console interface.
 	 */
 	public destroy(): void {
+		this.interface?.close();
 		this.renderer?.destroy();
 	}
 
@@ -152,8 +190,24 @@ export class ConsoleHandler {
 	 * @param messages - The error messages to log.
 	 */
 	public error(...messages: any[]): void {
-		if (this.debuggingMode) {
-			console.error(...messages);
+		if (this._debuggingMode) {
+			/** Current timestamp to lead message */
+			const timestamp = getTime(!this.includeDate);
+
+			messages = messages.map((message, index) =>
+				typeof message === "string" && index < messages.length - 1
+					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+					: message,
+			);
+
+			clearLine(process.stdout, 0);
+			cursorTo(process.stdout, 0);
+
+			if (this.consoleMethods) {
+				this.consoleMethods.error(`[${timestamp}]\x1b[31m`, ...messages, "\x1b[0m");
+			} else {
+				console.error(`[${timestamp}]\x1b[31m`, ...messages, "\x1b[0m");
+			}
 		} else {
 			this.logs?.error(...messages);
 		}
@@ -164,8 +218,24 @@ export class ConsoleHandler {
 	 * @param messages - The informational messages to log.
 	 */
 	public info(...messages: any[]): void {
-		if (this.debuggingMode) {
-			console.info(...messages);
+		if (this._debuggingMode) {
+			/** Current timestamp to lead message */
+			const timestamp = getTime(!this.includeDate);
+
+			messages = messages.map((message, index) =>
+				typeof message === "string" && index < messages.length - 1
+					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+					: message,
+			);
+
+			clearLine(process.stdout, 0);
+			cursorTo(process.stdout, 0);
+
+			if (this.consoleMethods) {
+				this.consoleMethods.info(`[${timestamp}]\x1b[34m`, ...messages, "\x1b[0m");
+			} else {
+				console.info(`[${timestamp}]\x1b[34m`, ...messages, "\x1b[0m");
+			}
 		} else {
 			this.logs?.info(...messages);
 		}
@@ -173,32 +243,49 @@ export class ConsoleHandler {
 
 	/**
 	 * Initializes the console handler with a CLI renderer. Creates and arranges all UI components including command
-	 * input, log display, and the split layout. If wanted, common console methods , {@linkcode console.debug},
+	 * input, log display, and the split layout. If wanted, common console methods like {@linkcode console.debug},
 	 * {@linkcode console.error}, {@linkcode console.info} and {@linkcode console.warn} can be replaced by matching
 	 * intern console handler methods {@linkcode debug}, {@linkcode error}, {@linkcode info} and {@linkcode warn}.
 	 * @param ctx - The CLI renderer instance to use for the interface.
+	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
+	 * Defaults to `true`.
+	 */
+	public initialize(ctx: CliRenderer, overwriteConsole?: boolean): void;
+
+	/**
+	 * Initializes the console handler with a basic command handler in the console for debugging purposes. If wanted,
+	 * common console methods like {@linkcode console.debug}, {@linkcode console.error}, {@linkcode console.info} and
+	 * {@linkcode console.warn} can be replaced by matching intern console handler methods {@linkcode debug},
+	 * {@linkcode error}, {@linkcode info} and {@linkcode warn}.
 	 * @param debugging - Whether the application runs in debugging mode.
 	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
-	 * Defaults to `true`. Ignored if {@linkcode debuggingMode} is `true`.
+	 * Defaults to `true`.
 	 */
-	public initialize(
-		ctx: CliRenderer,
-		debugging: boolean = !process.stdin.isTTY,
-		overwriteConsole: boolean = true,
-	): void {
-		this.debuggingMode = debugging;
+	public initialize(debugging: true, overwriteConsole?: boolean): void;
 
-		if (!this.debuggingMode) {
+	public initialize(x: CliRenderer | true, overwriteConsole: boolean = true): void {
+		this._debuggingMode = x === true;
+
+		/**
+		 * Overload ctx parameter
+		 * @see {@linkcode CliRenderer}
+		 */
+		const ctx = x instanceof CliRenderer ? x : null;
+
+		if (!this._debuggingMode && ctx) {
 			this.renderer = ctx;
 
-			this.commandInput = new CommandInputRenderable(this.renderer, {
+			this.commandHandler = new CommandInputRenderable(this.renderer, {
 				flexDirection: "row",
 				height: "20%",
 				minHeight: 4,
 				title: "Commands",
 			});
 
-			/** Container for the log output area */
+			/**
+			 * Container for the log output area
+			 * @see {@linkcode BoxRenderable}
+			 */
 			const logBox = new BoxRenderable(this.renderer, {
 				height: "80%",
 				title: "Logs",
@@ -208,7 +295,7 @@ export class ConsoleHandler {
 
 			logBox.add(this.logs);
 
-			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandInput, logBox], {
+			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandHandler, logBox], {
 				border: true,
 				borderStyle: "rounded",
 				focusedBorderColor: RGBA.fromHex(
@@ -229,19 +316,12 @@ export class ConsoleHandler {
 			this.splitBox.switchFocus();
 
 			this.renderer.start();
-
-			if (overwriteConsole) {
-				console.error = this.error;
-				console.debug = this.debug;
-				console.info = this.info;
-				console.warn = this.warn;
-			}
 		} else {
-			this.commandInput = new CommandInputRenderable();
+			this.commandHandler = new CommandHandler();
 
 			this.updateCommands();
 
-			const rl = createInterface({
+			this.interface = createInterface({
 				completer: (input: string) => {
 					const options: string[] = [];
 
@@ -263,17 +343,34 @@ export class ConsoleHandler {
 				},
 				input: process.stdin,
 				output: process.stdout,
-				prompt: "Enter command",
+				prompt: `[${getTime(!this.includeDate)}] \x1b[35mEnter command: \x1b[0m`,
 				removeHistoryDuplicates: true,
 				terminal: true,
 			});
 
-			rl.once("close", () => process.exit());
+			this.interface.once("close", () => process.exit());
 
-			rl.on("line", (input: string) => this.commandInput?.handleCommand(input));
+			this.interface.on("line", (input: string) => (this.commandHandler as CommandHandler).handleCommand(input));
 
-			rl.prompt();
+			this.interface.prompt();
 		}
+
+		if (overwriteConsole) {
+			this.consoleMethods = {
+				debug: console.debug,
+				error: console.error,
+				info: console.info,
+				log: console.log,
+				warn: console.warn,
+			};
+
+			console.error = this.error;
+			console.debug = this.debug;
+			console.info = this.info;
+			console.warn = this.warn;
+		}
+
+		console.debug(this.consoleMethods);
 	}
 
 	/**
@@ -289,8 +386,24 @@ export class ConsoleHandler {
 	 * @param messages - The success messages to log.
 	 */
 	public success(...messages: any[]): void {
-		if (this.debuggingMode) {
-			console.log(...messages);
+		if (this._debuggingMode) {
+			/** Current timestamp to lead message */
+			const timestamp = getTime(!this.includeDate);
+
+			messages = messages.map((message, index) =>
+				typeof message === "string" && index < messages.length - 1
+					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+					: message,
+			);
+
+			clearLine(process.stdout, 0);
+			cursorTo(process.stdout, 0);
+
+			if (this.consoleMethods) {
+				this.consoleMethods.log(`[${timestamp}]\x1b[32m`, ...messages, "\x1b[0m");
+			} else {
+				console.log(`[${timestamp}]\x1b[32m`, ...messages, "\x1b[0m");
+			}
 		} else {
 			this.logs?.success(...messages);
 		}
@@ -301,7 +414,7 @@ export class ConsoleHandler {
 	 * available commands from the filesystem.
 	 */
 	public async updateCommands(): Promise<void> {
-		await this.commandInput?.updateCommands();
+		await this.commandHandler?.updateCommands();
 	}
 
 	/**
@@ -309,8 +422,24 @@ export class ConsoleHandler {
 	 * @param messages - The warning messages to log.
 	 */
 	public warn(...messages: any[]): void {
-		if (this.debuggingMode) {
-			console.warn(...messages);
+		if (this._debuggingMode) {
+			/** Current timestamp to lead message */
+			const timestamp = getTime(!this.includeDate);
+
+			messages = messages.map((message, index) =>
+				typeof message === "string" && index < messages.length - 1
+					? message.replaceAll("\n", `\n\x1b[30m${timestamp}\x1b[0m`.padEnd(timestamp.length + 4, " "))
+					: message,
+			);
+
+			clearLine(process.stdout, 0);
+			cursorTo(process.stdout, 0);
+
+			if (this.consoleMethods) {
+				this.consoleMethods.warn(`[${timestamp}]\x1b[33m`, ...messages, "\x1b[0m");
+			} else {
+				console.warn(`[${timestamp}]\x1b[33m`, ...messages, "\x1b[0m");
+			}
 		} else {
 			this.logs?.warn(...messages);
 		}

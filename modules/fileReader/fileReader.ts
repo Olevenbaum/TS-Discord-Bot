@@ -25,7 +25,11 @@ export default async function readFiles<FileType>(directories: string | string[]
 		directories = [directories];
 	}
 
-	/** Array of tasks, that return promises upon execution */
+	/**
+	 * Array of tasks, that return promises upon execution
+	 * @see {@linkcode FileType}
+	 * @see {@linkcode Task}
+	 */
 	const tasks: Task<FileType | undefined>[] = [];
 
 	for (const directory of directories) {
@@ -49,8 +53,11 @@ export default async function readFiles<FileType>(directories: string | string[]
 					),
 			);
 		} catch (error) {
-			/** Error raised by the file system */
-			const errno = error as NodeJS.ErrnoException;
+			/**
+			 * Error raised by the file system
+			 * @see {@linkcode ErrnoException}
+			 */
+			const errno = error as ErrnoException;
 
 			if (errno && errno.code === "ENOENT") {
 				notify(

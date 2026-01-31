@@ -4,7 +4,7 @@ import type { SavedInteractionType, SavedModal } from "../../../types";
 // Data imports
 import { modals } from "#variables";
 
-// External libraries imports
+// External library imports
 import { bold, codeBlock, InteractionType, ModalSubmitInteraction, MessageFlags, underline } from "discord.js";
 
 // Module imports
@@ -12,7 +12,9 @@ import notify from "../../../modules/notification";
 import { updateCooldown, validateCooldown } from "../../../modules/utilities";
 
 /**
- * Modal submit interaction handler
+ * Interaction type handler for modal submissions. Processes form data from modals and applies cooldown restrictions to
+ * prevent rapid resubmissions. Provides user feedback for unhandled modals and manages error handling for modal
+ * execution failures.
  * @see {@linkcode SavedInteractionType}
  */
 const interactionType: SavedInteractionType = {

@@ -4,17 +4,25 @@ import type { SavedMessageComponentType, SavedInteractionType } from "../../../t
 // Data imports
 import { componentTypes } from "#variables";
 
-// External libraries imports
+// External library imports
 import { InteractionType, MessageComponentInteraction, ComponentType, bold, codeBlock, MessageFlags } from "discord.js";
 
 // Module imports
 import notify from "../../../modules/notification";
 
-/** Message component interaction handler */
+/**
+ * Interaction type handler for message components. Routes interactions to their respective component type handlers and
+ * manages error responses. Provides user feedback for unhandled component types and manages error handling for
+ * component execution failures.
+ * 
+ * More information on message components can be found on the
+ * {@link https://discord.com/developers/docs/components/overview | Discord Developer Portal}.
+ * @see {@linkcode SavedInteractionType}
+ */
 const interactionType: SavedInteractionType = {
 	type: InteractionType.MessageComponent,
 
-	async execute(interaction: MessageComponentInteraction) {
+	async execute(interaction: MessageComponentInteraction): Promise<void> {
 		/**
 		 * Message component type of the message component that was interacted with
 		 * @see {@linkcode SavedMessageComponentType}

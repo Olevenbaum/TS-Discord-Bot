@@ -1,8 +1,8 @@
-// Generic class & type exports
+// Generic console command parameter exports
 export type { ConsoleCommandParameter } from "./ConsoleCommandParameter";
 export type { ConsoleCommandBaseParameter } from "./ConsoleCommandBaseParameter";
 
-// Specific class & type exports
+// Specific console command parameter exports
 export type { ConsoleCommandArrayParameter } from "./ConsoleCommandArrayParameter";
 export type { ConsoleCommandBooleanParameter } from "./ConsoleCommandBooleanParameter";
 export type { ConsoleCommandNumberParameter } from "./ConsoleCommandNumberParameter";

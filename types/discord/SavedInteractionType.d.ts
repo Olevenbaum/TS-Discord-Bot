@@ -1,4 +1,4 @@
-// External libraries imports
+// External library imports
 import { BaseInteraction, InteractionType } from "discord.js";
 
 /**

@@ -34,7 +34,10 @@ export class LogRenderable extends TextRenderable {
 	/** Whether each log message's timestamp includes the current date */
 	protected includeDate: boolean;
 
-	/** Timestamp only including the date (year, month and day of the month) of the last printed log message */
+	/**
+	 * Timestamp only including the date (year, month and day of the month) of the last printed log message
+	 * @see {@linkcode Date}
+	 */
 	protected lastMessageDate?: Date;
 
 	/**
@@ -167,7 +170,7 @@ export class LogRenderable extends TextRenderable {
 				if (error) {
 					this.error(error);
 				} else {
-					// this.clear();
+					this.clear();
 
 					this.info(`Logs saved to '${absolutePath}'`);
 				}
@@ -198,13 +201,22 @@ export class LogRenderable extends TextRenderable {
 	 * logs are saved daily. Updates the last message date after checking.
 	 */
 	public triggerSave(): void {
-		/** Current date and time */
+		/**
+		 * Current date and time
+		 * @see {@linkcode Date}
+		 */
 		const now = new Date();
 
-		/** Current date (year, month and day of month) */
+		/**
+		 * Current date (year, month and day of month)
+		 * @see {@linkcode Date}
+		 */
 		const currentDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 
-		/** Date of the day after the last printed log message */
+		/**
+		 * Date of the day after the last printed log message
+		 * @see {@linkcode Date}
+		 */
 		const nextDayDate = new Date(this.lastMessageDate ?? currentDate);
 
 		nextDayDate.setDate(nextDayDate.getDate() + 1);

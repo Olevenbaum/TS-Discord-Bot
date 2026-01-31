@@ -9,10 +9,16 @@ import { color, type ColorInput } from "bun";
  * @see {@linkcode BoxRenderable}
  */
 export class VerticalSplitBoxRenderable extends BoxRenderable {
-	/** All children BoxRenderable elements contained within this vertical split box */
+	/**
+	 * All children BoxRenderable elements contained within this vertical split box
+	 * @ee {@linkcode BoxRenderable}
+	 */
 	protected children: BoxRenderable[];
 
-	/** Common styling options applied to all child elements */
+	/**
+	 * Common styling options applied to all child elements
+	 * @see {@linkcode BoxOptions}
+	 */
 	protected commonOptions: Exclude<BoxOptions, "position" | "visible" | "width" | "zIndex">;
 
 	/**
@@ -38,11 +44,11 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 		this.commonOptions = commonOptions;
 
 		this.children.forEach((child) => {
-			this.add(child);
-
 			Object.entries(this.commonOptions).forEach(([key, value]) => {
 				(child as any)[key] = value;
 			});
+
+			this.add(child);
 		});
 
 		this.onKeyDown = (key) => {
@@ -100,8 +106,6 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 		}
 
 		children.forEach((child, index) => {
-			this.add(child);
-
 			Object.entries(this.commonOptions).forEach(([key, value]) => {
 				(child as any)[key] = value;
 			});
@@ -113,6 +117,8 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 			}
 
 			this.children.push(child);
+
+			this.add(child);
 		});
 
 		return this;

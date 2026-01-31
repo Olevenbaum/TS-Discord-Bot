@@ -2,29 +2,27 @@
 import { type LogLevel, LogType } from "../modules/notification";
 
 // External libraries imports
+import type { Options } from "@sequelize/core";
 import { type Snowflake, TeamMemberRole } from "discord.js";
 import type { Path } from "typescript";
-import type { Options } from "@sequelize/core";
 
 /**
  * Represents the essential configuration data required for a Discord bot to function properly. This includes
  * credentials and identifiers obtained from the
  * {@link https://discord.com/developers/applications | Discord Developer Portal} that authenticate the bot with
  * Discord's API.
- *
- * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface BotData {
 	/**
 	 * Application ID of the bot
-	 * @see {@link Snowflake}
+	 * @see {@linkcode Snowflake}
 	 */
 	applicationId: Snowflake;
 
 	/** Public key of the bot */
 	publicKey: string;
 
-	/** Verification token of the bot. Can only be shown once on
+	/** Verification token of the bot. Can only be shown once on the
 	 * {@link https://discord.com/developers/applications | Discord Developer Portal}. If lost, create a new one. Make
 	 * sure to keep it secret and never share it with anyone!
 	 */
@@ -34,8 +32,6 @@ interface BotData {
 /**
  * Represents the configuration data imported from a JSON file that specifies the bot's behavior and operational
  * parameters. This includes settings for interactions, notifications, updates, and various bot features.
- *
- * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface BotConfiguration {
 	/**
@@ -46,7 +42,7 @@ interface BotConfiguration {
 
 	/**
 	 * Data of a single or multiple bots that can be started
-	 * @see {@link BotData}
+	 * @see {@linkcode BotData}
 	 */
 	botData: BotData | BotData[];
 
@@ -85,7 +81,7 @@ interface BotConfiguration {
 	 * Can be a boolean to enable/disable notifications, a number to set the minimal importance of notifications to
 	 * receive or an object to specify detailed preferences
 	 * @defaultValue `false`
-	 * @see {@link NotificationPreferences}
+	 * @see {@linkcode NotificationPreferences}
 	 */
 	notifications?: boolean | number | NotificationPreferences;
 
@@ -99,42 +95,29 @@ interface BotConfiguration {
 /**
  * Represents the comprehensive configuration data that specifies the bot's behavior, project structure, and external
  * service integrations. This is the root configuration object that encompasses all bot settings.
- *
- * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface Configuration {
 	/**
 	 * Bot configuration data
-	 * @see {@link BotConfiguration}
-	 *
-	 * More documentation can be found on the
-	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
+	 * @see {@linkcode BotConfiguration}
 	 */
 	bot: BotConfiguration;
 
 	/**
 	 * Database configuration data
-	 * @see {@link Options}
-	 *
-	 * More documentation can be found on {@link https://sequelize.org/ | Sequelize}.
+	 * @see {@linkcode Options}
 	 */
 	database?: Options;
 
 	/**
 	 * Constants given by Discord API
-	 * @see {@link DiscordConstants}
-	 *
-	 * More documentation can be found on the
-	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
+	 * @see {@linkcode DiscordConstants}
 	 */
 	discord: DiscordConstants;
 
 	/**
 	 * Paths of various files and directories used in the project
-	 * @see {@link Paths}
-	 *
-	 * More documentation can be found on the
-	 * {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
+	 * @see {@linkcode Paths}
 	 */
 	paths: Paths;
 }
@@ -154,9 +137,6 @@ interface DatabaseConfiguration {
 /**
  * Represents constants defined by the Discord API that affect bot behavior and limitations. These values are
  * fixed by Discord and should be used to ensure compliance with API constraints.
- *
- * More documentation can be found on the
- * {@link https://github.com/Olevenbaum/TS-Discord-Bot/wiki | GitHub wiki}.
  */
 interface DiscordConstants {
 	/**
@@ -177,38 +157,37 @@ interface DiscordConstants {
 /**
  * Represents the preferences for controlling bot notifications, including recipient filtering and importance levels.
  * This allows fine-grained control over who receives notifications and what types of events trigger them.
- *
- * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface NotificationPreferences {
 	/**
 	 * Team members to exclude from receiving notifications
-	 * @see {@link Snowflake}
+	 * @see {@linkcode Snowflake}
 	 */
 	excludedMembers?: Snowflake[];
 
 	/**
 	 * Team member roles to exclude from receiving notifications
-	 * @see {@link TeamMemberRole}
+	 * @see {@linkcode TeamMemberRole}
 	 */
 	excludedRoles: TeamMemberRole[];
 
 	/**
 	 * Importance level of notifications to receive
 	 * @defaultValue `0`
-	 * @see {@link NotificationImportance}
+	 * @see {@linkcode LogLevel}
 	 */
 	minImportance?: LogLevel;
 
 	/**
 	 * Team members and their chosen minimal importance of notifications to receive
-	 * @see {@link Snowflake} | {@link NotificationImportance}
+	 * @see {@linkcode Snowflake}
+	 * @see {@linkcode LogLevel}
 	 */
 	restrictedMembers?: { [key: Snowflake]: LogLevel };
 
 	/**
 	 * Types of notifications to enable
-	 * @see {@link NotificationType}
+	 * @see {@linkcode NotificationType}
 	 */
 	types?: LogType[];
 }
@@ -216,8 +195,6 @@ interface NotificationPreferences {
 /**
  * Represents the file and directory paths used throughout the project for loading various bot components and
  * resources. These paths define the project structure and where different types of files are located.
- *
- * More documentation can be found on the {@link https://github.com/Olevenbaum/TS-Bot-Template/wiki/... | GitHub wiki}.
  */
 interface Paths {
 	/** Path(s) to the directory or directories containing application command type definitions. */

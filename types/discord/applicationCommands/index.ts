@@ -1,8 +1,8 @@
-// Generic class & type exports
+// Generic application command type & application command interaction exports
 export type { SavedApplicationCommand } from "./SavedApplicationCommand";
 export type { SavedApplicationCommandType } from "./SavedApplicationCommandType";
 
-// Specific class & type exports
+// Specific application command type exports
 export type { SavedChatInputCommand } from "./SavedChatInputCommand";
 export type { SavedMessageCommand } from "./SavedMessageCommand";
 export type { SavedUserCommand } from "./SavedUserCommand";

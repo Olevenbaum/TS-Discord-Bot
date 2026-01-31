@@ -1,8 +1,8 @@
-// Default exports
+// Main application function default export
 export { default } from "./application";
 
-// Function exports
+// Main application function named export
 export { default as main } from "./application";
 
-// Variable exports
+// Global variable exports
 export { client, cli, database } from "./application";

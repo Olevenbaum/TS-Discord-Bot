@@ -4,14 +4,19 @@ import type { SavedEventType, SavedInteractionType } from "../../types";
 // Data imports
 import { blockedUsers, configuration, interactionTypes } from "#variables";
 
-// External libraries imports
+// External library imports
 import { bold, codeBlock, Events, type Interaction, InteractionType, MessageFlags } from "discord.js";
 
 // Module imports
 import notify from "../../modules/notification";
 
 /**
- * Interaction event handler
+ * Event handler for all Discord interactions. Routes interactions to their respective type handlers and manages blocked
+ * users and bot interaction permissions. Provides user feedback for unhandled interaction types and manages error
+ * handling for interaction execution failures.
+ * 
+ * More information on interactions can be found on the
+ * {@link https://discord.com/developers/docs/interactions/overview | Discord Developer Portal}.
  * @see {@linkcode SavedEventType}
  */
 const interactionCreate: SavedEventType = {
