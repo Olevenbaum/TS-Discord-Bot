@@ -1,4 +1,4 @@
-// External libraries imports
+// External library imports
 import { type BoxOptions, BoxRenderable, Renderable, type RenderContext, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 
@@ -48,14 +48,16 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 				(child as any)[key] = value;
 			});
 
+			child.onMouseOver = () => {
+				child.focus();
+			};
+
+			child.onMouseOut = () => {
+				child.blur();
+			};
+
 			this.add(child);
 		});
-
-		this.onKeyDown = (key) => {
-			if (key.name === "tab") {
-				this.switchFocus();
-			}
-		};
 	}
 
 	/**
@@ -116,7 +118,13 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 				this.children.push(child);
 			}
 
-			this.children.push(child);
+			child.onMouseOver = () => {
+				child.focus();
+			};
+
+			child.onMouseOut = () => {
+				child.blur();
+			};
 
 			this.add(child);
 		});

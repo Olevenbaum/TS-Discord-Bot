@@ -1,7 +1,7 @@
 // Class & type imports
 import type { ConsoleCommand } from "../../types";
 
-// External libraries imports
+// External library imports
 import {
 	type BoxOptions,
 	BoxRenderable,
@@ -40,7 +40,7 @@ export class CommandInputRenderable extends BoxRenderable {
 	 * aliases as the user types.
 	 * @see {@linkcode SelectRenderable}
 	 */
-	protected autocompleteInput?: SelectRenderable;
+	protected autocompleteInput: SelectRenderable;
 
 	/**
 	 * @see {@linkcode CommandHandler}
@@ -51,7 +51,7 @@ export class CommandInputRenderable extends BoxRenderable {
 	 * The input field where users enter console commands. Handles text input and command submission via Enter key.
 	 * @see {@linkcode InputRenderable}
 	 */
-	protected commandInput?: InputRenderable;
+	protected commandInput: InputRenderable;
 
 	/**
 	 * Creates a new command input renderable with the specified rendering context and options. Initializes the input
@@ -81,7 +81,7 @@ export class CommandInputRenderable extends BoxRenderable {
 			.on(InputRenderableEvents.ENTER, (input: string) => {
 				try {
 					this.commandHandler.handleCommand(input);
-					this.commandInput!.value = "";
+					this.commandInput.value = "";
 				} catch (error) {
 					if (this.parent instanceof ConsoleHandler) {
 						this.parent.error(error);
@@ -125,7 +125,7 @@ export class CommandInputRenderable extends BoxRenderable {
 					});
 				}
 
-				this.autocompleteInput!.options = options;
+				this.autocompleteInput.options = options;
 			});
 
 		this.autocompleteInput = new SelectRenderable(
@@ -139,10 +139,10 @@ export class CommandInputRenderable extends BoxRenderable {
 				width: "40%",
 			},
 		).on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
-			this.commandInput!.insertText((option.value ?? option.name).substring(this.commandInput!.value.length));
+			this.commandInput.insertText((option.value ?? option.name).substring(this.commandInput.value.length));
 		});
 
-		this.on(RenderableEvents.FOCUSED, () => this.commandInput!.focus());
+		this.on(RenderableEvents.FOCUSED, () => this.commandInput.focus());
 
 		this.autocompleteInput.options = this._commands
 			.map((command) => {
@@ -175,19 +175,19 @@ export class CommandInputRenderable extends BoxRenderable {
 
 		this.onMouseScroll = (event: MouseEvent) => {
 			if (event.scroll!.direction === "up") {
-				this.autocompleteInput!.moveUp();
+				this.autocompleteInput.moveUp();
 			} else if (event.scroll!.direction === "down") {
-				this.autocompleteInput!.moveDown();
+				this.autocompleteInput.moveDown();
 			}
 		};
 
 		this.onKeyDown = (key: KeyEvent) => {
 			if (key.name === "tab") {
-				this.autocompleteInput!.selectCurrent();
+				this.autocompleteInput.selectCurrent();
 			} else if (key.name === "up") {
-				this.autocompleteInput!.moveUp();
+				this.autocompleteInput.moveUp();
 			} else if (key.name === "down") {
-				this.autocompleteInput!.moveDown();
+				this.autocompleteInput.moveDown();
 			}
 
 			if (this.parent instanceof ConsoleHandler) {

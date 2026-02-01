@@ -54,7 +54,7 @@ export default async function main(botIndex: number = 0, debugging: boolean = fa
 	if (debugging) {
 		cli.initialize(debugging);
 	} else {
-		cli.initialize(await createCliRenderer({ openConsoleOnError: false }));
+		await cli.initialize(await createCliRenderer({ openConsoleOnError: false }));
 	}
 
 	notify("Bot is starting...", "INFORMATION");

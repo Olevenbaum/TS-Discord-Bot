@@ -4,7 +4,7 @@ import { ConsoleCommand } from "../../types";
 // Data imports
 import { client } from "#application";
 
-// External libraries imports
+// External library imports
 import { BoxRenderable, CliRenderer, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 import { Colors } from "discord.js";
@@ -27,11 +27,10 @@ import getTime from "../../modules/time";
  */
 export class ConsoleHandler {
 	/**
-	 * The color used for borders of focused UI elements. Can be a specific color or `"auto"` to use the bot's accent
-	 * color.
+	 * The color used for borders of focused UI elements.
 	 * @see {@linkcode ColorInput}
 	 */
-	protected _focusColor: ColorInput | "auto" = "auto";
+	protected _focusColor: ColorInput;
 
 	/**
 	 * The command handler that handles user command entry and execution.
@@ -89,8 +88,8 @@ export class ConsoleHandler {
 	 * @param includeDate - Whether to include dates in log timestamps.
 	 * @see {@linkcode ColorInput}
 	 */
-	constructor(focusColor: ColorInput | "auto" = "auto", includeDate: boolean = false) {
-		this._focusColor = focusColor;
+	constructor(focusColor?: ColorInput, includeDate: boolean = false) {
+		this._focusColor = focusColor ?? this.defaultFocusColor;
 		this.includeDate = includeDate;
 	}
 
@@ -98,8 +97,8 @@ export class ConsoleHandler {
 	 * Console commands of the command handler
 	 * @see {@linkcode ConsoleCommand}
 	 */
-	public get commands(): ConsoleCommand[] {
-		return this.commandHandler!.commands;
+	public get commands(): ConsoleCommand[] | undefined {
+		return this.commandHandler?.commands;
 	}
 
 	/** Whether the CLI runs in debugging mode */
@@ -112,22 +111,22 @@ export class ConsoleHandler {
 	 * @see {@linkcode ColorInput}
 	 */
 	public get focusColor(): ColorInput {
-		return this._focusColor;
+		return this._focusColor ?? this.defaultFocusColor;
 	}
 
 	/**
 	 * Current focus color used for UI element borders.
 	 * @see {@linkcode ColorInput}
 	 */
-	public set focusColor(focusColor: ColorInput | "auto") {
-		this._focusColor = color(focusColor, "HEX") ?? "auto";
-
-		if (this._focusColor === "auto") {
+	public set focusColor(focusColor: ColorInput | undefined) {
+		if (!focusColor) {
 			if (client.isReady()) {
 				this.autoFocusColor();
 			} else {
 				this._focusColor = this.defaultFocusColor;
 			}
+		} else {
+			this._focusColor = focusColor;
 		}
 
 		if (!client.isReady() && this.splitBox) {
@@ -140,9 +139,12 @@ export class ConsoleHandler {
 	 * the accent color is unavailable.
 	 */
 	private async autoFocusColor(): Promise<void> {
-		await client.user!.fetch();
-
-		this._focusColor = client.user!.hexAccentColor ?? this.defaultFocusColor;
+		if (client.isReady()) {
+			await client.user!.fetch();
+			this._focusColor = client.user!.hexAccentColor ?? this.defaultFocusColor;
+		} else {
+			this._focusColor = this.defaultFocusColor;
+		}
 
 		if (this.splitBox) {
 			this.splitBox.focusColor = this._focusColor;
@@ -251,10 +253,12 @@ export class ConsoleHandler {
 	 * {@linkcode console.error}, {@linkcode console.info} and {@linkcode console.warn} can be replaced by matching
 	 * intern console handler methods {@linkcode debug}, {@linkcode error}, {@linkcode info} and {@linkcode warn}.
 	 * @param ctx - The CLI renderer instance to use for the interface.
+	 * @param useAccentColor - Whether to automatically set the focus color to the bots accent color on Discord.
+	 * Defaults to `true`.
 	 * @param overwriteConsole - Whether to replace the logging methods with the matching intern console handler.
 	 * Defaults to `true`.
 	 */
-	public initialize(ctx: CliRenderer, overwriteConsole?: boolean): void;
+	public async initialize(ctx: CliRenderer, useAccentColor?: boolean, overwriteConsole?: boolean): Promise<void>;
 
 	/**
 	 * Initializes the console handler with a basic command handler in the console for debugging purposes. If wanted,
@@ -267,8 +271,10 @@ export class ConsoleHandler {
 	 */
 	public initialize(debugging: true, overwriteConsole?: boolean): void;
 
-	public initialize(x: CliRenderer | true, overwriteConsole: boolean = true): void {
+	public async initialize(x: CliRenderer | true, y: boolean = true, overwriteConsole: boolean = true): Promise<void> {
 		this._debuggingMode = x === true;
+
+		overwriteConsole = typeof x === "boolean" ? y : overwriteConsole;
 
 		/**
 		 * Overload ctx parameter
@@ -277,6 +283,13 @@ export class ConsoleHandler {
 		const ctx = x instanceof CliRenderer ? x : null;
 
 		if (!this._debuggingMode && ctx) {
+			/** Overload accent color parameter */
+			const useAccentColor = x instanceof CliRenderer ? y : null;
+
+			if (useAccentColor) {
+				await this.autoFocusColor();
+			}
+
 			this.renderer = ctx;
 
 			this.commandHandler = new CommandInputRenderable(this.renderer, {
@@ -302,17 +315,7 @@ export class ConsoleHandler {
 			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandHandler, logBox], {
 				border: true,
 				borderStyle: "rounded",
-				focusedBorderColor: RGBA.fromHex(
-					this._focusColor === "auto" ? color(this.defaultFocusColor, "HEX")! : (this._focusColor as string),
-				),
-				onMouseOut() {
-					this.borderColor = this._defaultOptions.borderColor;
-					this.blur();
-				},
-				onMouseOver() {
-					this.borderColor = this.focusedBorderColor;
-					this.focus();
-				},
+				focusedBorderColor: RGBA.fromHex(color(this._focusColor, "HEX")!),
 			});
 
 			this.renderer.root.add(this.splitBox);
@@ -329,7 +332,7 @@ export class ConsoleHandler {
 				completer: (input: string) => {
 					const options: string[] = [];
 
-					this.commands.forEach((command) => {
+					this.commands!.forEach((command) => {
 						if (command.name.startsWith(input.toUpperCase())) {
 							options.push(command.name);
 						}

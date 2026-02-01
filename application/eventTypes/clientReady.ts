@@ -2,7 +2,7 @@
 import type { SavedEventType } from "../../types";
 
 // Data imports
-import { cli, client } from "#application";
+import { client } from "#application";
 
 // External library imports
 import { Events } from "discord.js";
@@ -25,8 +25,6 @@ const clientReady: SavedEventType = {
 		notify(`Client logged in as '${client.user!.username}'`, "SUCCESS", `I've awaken, @member!`, 6);
 
 		updateFiles(["configuration", "eventTypes"], true);
-
-		cli.focusColor = cli.focusColor;
 	},
 };
 
