@@ -4,7 +4,7 @@ import { LogType } from "../../modules/notification";
 // Data imports
 import { configuration } from "#variables";
 
-// External libraries imports
+// External library imports
 import {
 	blue,
 	brightRed,
@@ -133,7 +133,9 @@ export class LogRenderable extends TextRenderable {
 			]),
 		);
 
-		this.triggerSave();
+		if (configuration.bot.saveLogs !== false) {
+			this.triggerSave();
+		}
 	}
 
 	/**
@@ -145,8 +147,6 @@ export class LogRenderable extends TextRenderable {
 		if (configuration.bot.saveLogs === false) {
 			return;
 		}
-
-		this.debug(relativePath(path ?? configuration.paths.logPath));
 
 		access(relativePath(path ?? configuration.paths.logPath), () =>
 			mkdirSync(relativePath(path ?? configuration.paths.logPath)),

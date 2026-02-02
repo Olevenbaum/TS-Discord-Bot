@@ -1,4 +1,4 @@
-// External libraries imports
+// External library imports
 import { Collection, InteractionType, type Snowflake } from "discord.js";
 
 /**
@@ -71,15 +71,3 @@ type NotificationImportance = 0 | 1 | 2 | 3 | 4 | 5;
  * specific kind of event or status message, allowing for appropriate filtering and presentation.
  */
 type NotificationType = "ERROR" | "INFO" | "SUCCESS" | "TEST" | "WARNING";
-
-/**
- * Nested array with unknown depth. Used for representing hierarchical data structures where arrays can contain
- * other arrays of the same type.
- */
-type NestedArray<Type> = Array<Type | NestedArray<Type>>;
-
-/**
- * Task that can be called to perform a promise based action. Represents a function that returns a promise,
- * commonly used for asynchronous operations that can be scheduled or executed later.
- */
-type Task<ReturnType> = () => Promise<ReturnType>;

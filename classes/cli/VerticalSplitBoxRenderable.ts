@@ -44,9 +44,7 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 		this.commonOptions = commonOptions;
 
 		this.children.forEach((child) => {
-			Object.entries(this.commonOptions).forEach(([key, value]) => {
-				(child as any)[key] = value;
-			});
+			Object.assign(child, this.commonOptions);
 
 			child.onMouseOver = () => {
 				child.focus();
@@ -108,9 +106,7 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 		}
 
 		children.forEach((child, index) => {
-			Object.entries(this.commonOptions).forEach(([key, value]) => {
-				(child as any)[key] = value;
-			});
+			Object.assign(child, this.commonOptions);
 
 			if (typeof startIndex === "number") {
 				this.children.splice(startIndex + index, 0, child);
@@ -126,7 +122,7 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 				child.blur();
 			};
 
-			this.add(child);
+			this.add(child, typeof startIndex === "number" ? startIndex + index : undefined);
 		});
 
 		return this;
