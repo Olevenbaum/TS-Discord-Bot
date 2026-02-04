@@ -7,6 +7,8 @@ import { configuration } from "#variables";
 // External library imports
 import {
 	blue,
+	BoxOptions,
+	BoxRenderable,
 	brightRed,
 	green,
 	red,
@@ -27,10 +29,10 @@ import getTime from "../../modules/time";
 
 /**
  * A renderable component for displaying console logs with timestamped messages in different colors based on log levels.
- * Extends TextRenderable to provide logging functionality with automatic file saving capabilities.
- * @see {@linkcode TextRenderable}
+ * Extends BoxRenderable to provide logging functionality with automatic file saving capabilities.
+ * @see {@linkcode BoxRenderable}
  */
-export class LogRenderable extends TextRenderable {
+export class LogRenderable extends BoxRenderable {
 	/** Whether each log message's timestamp includes the current date */
 	protected includeDate: boolean;
 
@@ -39,6 +41,8 @@ export class LogRenderable extends TextRenderable {
 	 * @see {@linkcode Date}
 	 */
 	protected lastMessageDate?: Date;
+
+	protected logText: TextRenderable;
 
 	/**
 	 * Creates a new LogRenderable instance for displaying timestamped console logs.
@@ -49,7 +53,12 @@ export class LogRenderable extends TextRenderable {
 	 * @see {@linkcode RenderContext}
 	 * @see {@linkcode TextOptions}
 	 */
-	constructor(parent: Renderable | RenderContext, includeDate: boolean = false, options: TextOptions = {}) {
+	constructor(
+		parent: Renderable | RenderContext,
+		includeDate: boolean = false,
+		options: BoxOptions = {},
+		textOptions: TextOptions = {},
+	) {
 		super(parent instanceof Renderable ? parent.ctx : parent, options);
 
 		if (parent instanceof Renderable) {
@@ -57,6 +66,9 @@ export class LogRenderable extends TextRenderable {
 		}
 
 		this.includeDate = includeDate;
+		this.logText = new TextRenderable(parent instanceof Renderable ? parent.ctx : parent, textOptions);
+
+		this.add(this.logText);
 	}
 
 	/**
@@ -95,9 +107,9 @@ export class LogRenderable extends TextRenderable {
 	 */
 	protected log(type: LogType, ...messages: any[]): void {
 		/** Timestamp */
-		const timestamp = `[${getTime(!this.includeDate)}]: `;
+		const timestamp = `[${getTime(!this.includeDate)}] `;
 
-		this.add(
+		this.logText.add(
 			new StyledText([
 				white(timestamp),
 				...messages
@@ -138,6 +150,11 @@ export class LogRenderable extends TextRenderable {
 		}
 	}
 
+	/** Clears all text from the logs. */
+	public clear(): void {
+		this.logText.clear();
+	}
+
 	/**
 	 * Saves the current log contents to a file. Uses the specified path or falls back to the configured log directory.
 	 * The filename includes a timestamp for uniqueness.
@@ -162,7 +179,7 @@ export class LogRenderable extends TextRenderable {
 
 		appendFile(
 			absolutePath,
-			this.rootTextNode
+			this.logText.textNode
 				.toChunks()
 				.map((chunk) => chunk.text)
 				.join(""),

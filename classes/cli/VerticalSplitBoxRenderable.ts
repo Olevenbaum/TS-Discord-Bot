@@ -47,10 +47,12 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 			Object.assign(child, this.commonOptions);
 
 			child.onMouseOver = () => {
+				child.borderColor = child.focusedBorderColor;
 				child.focus();
 			};
 
 			child.onMouseOut = () => {
+				child.borderColor = this._defaultOptions.borderColor;
 				child.blur();
 			};
 
@@ -148,7 +150,7 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 
 		if (focusedIndex !== -1) {
 			this.children[focusedIndex]?.blur();
-			this.children[(focusedIndex + (direction === "up" ? -x : x)) % this.children.length]?.focus();
+			this.children[(focusedIndex + (direction === "up" ? -x : x)) % this.children.length]!.focus();
 
 			return this.children[(focusedIndex + (direction === "up" ? -x : x)) % this.children.length]!;
 		}

@@ -5,7 +5,7 @@ import { ConsoleCommand } from "../../types";
 import { client } from "#application";
 
 // External library imports
-import { BoxRenderable, CliRenderer, RGBA } from "@opentui/core";
+import { CliRenderer, RGBA } from "@opentui/core";
 import { color, type ColorInput } from "bun";
 import { Colors } from "discord.js";
 import { clearLine, createInterface, cursorTo, Interface } from "readline";
@@ -299,30 +299,26 @@ export class ConsoleHandler {
 				title: "Commands",
 			});
 
-			/**
-			 * Container for the log output area
-			 * @see {@linkcode BoxRenderable}
-			 */
-			const logBox = new BoxRenderable(this.renderer, {
-				height: "80%",
-				title: "Logs",
-			});
+			this.logs = new LogRenderable(
+				this.renderer,
+				this.includeDate,
+				{
+					height: "80%",
+					title: "Logs",
+				},
+				{},
+			);
 
-			this.logs = new LogRenderable(this.renderer, this.includeDate, {});
-
-			logBox.add(this.logs);
-
-			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandHandler, logBox], {
+			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandHandler, this.logs], {
 				border: true,
 				borderStyle: "rounded",
 				focusedBorderColor: RGBA.fromHex(color(this._focusColor, "HEX")!),
 			});
 
 			this.renderer.root.add(this.splitBox);
-
-			this.splitBox.switchFocus();
-
 			this.renderer.start();
+
+			this.splitBox.focus();
 		} else {
 			this.commandHandler = new CommandHandler();
 
