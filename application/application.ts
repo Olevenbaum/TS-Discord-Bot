@@ -6,7 +6,6 @@ import type { BotData } from "../types";
 import { configuration } from "#variables";
 
 // External library imports
-import { createCliRenderer } from "@opentui/core";
 import { Client, DiscordAPIError, GatewayIntentBits } from "discord.js";
 import { Sequelize } from "sequelize";
 
@@ -14,13 +13,14 @@ import { Sequelize } from "sequelize";
 import "../extensions/Array";
 import notify from "../modules/notification";
 import { updateFiles } from "../modules/update";
+import { DebuggingState } from "../classes/DebuggingState";
 
 /**
  * Console interface for viewing logs and interacting with the bot directly through the command line.
  * Initialized with automatic focus color detection.
  * @see {@linkcode ConsoleHandler}
  */
-export const cli = new ConsoleHandler("auto");
+export const cli = new ConsoleHandler();
 
 /**
  * Discord bot client instance with configured gateway intents. This client handles all Discord events.
@@ -48,14 +48,14 @@ export const database: Sequelize | null = configuration.database ? new Sequelize
  * bot configurations and debugging mode. Automatically updates event type files on startup and authenticates the
  * database connection if configured.
  * @param botIndex - Index of the bot to use when multiple bots are configured. Defaults to `0`.
- * @param debugging - Whether to run in debugging mode. Running in debugging mode disables the CLI. Defaults to `false`.
+ * @param debugging - The debugging mode to run the bot in. Defaults to {@linkcode DebuggingState.NONE}.
+ * @see {@linkcode DebuggingState}
  */
-export default async function main(botIndex: number = 0, debugging: boolean = false): Promise<void> {
-	if (debugging) {
-		cli.initialize(debugging);
-	} else {
-		await cli.initialize(await createCliRenderer({ openConsoleOnError: false }));
-	}
+export default async function main(
+	botIndex: number = 0,
+	debugging: DebuggingState = DebuggingState.NONE,
+): Promise<void> {
+	await cli.initialize(debugging);
 
 	notify("Bot is starting...", "INFORMATION");
 

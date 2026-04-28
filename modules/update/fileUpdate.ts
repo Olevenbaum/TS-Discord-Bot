@@ -1,6 +1,9 @@
 // Data imports
 import { blockedUsers, configuration } from "#variables";
 
+// Internal class & type imports
+import { FileInclude } from "./types";
+
 // Internal module imports
 import updateApplicationCommandTypes from "./applicationCommandTypeUpdate";
 import updateApplicationCommands from "./applicationCommandUpdate";
@@ -9,26 +12,23 @@ import updateInteractionTypes from "./interactionTypeUpdate";
 import updateComponentTypes from "./componentTypeUpdate";
 import updateModals from "./modalUpdate";
 
-// Internal type imports
-import { FileInclude } from "./types";
-
 // Module imports
 import { relativePath } from "../fileReader";
 import notify from "../notification";
 
 /**
  * Updates all changed files, adds new ones and deletes removed ones.
- * @param forceReload Whether to reload all files no matter if files were changed, added or removed (defaults to
- * `false`)
+ * @param forceReload Whether to reload all files no matter if files were changed, added or removed. Defaults to
+ * `false`
  */
 export default function updateFiles(forceReload?: boolean): Promise<void>;
 
 /**
  * Updates all changed files, adds new ones and deletes removed ones.
- * @param files Files to reload. If undefined all files are reloaded. If an object is provided, the presence of a
+ * @param files Files to reload. If `undefined` all files are reloaded. If an object is provided, the presence of a
  * key alone indicates whether to reload the specific file type or not, a boolean value indicates whether to force
- * reload all files of the specific type or not. If include is `false`, the value of any key is ignored
- * @param exclude Whether to include (`false`) or exclude (`true`) the specified files (defaults to `false`)
+ * reload all files of the specific type or not. If `exclude` is set to `true`, the value of any key is ignored
+ * @param exclude Whether to include (`false`) or exclude (`true`) the specified files. Defaults to `false`
  * @see {@link FileInclude}
  */
 export default function updateFiles(files?: FileInclude | (keyof FileInclude)[], exclude?: boolean): Promise<void>;

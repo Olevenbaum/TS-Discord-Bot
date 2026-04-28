@@ -1,5 +1,5 @@
 // Class & type imports
-import { ConsoleCommand } from "../../types";
+import type { ConsoleCommand } from "../../types";
 
 // Data imports
 import { client } from "#application";
@@ -299,15 +299,10 @@ export class ConsoleHandler {
 				title: "Commands",
 			});
 
-			this.logs = new LogRenderable(
-				this.renderer,
-				this.includeDate,
-				{
-					height: "80%",
-					title: "Logs",
-				},
-				{},
-			);
+			this.logs = new LogRenderable(this.renderer, this.includeDate, {
+				height: "80%",
+				title: "Logs",
+			});
 
 			this.splitBox = new VerticalSplitBoxRenderable(this.renderer, undefined, [this.commandHandler, this.logs], {
 				border: true,
@@ -321,8 +316,6 @@ export class ConsoleHandler {
 			this.splitBox.focus();
 		} else {
 			this.commandHandler = new CommandHandler();
-
-			this.updateCommands();
 
 			this.interface = createInterface({
 				completer: (input: string) => {
@@ -372,6 +365,8 @@ export class ConsoleHandler {
 			console.info = this.info.bind(this);
 			console.warn = this.warn.bind(this);
 		}
+
+		this.updateCommands();
 	}
 
 	/**

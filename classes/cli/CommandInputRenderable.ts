@@ -10,7 +10,6 @@ import {
 	KeyEvent,
 	MouseEvent,
 	Renderable,
-	RenderableEvents,
 	type RenderContext,
 	type SelectOption,
 	SelectRenderable,
@@ -136,39 +135,28 @@ export class CommandInputRenderable extends BoxRenderable {
 					{ name: "down", action: "move-down" },
 				],
 				minWidth: 40,
+				options: this.commands
+					.map((command) => [
+						{
+							name: command.name,
+							description: command.description,
+						},
+						...(command.aliases?.map((alias) => {
+							return {
+								name: alias,
+								description: command.description,
+							};
+						}) ?? []),
+					])
+					.flat(),
+
 				width: "40%",
 			},
 		).on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
 			this.commandInput.insertText((option.value ?? option.name).substring(this.commandInput.value.length));
 		});
 
-		this.on(RenderableEvents.FOCUSED, () => this.commandInput.focus());
-
-		this.autocompleteInput.options = this._commands
-			.map((command) => {
-				/**
-				 * Options of the autocomplete input based on every console command
-				 * @see {@linkcode SelectOption}
-				 */
-				const options: SelectOption[] = [];
-
-				options.push({
-					name: command.name,
-					description: command.description,
-				});
-
-				if (command.aliases) {
-					command.aliases.forEach((alias) => {
-						options.push({
-							name: alias,
-							description: command.description,
-						});
-					});
-				}
-
-				return options;
-			})
-			.flat();
+		// this.on(RenderableEvents.FOCUSED, () => this.commandInput.focus());
 
 		this.add(this.commandInput);
 		this.add(this.autocompleteInput);
@@ -203,6 +191,18 @@ export class CommandInputRenderable extends BoxRenderable {
 	 */
 	public get commands(): ConsoleCommand[] {
 		return this.commandHandler.commands;
+	}
+
+	public override blur(): void {
+		this.commandInput.blur();
+
+		super.blur();
+	}
+
+	public override focus(): void {
+		super.focus();
+
+		this.commandInput.focus();
 	}
 
 	/**

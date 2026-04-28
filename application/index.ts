@@ -5,4 +5,4 @@ export { default } from "./application";
 export { default as main } from "./application";
 
 // Global variable exports
-export { client, cli, database } from "./application";
+export { client, database } from "./application";

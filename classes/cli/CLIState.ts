@@ -1,0 +1,7 @@
+/** */
+export enum CLIState {
+	UNINITIALIZED,
+	INITIALIZING,
+	READY,
+	DESTROYED,
+}
