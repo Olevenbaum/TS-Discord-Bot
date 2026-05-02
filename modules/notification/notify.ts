@@ -1,6 +1,6 @@
 // Data imports
-import { client } from "#application";
-import { cli, configuration } from "#variables";
+import { cli, client } from "#application";
+import { configuration } from "#variables";
 
 // External libraries imports
 import { Team, TeamMemberMembershipState, User, userMention } from "discord.js";

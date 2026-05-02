@@ -2,8 +2,7 @@
 import { ConsoleCommand } from "../../types";
 
 // Data imports
-import { client } from "#application";
-import { cli } from "#variables";
+import { cli, client } from "#application";
 
 // Module imports
 import notify from "../../modules/notification";
