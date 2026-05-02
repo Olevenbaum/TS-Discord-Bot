@@ -48,11 +48,21 @@ export class VerticalSplitBoxRenderable extends BoxRenderable {
 
 			child.onMouseOver = () => {
 				child.borderColor = child.focusedBorderColor;
-				child.focus();
+
+				if (child.getChildrenCount() === 1) {
+					child.getChildren().every((grandchild) => grandchild.focus());
+				} else {
+					child.focus();
+				}
 			};
 
 			child.onMouseOut = () => {
 				child.borderColor = this._defaultOptions.borderColor;
+
+				if (child.getChildrenCount() > 0) {
+					child.getChildren().every((grandchild) => grandchild.blur());
+				}
+
 				child.blur();
 			};
 

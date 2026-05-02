@@ -13,6 +13,7 @@ import {
 	green,
 	red,
 	Renderable,
+	RenderableEvents,
 	type RenderContext,
 	StyledText,
 	type TextOptions,
@@ -67,6 +68,8 @@ export class LogRenderable extends BoxRenderable {
 
 		this.includeDate = includeDate;
 		this.logText = new TextRenderable(parent instanceof Renderable ? parent.ctx : parent, textOptions);
+
+		this.on(RenderableEvents.FOCUSED, () => this.logText.focus());
 
 		this.add(this.logText);
 	}

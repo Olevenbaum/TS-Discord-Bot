@@ -8,9 +8,9 @@
 		"@types/bun": "latest"
 	},
 	"dependencies": {
-		"@opentui/core": "^0.1.105",
+		"@opentui/core": "^0.1.107",
 		"@sequelize/postgres": "^7.0.0-alpha.48",
-		"discord.js": "^14.26.3",
+		"discord.js": "^14.26.4",
 		"sequelize": "^6.37.8"
 	},
 	"displayName": "Typescript Discord Bot",
