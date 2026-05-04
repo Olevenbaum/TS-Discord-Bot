@@ -16,9 +16,9 @@ import {
 	SelectRenderableEvents,
 } from "@opentui/core";
 
-// Internal class & tpe imports
+// Internal class & type imports
 import { CommandHandler } from "./CommandHandler";
-import { ConsoleHandler } from "./ConsoleHandler";
+import { ConsoleHandler } from "./NewConsoleHandler";
 
 /**
  * A renderable component that provides an interactive command-line interface for executing console commands. It
