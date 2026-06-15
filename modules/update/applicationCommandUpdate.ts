@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedChatInputCommand, SavedMessageCommand, SavedUserCommand, Task } from "../../types";
+import type { SavedChatInputCommand, SavedMessageCommand, SavedUserCommand, Task } from "#types";
 
 // Data import
 import { client } from "#application";
@@ -15,34 +15,34 @@ import {
 } from "discord.js";
 
 // Module imports
-import readFiles from "../fileReader";
-import notify from "../notification";
+import readFiles from "#modules/fileReader";
+import notify from "#modules/notification";
 
 /**
  * Iterates all files in the application command directoryies. If files were deleted, the matching application commands
  * are removed from the collection. If files were added the matching application commands are added to the collection.
  * On force reload remaining application commands are reloaded from the matching files.
- * @param forceReload - Whether to reload all existing application commands (defaults to `false`)
+ * @param forceReload - Whether to reload all existing application commands. Defaults to `false`.
  */
-export default async function updateApplicationCommands(forceReload?: boolean): Promise<void>;
+export async function updateApplicationCommands(forceReload?: boolean): Promise<void>;
 
 /**
  * Iterates all files in the application command directories. If files were deleted, the matching application commands
  * are removed from the collection. If files were added the matching application commands are added to the collection.
  * Any specified application commands either reloaded or are excluded from reloading.
  * @param applicationCommands - Application commands to reload or exclude from reloading
- * @param exclude - Whether to include (`false`) or exclude (`true`) the specified application commands (defaults to
- * `false`)
+ * @param exclude - Whether to include (`false`) or exclude (`true`) the specified application commands. Defaults to
+ * `false`.
  * @see {@link ApplicationCommandType}
  */
-export default async function updateApplicationCommands(
+export async function updateApplicationCommands(
 	applicationCommands:
 		| Partial<Record<ApplicationCommandType, string[]>>
 		| Partial<Record<keyof typeof ApplicationCommandType, string[]>>,
 	exclude?: boolean,
 ): Promise<void>;
 
-export default async function updateApplicationCommands(
+export async function updateApplicationCommands(
 	x:
 		| boolean
 		| Partial<Record<ApplicationCommandType, string[]>>
@@ -54,15 +54,15 @@ export default async function updateApplicationCommands(
 		typeof x === "boolean"
 			? undefined
 			: Object.keys(x).every((applicationCommandType) => typeof applicationCommandType === "string")
-			? Object.fromEntries(
-					Object.entries(x as Partial<Record<keyof typeof ApplicationCommandType, string[]>>).map(
-						([applicationCommandType, applicationCommandColletion]) => [
-							ApplicationCommandType[applicationCommandType as keyof typeof ApplicationCommandType],
-							applicationCommandColletion,
-						],
-					),
-			  )
-			: (x as Partial<Record<ApplicationCommandType, string[]>>);
+				? Object.fromEntries(
+						Object.entries(x as Partial<Record<keyof typeof ApplicationCommandType, string[]>>).map(
+							([applicationCommandType, applicationCommandColletion]) => [
+								ApplicationCommandType[applicationCommandType as keyof typeof ApplicationCommandType],
+								applicationCommandColletion,
+							],
+						),
+					)
+				: (x as Partial<Record<ApplicationCommandType, string[]>>);
 
 	/** Force reload overload parameter */
 	const forceReload = typeof x === "boolean" ? x : false;
@@ -89,30 +89,39 @@ export default async function updateApplicationCommands(
 	const userCommandFiles = await readFiles<SavedUserCommand>(configuration.paths.userCommandsPath);
 
 	if (commands) {
-		Object.entries(commands).forEach(([applicationCommandType, applicationCommands]) => {
+		Object.entries(commands).forEach(([applicationCommandTypeKey, applicationCommands]) => {
+			/**
+			 * Application command type of the application command.
+			 * @see {@linkcode ApplicationCommandType}
+			 */
+			const applicationCommandType = Number(applicationCommandTypeKey) as ApplicationCommandType;
+
 			commands[applicationCommandType] = applicationCommands.filter((applicationCommand) => {
 				if (
 					!savedApplicationCommands[applicationCommandType]?.some(
 						(savedApplicationCommand) => savedApplicationCommand.data.name === applicationCommand,
 					)
 				) {
-					notify(`No application commands of type '${applicationCommandType}' exist`, "WARNING");
+					notify(
+						`No application commands of type '${ApplicationCommandType[applicationCommandType]}' exist`,
+						"WARNING",
+					);
 
 					return false;
 				}
 
 				switch (applicationCommandType) {
-					case ApplicationCommandType[ApplicationCommandType.ChatInput]:
+					case ApplicationCommandType.ChatInput:
 						return chatInputCommandFiles.some(
 							(chatInputCommandFile) => chatInputCommandFile.data.name === applicationCommand,
 						);
 
-					case ApplicationCommandType[ApplicationCommandType.Message]:
+					case ApplicationCommandType.Message:
 						return messageCommandFiles.some(
 							(messageCommandFile) => messageCommandFile.data.name === applicationCommand,
 						);
 
-					case ApplicationCommandType[ApplicationCommandType.User]:
+					case ApplicationCommandType.User:
 						return userCommandFiles.some(
 							(userCommandFile) => userCommandFile.data.name === applicationCommand,
 						);
@@ -124,18 +133,24 @@ export default async function updateApplicationCommands(
 		});
 	}
 
-	Object.keys(savedApplicationCommands).forEach((applicationCommmandType) => {
+	Object.keys(savedApplicationCommands).forEach((applicationCommmandTypeKey) => {
+		/**
+		 * Application command type of the application command.
+		 * @see {@linkcode ApplicationCommandType}
+		 */
+		const applicationCommmandType = Number(applicationCommmandTypeKey) as ApplicationCommandType;
+
 		savedApplicationCommands[applicationCommmandType]!.sweep((_, applicationCommandName) => {
 			switch (applicationCommmandType) {
-				case ApplicationCommandType[ApplicationCommandType.ChatInput]:
+				case ApplicationCommandType.ChatInput:
 					return !chatInputCommandFiles.some(
 						(chatInputCommandFile) => chatInputCommandFile.data.name === applicationCommandName,
 					);
-				case ApplicationCommandType[ApplicationCommandType.Message]:
+				case ApplicationCommandType.Message:
 					return !messageCommandFiles.some(
 						(messageCommandFile) => messageCommandFile.data.name === applicationCommandName,
 					);
-				case ApplicationCommandType[ApplicationCommandType.User]:
+				case ApplicationCommandType.User:
 					return !userCommandFiles.some(
 						(userCommandFile) => userCommandFile.data.name === applicationCommandName,
 					);
@@ -215,7 +230,7 @@ export default async function updateApplicationCommands(
 
 					if (!registeredApplicationCommand) {
 						tasks.add.push(async () =>
-							client.application.commands
+							client.application?.commands
 								.create(savedApplicationCommand.data as ApplicationCommandData)
 								.then((createdApplicationCommand) => {
 									notify(
@@ -226,7 +241,7 @@ export default async function updateApplicationCommands(
 												? chatInputApplicationCommandMention(
 														createdApplicationCommand.name,
 														createdApplicationCommand.id,
-												  )
+													)
 												: `'${bold(savedApplicationCommandName)}'`
 										}!`,
 										2,
@@ -256,7 +271,7 @@ export default async function updateApplicationCommands(
 												? chatInputApplicationCommandMention(
 														updatedApplicationCommand.name,
 														updatedApplicationCommand.id,
-												  )
+													)
 												: `'${bold(savedApplicationCommandName)}'`
 										} just got an update!`,
 										2,

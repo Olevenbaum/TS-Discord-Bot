@@ -3,7 +3,7 @@ import { configuration } from "#variables";
 
 // Internal class & type imports
 import { LogType } from "./classes";
-import { LogLevel } from "./types";
+import type { LogLevel } from "./types";
 
 /**
  * Evaluates whether the owner(s) of the bot should receive the log messages on Discord directly.

@@ -1,7 +1,7 @@
 // Class & type imports
-import type { SavedEventType } from "../../../types";
+import type { SavedEventType } from "#types";
 
-// External library imports
+// External libraries imports
 import { Events } from "discord.js";
 
 /**

@@ -1,2 +1,2 @@
-// Class exports
-export * from "./LogType";
+// Named exports
+export { LogType } from "./LogType";

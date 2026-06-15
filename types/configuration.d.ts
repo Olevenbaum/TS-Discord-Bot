@@ -89,7 +89,7 @@ interface BotConfiguration {
 	 * Whether to save the log messages at least once a day and before the bot shuts down.
 	 * @defaultValue `true`
 	 */
-	saveLogs: boolean;
+	saveLogs?: boolean;
 }
 
 /**
@@ -198,22 +198,22 @@ interface NotificationPreferences {
  */
 interface Paths {
 	/** Path(s) to the directory or directories containing application command type definitions. */
-	applicationCommandTypesPath: string | string[];
+	applicationCommandTypesPath: Path | Path[];
 
 	/** Path to the file containing the list of blocked users who cannot interact with the bot. */
-	blockedUsersPath: string;
+	blockedUsersPath: Path;
 
 	/** Path(s) to the directory or directories containing chat input (slash) command definitions. */
-	chatInputCommandsPath: string | string[];
+	chatInputCommandsPath: Path | Path[];
 
 	/** Path(s) to the directory or directories containing message component definitions. */
-	componentsPath: string | string[];
+	componentsPath: Path | Path[];
 
 	/** Path to the configuration data file containing bot settings and parameters. */
-	configurationPath: string;
+	configurationPath: Path;
 
 	/** Path(s) to the directory or directories containing console command definitions. */
-	consoleCommandsPath: string | string[];
+	consoleCommandsPath: Path | Path[];
 
 	/** Path to the Discord configuration data file containing API-related constants and settings. */
 	discordConfigurationsPath: Path;
@@ -228,14 +228,17 @@ interface Paths {
 	logPath: Path;
 
 	/** Path(s) to the directory or directories containing message context menu command definitions. */
-	messageCommandsPath: string | string[];
+	messageCommandsPath: Path | Path[];
 
 	/** Path(s) to the directory or directories containing message component type definitions. */
-	componentTypesPath: string | string[];
+	componentTypesPath: Path | Path[];
 
 	/** Path(s) to the directory or directories containing modal dialog definitions. */
-	modalsPath: string | string[];
+	modalsPath: Path | Path[];
 
 	/** Path(s) to the directory or directories containing user context menu command definitions. */
-	userCommandsPath: string | string[];
+	userCommandsPath: Path | Path[];
+
+	/** Path(s) to the directory or directories containing CLI windows. */
+	windows: Path | Path[];
 }

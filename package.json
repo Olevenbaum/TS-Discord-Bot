@@ -16,6 +16,9 @@
 	"displayName": "Typescript Discord Bot",
 	"imports": {
 		"#application": "./application/index.ts",
+		"#classes": "./classes/index.ts",
+		"#modules/*": "./modules/*/index.ts",
+		"#types": "./types/index.ts",
 		"#variables": "./resources/variables.ts"
 	},
 	"license": "BSD-3-Clause",

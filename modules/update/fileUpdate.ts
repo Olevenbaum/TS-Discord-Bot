@@ -1,27 +1,25 @@
 // Data imports
 import { blockedUsers, configuration } from "#variables";
 
-// Internal class & type imports
-import { FileInclude } from "./types";
-
 // Internal module imports
-import updateApplicationCommandTypes from "./applicationCommandTypeUpdate";
-import updateApplicationCommands from "./applicationCommandUpdate";
-import updateEventTypes from "./eventTypeUpdate";
-import updateInteractionTypes from "./interactionTypeUpdate";
-import updateComponentTypes from "./componentTypeUpdate";
-import updateModals from "./modalUpdate";
+import type { FileInclude } from "./types";
+import { updateApplicationCommandTypes } from "./applicationCommandTypeUpdate";
+import { updateApplicationCommands } from "./applicationCommandUpdate";
+import { updateEventTypes } from "./eventTypeUpdate";
+import { updateInteractionTypes } from "./interactionTypeUpdate";
+import { updateComponentTypes } from "./componentTypeUpdate";
+import { updateModals } from "./modalUpdate";
 
 // Module imports
-import { relativePath } from "../fileReader";
-import notify from "../notification";
+import { relativePath } from "#modules/fileReader";
+import notify from "#modules/notification";
 
 /**
  * Updates all changed files, adds new ones and deletes removed ones.
  * @param forceReload Whether to reload all files no matter if files were changed, added or removed. Defaults to
  * `false`
  */
-export default function updateFiles(forceReload?: boolean): Promise<void>;
+export function updateFiles(forceReload?: boolean): Promise<void>;
 
 /**
  * Updates all changed files, adds new ones and deletes removed ones.
@@ -31,12 +29,9 @@ export default function updateFiles(forceReload?: boolean): Promise<void>;
  * @param exclude Whether to include (`false`) or exclude (`true`) the specified files. Defaults to `false`
  * @see {@link FileInclude}
  */
-export default function updateFiles(files?: FileInclude | (keyof FileInclude)[], exclude?: boolean): Promise<void>;
+export function updateFiles(files?: FileInclude | (keyof FileInclude)[], exclude?: boolean): Promise<void>;
 
-export default async function updateFiles(
-	x: boolean | FileInclude | (keyof FileInclude)[] = false,
-	exclude: boolean = false,
-) {
+export async function updateFiles(x: boolean | FileInclude | (keyof FileInclude)[] = false, exclude: boolean = false) {
 	/** Force reload overload parameter */
 	const forceReload = typeof x === "boolean" ? x : false;
 

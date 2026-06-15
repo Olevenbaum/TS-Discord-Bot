@@ -1,14 +1,14 @@
 // Class & type imports
-import type { SavedApplicationCommandType, SavedInteractionType } from "../../../types";
+import type { SavedApplicationCommandType, SavedInteractionType } from "#types";
 
 // Data imports
 import { applicationCommandTypes } from "#variables";
 
-// External library imports
+// External libraries imports
 import { ApplicationCommandType, bold, codeBlock, CommandInteraction, InteractionType, MessageFlags } from "discord.js";
 
 // Module imports
-import notify from "../../../modules/notification";
+import notify from "#modules/notification";
 
 /**
  * Interaction type handler for application commands. Routes interactions to the appropriate application command type

@@ -1,7 +1,7 @@
 // Class & type imports
-import type { SavedInteractionType } from "../../../../types";
+import type { SavedInteractionType } from "#types";
 
-// External library imports
+// External libraries imports
 import { Interaction, InteractionType } from "discord.js";
 
 /**

@@ -1,8 +1,8 @@
-// Class & type imports
-import { type ClientEvents, InteractionType, type MessageComponentType, ApplicationCommandType } from "discord.js";
+// External libraries imports
+import { Events, InteractionType, type MessageComponentType, ApplicationCommandType } from "discord.js";
 
 /** Files of types of components that should be updated */
-interface FileInclude {
+export interface FileInclude {
 	/**
 	 * Whether to update application commands or list of application commands to update
 	 * @see {@link ApplicationCommandType}
@@ -28,7 +28,7 @@ interface FileInclude {
 	 * Whether to update event types or list of event types to update
 	 * @see {@link ClientEvents}
 	 */
-	eventTypes?: boolean | (keyof ClientEvents)[];
+	eventTypes?: boolean | Events[];
 
 	/**
 	 * Whether to update interaction types or list of interaction types to update

@@ -1,2 +1,2 @@
-export { default as validateCooldown } from "./cooldownValidator";
-export * from "./cooldownValidator";
+// Named exports
+export { updateCooldown, validateCooldown } from "./cooldownValidator";

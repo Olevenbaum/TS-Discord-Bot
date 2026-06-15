@@ -15,11 +15,12 @@ import {
 } from "discord.js";
 
 /**
- * Updates the cooldowns of the application command if needed
- * @param type The type of the interaction the cooldown belongs to
- * @param applicationCommand The application command to update
- * @param interaction The interaction that caused the update
- * @see {@link CommandInteraction} | {@link SavedApplicationCommand}
+ * Updates the cooldowns of the application command if needed.
+ * @param type - The type of the interaction the cooldown belongs to.
+ * @param applicationCommand - The application command to update.
+ * @param interaction - The interaction that caused the update.
+ * @see {@link CommandInteraction}
+ * @see {@link SavedApplicationCommand}
  */
 export async function updateCooldown(
 	type: "ApplicationCommand",
@@ -28,11 +29,12 @@ export async function updateCooldown(
 ): Promise<void>;
 
 /**
- * Updates the cooldowns of the message component if needed
- * @param type The type of the interaction the cooldown belongs to
- * @param messageComponent The message component to update
- * @param interaction The interaction that caused the update
- * @see {@link MessageComponentInteraction} | {@link SavedMessageComponent}
+ * Updates the cooldowns of the message component if needed.
+ * @param type - The type of the interaction the cooldown belongs to.
+ * @param messageComponent - The message component to update.
+ * @param interaction - The interaction that caused the update.
+ * @see {@link MessageComponentInteraction}
+ * @see {@link SavedMessageComponent}
  */
 export async function updateCooldown(
 	type: "MessageComponent",
@@ -41,11 +43,12 @@ export async function updateCooldown(
 ): Promise<void>;
 
 /**
- * Updates the cooldowns of the modal if needed
- * @param type The type of the interaction the cooldown belongs to
- * @param modal The modal to update
- * @param interaction The interaction that caused the update
- * @see {@link ModalSubmitInteraction} | {@link SavedModal}
+ * Updates the cooldowns of the modal if needed.
+ * @param type - The type of the interaction the cooldown belongs to.
+ * @param modal - The modal to update.
+ * @param interaction - The interaction that caused the update.
+ * @see {@link ModalSubmitInteraction}
+ * @see {@link SavedModal}
  */
 export async function updateCooldown(
 	type: "ModalSubmit",
@@ -103,42 +106,45 @@ export async function updateCooldown(
 }
 
 /**
- * Checks whether the user can use the application command
- * @param applicationCommand The application command to check
- * @param interaction The interaction the cooldown needs to be checked for
- * @returns Whether the user can use the application command
- * @see {@link CommandInteraction} | {@link SavedApplicationCommand}
+ * Checks whether the user can use the application command.
+ * @param applicationCommand - The application command to check.
+ * @param interaction - The interaction the cooldown needs to be checked for.
+ * @returns - Whether the user can use the application command.
+ * @see {@link CommandInteraction}
+ * @see {@link SavedApplicationCommand}
  */
-export default async function validateCooldown(
+export async function validateCooldown(
 	applicationCommand: SavedApplicationCommand,
 	interaction: CommandInteraction,
 ): Promise<true | number>;
 
 /**
- * Checks whether the user can use the message component
- * @param messageComponent The message component to check
- * @param interaction The interaction the cooldown needs to be checked for
- * @returns Whether the user can use the application command
- * @see {@link MessageComponentInteraction} | {@link SavedMessageComponent}
+ * Checks whether the user can use the message component.
+ * @param messageComponent - The message component to check.
+ * @param interaction - The interaction the cooldown needs to be checked for.
+ * @returns - Whether the user can use the application command.
+ * @see {@link MessageComponentInteraction}
+ * @see {@link SavedMessageComponent}
  */
-export default async function validateCooldown(
+export async function validateCooldown(
 	messageComponent: SavedMessageComponent,
 	interaction: MessageComponentInteraction,
 ): Promise<true | number>;
 
 /**
- * Checks whether the user can submit the modal
- * @param modal The modal to check
- * @param interaction The interaction the cooldown needs to be checked for
- * @returns Whether the user can submit the modal
- * @see {@link ModalSubmitInteraction} | {@link SavedModal}
+ * Checks whether the user can submit the modal.
+ * @param modal - The modal to check.
+ * @param interaction - The interaction the cooldown needs to be checked for.
+ * @returns - Whether the user can submit the modal.
+ * @see {@link ModalSubmitInteraction}
+ * @see {@link SavedModal}
  */
-export default async function validateCooldown(
+export async function validateCooldown(
 	modal: SavedModal,
 	interaction: ModalSubmitInteraction,
 ): Promise<true | number>;
 
-export default async function validateCooldown(
+export async function validateCooldown(
 	x: SavedApplicationCommand | SavedMessageComponent | SavedModal,
 	interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction,
 ) {

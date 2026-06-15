@@ -1,6 +1,5 @@
 // Class & type imports
-import { ConsoleHandler } from "../classes";
-import type { BotData } from "../types";
+import type { BotData } from "#types";
 
 // Data imports
 import { configuration } from "#variables";
@@ -11,13 +10,12 @@ import { Sequelize } from "sequelize";
 
 // Module imports
 import "../extensions/Array";
-import notify from "../modules/notification";
-import { updateFiles } from "../modules/update";
-import { DebuggingState } from "../classes/DebuggingState";
+import ConsoleHandler from "#modules/cli";
+import notify from "#modules/notification";
+import { updateFiles } from "#modules/update";
 
 /**
  * Console interface for viewing logs and interacting with the bot directly through the command line.
- * Initialized with automatic focus color detection.
  * @see {@linkcode ConsoleHandler}
  */
 export const cli = new ConsoleHandler();
@@ -48,15 +46,8 @@ export const database: Sequelize | null = configuration.database ? new Sequelize
  * bot configurations and debugging mode. Automatically updates event type files on startup and authenticates the
  * database connection if configured.
  * @param botIndex - Index of the bot to use when multiple bots are configured. Defaults to `0`.
- * @param debugging - The debugging mode to run the bot in. Defaults to {@linkcode DebuggingState.NONE}.
- * @see {@linkcode DebuggingState}
  */
-export default async function main(
-	botIndex: number = 0,
-	debugging: DebuggingState = DebuggingState.NONE,
-): Promise<void> {
-	await cli.initialize(debugging);
-
+export async function main(botIndex: number = 0): Promise<void> {
 	notify("Bot is starting...", "INFORMATION");
 
 	await updateFiles(["eventTypes"]);

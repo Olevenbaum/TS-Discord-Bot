@@ -1,14 +1,11 @@
-// Class & type exports
-export type * from "./types";
+// Default export
+export { updateFiles as default } from "./fileUpdate";
 
-// Default / main function export
-export { default } from "./fileUpdate";
-
-// Specific file update function exports
-export { default as updateApplicationCommandTypes } from "./applicationCommandTypeUpdate";
-export { default as updateApplicationCommands } from "./applicationCommandUpdate";
-export { default as updateEventTypes } from "./eventTypeUpdate";
-export { default as updateFiles } from "./fileUpdate";
-export { default as updateInteractionTypes } from "./interactionTypeUpdate";
-export { default as updateComponentTypes } from "./componentTypeUpdate";
-export { default as updateModals } from "./modalUpdate";
+// Named exports
+export { updateApplicationCommandTypes } from "./applicationCommandTypeUpdate";
+export { updateApplicationCommands } from "./applicationCommandUpdate";
+export { updateEventTypes } from "./eventTypeUpdate";
+export { updateFiles } from "./fileUpdate";
+export { updateInteractionTypes } from "./interactionTypeUpdate";
+export { updateComponentTypes } from "./componentTypeUpdate";
+export { updateModals } from "./modalUpdate";

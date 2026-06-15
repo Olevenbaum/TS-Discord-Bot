@@ -1,14 +1,14 @@
 // Class & type imports
-import type { SavedEventType, SavedInteractionType } from "../../types";
+import type { SavedEventType, SavedInteractionType } from "#types";
 
 // Data imports
 import { blockedUsers, configuration, interactionTypes } from "#variables";
 
-// External library imports
+// External libraries imports
 import { bold, codeBlock, Events, type Interaction, InteractionType, MessageFlags } from "discord.js";
 
 // Module imports
-import notify from "../../modules/notification";
+import notify from "#modules/notification";
 
 /**
  * Event handler for all Discord interactions. Routes interactions to their respective type handlers and manages blocked

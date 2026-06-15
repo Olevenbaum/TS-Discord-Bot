@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedMessageComponentType } from "../../types";
+import type { SavedMessageComponentType } from "#types";
 
 // Data imports
 import { componentTypes, configuration } from "#variables";
@@ -8,31 +8,31 @@ import { componentTypes, configuration } from "#variables";
 import { ComponentType } from "discord.js";
 
 // Module imports
-import readFiles from "../fileReader";
-import notify from "../notification";
+import readFiles from "#modules/fileReader";
+import notify from "#modules/notification";
 
 /**
  * Iterates all files in the component type directories. If files were deleted, the matching component types are removed
  * from the collection. If files were added the matching component types are added to the collection. On force reload
  * remaining component types are reloaded from the matching files.
- * @param forceReload - Whether to reload all existing component types (defaults to `false`)
+ * @param forceReload - Whether to reload all existing component types. Defaults to `false`.
  */
-export default async function updateComponentTypes(forceReload?: boolean): Promise<void>;
+export async function updateComponentTypes(forceReload?: boolean): Promise<void>;
 
 /**
  * Iterates all files in the component type directories. If files were deleted, the matching component types are removed
  * from the collection. If files were added the matching component types are added to the collection. Any specified
  * component types are either reloaded or excluded from reloading.
  * @param componentTypes - Component types to reload or exclude from reloading
- * @param exclude - Whether to include (`false`) or exclude (`true`) the specified component types (defaults to `false`)
+ * @param exclude - Whether to include (`false`) or exclude (`true`) the specified component types. Defaults to `false`.
  * @see {@link ComponentType}
  */
-export default async function updateComponentTypes(
+export async function updateComponentTypes(
 	componentTypes: ComponentType[] | (keyof typeof ComponentType)[],
 	exclude?: boolean,
 ): Promise<void>;
 
-export default async function updateComponentTypes(
+export async function updateComponentTypes(
 	x: boolean | ComponentType[] | (keyof typeof ComponentType)[] = false,
 	exclude: boolean = false,
 ) {
@@ -44,8 +44,8 @@ export default async function updateComponentTypes(
 		typeof x === "boolean" || x.length === 0
 			? undefined
 			: x.every((componentType) => typeof componentType === "string")
-			? x.map((componentType) => ComponentType[componentType])
-			: x;
+				? x.map((componentType) => ComponentType[componentType])
+				: x;
 
 	notify(
 		`Updating component type${Array.isArray(types) && types.length === 1 ? "" : "s"}${

@@ -1,2 +1,2 @@
-// Type exports
-export type * from "./LogLevel";
+// Named exports
+export type { LogLevel } from "./LogLevel";

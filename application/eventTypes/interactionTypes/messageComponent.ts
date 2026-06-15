@@ -1,14 +1,14 @@
 // Class & type imports
-import type { SavedMessageComponentType, SavedInteractionType } from "../../../types";
+import type { SavedMessageComponentType, SavedInteractionType } from "#types";
 
 // Data imports
 import { componentTypes } from "#variables";
 
-// External library imports
+// External libraries imports
 import { InteractionType, MessageComponentInteraction, ComponentType, bold, codeBlock, MessageFlags } from "discord.js";
 
 // Module imports
-import notify from "../../../modules/notification";
+import notify from "#modules/notification";
 
 /**
  * Interaction type handler for message components. Routes interactions to their respective component type handlers and

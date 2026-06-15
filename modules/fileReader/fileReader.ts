@@ -1,26 +1,26 @@
 // Class & type imports
-import type { Task } from "../../types";
-
-// Internal module imports
-import relativePath from "./pathRelativation";
+import type { Task } from "#types";
 
 // External libraries imports
 import { readdirSync } from "fs";
 import { basename, extname, join } from "path";
+import type { Path } from "typescript";
+
+// Internal module imports
+import { relativePath } from "./pathRelativation";
 
 // Module imports
-import notify from "../notification";
+import notify from "#modules/notification";
 
 /**
  * Asynchronously reads all TypeScript and JavaScript files from one or multiple directories and returns their default
  * exports if existing. Files are read in parallel for better performance. To load the files, {@link relativePath} is
  * used to build the relative path between the working directory and each desired directories.
- * @param directories - One or more paths of directories to read files from
- * @returns The default export of each TypeScript and JavaScript file if existing
+ * @param directories - One or more paths of directories to read files from.
+ * @returns - The default export of each TypeScript and JavaScript file if existing.
+ * @see {@linkcode Path}
  */
-export default async function readFiles<FileType>(directories: string | string[]): Promise<FileType[]>;
-
-export default async function readFiles<FileType>(directories: string | string[]) {
+export async function readFiles<FileType>(directories: Path | Path[]): Promise<FileType[]> {
 	if (!Array.isArray(directories)) {
 		directories = [directories];
 	}
@@ -33,7 +33,10 @@ export default async function readFiles<FileType>(directories: string | string[]
 	const tasks: Task<FileType | undefined>[] = [];
 
 	for (const directory of directories) {
-		/** Relative path between the current working directory and the directory of the files */
+		/**
+		 * Relative path from the current working directory to the directory of the files
+		 * @see {@linkcode Path}
+		 */
 		const newPath = relativePath(directory);
 
 		try {
@@ -61,7 +64,7 @@ export default async function readFiles<FileType>(directories: string | string[]
 
 			if (errno && errno.code === "ENOENT") {
 				notify(
-					`Found no directory at ${errno.path ? relativePath(errno.path, true) : "unknown path"}`,
+					`Found no directory at ${errno.path ? relativePath(errno.path as Path, true) : "unknown path"}`,
 					"WARNING",
 				);
 			} else {

@@ -1,4 +1,4 @@
-// External library imports
+// External libraries imports
 import { type ClientEvents, Events } from "discord.js";
 
 /**
@@ -6,7 +6,7 @@ import { type ClientEvents, Events } from "discord.js";
  * client events, such as message creation, guild member updates, or bot readiness. These are typically loaded
  * dynamically and registered with the client.
  */
-interface SavedEventType {
+interface SavedEventType<EventType extends keyof ClientEvents = keyof ClientEvents> {
 	/**
 	 * Whether this event handler should only be called once. If true, the handler will be removed after the first
 	 * execution. Useful for one-time initialization events like {@linkcode Events.ClientReady}.
@@ -18,12 +18,12 @@ interface SavedEventType {
 	 * handler's execution.
 	 * @see {@linkcode ClientEvents}
 	 */
-	type: keyof ClientEvents;
+	type: EventType;
 
 	/**
 	 * Executes the event handler logic when the associated event is emitted. Receives the event arguments specific to
 	 * the event type and performs the necessary actions.
 	 * @param args - The arguments emitted with the event, typed according to the event type.
 	 */
-	execute(...args: any): Promise<void>;
+	execute(...args: ClientEvents[EventType]): Promise<void>;
 }

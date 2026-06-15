@@ -12,5 +12,6 @@
 	"messageCommandsPath": "./resources/applicationCommands/messageCommands",
 	"componentTypesPath": "./application/eventTypes/interactionTypes/componentTypes",
 	"modalsPath": "./resources/modals",
-	"userCommandsPath": "./resources/applicationCommands/userCommands"
+	"userCommandsPath": "./resources/applicationCommands/userCommands",
+	"windows": "./resources/windows"
 }

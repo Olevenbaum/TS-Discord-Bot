@@ -1,15 +1,15 @@
 // Class & type imports
-import type { SavedInteractionType, SavedModal } from "../../../types";
+import type { SavedInteractionType, SavedModal } from "#types";
 
 // Data imports
 import { modals } from "#variables";
 
-// External library imports
+// External libraries imports
 import { bold, codeBlock, InteractionType, ModalSubmitInteraction, MessageFlags, underline } from "discord.js";
 
 // Module imports
-import notify from "../../../modules/notification";
-import { updateCooldown, validateCooldown } from "../../../modules/utilities";
+import notify from "#modules/notification";
+import { updateCooldown, validateCooldown } from "#modules/utilities";
 
 /**
  * Interaction type handler for modal submissions. Processes form data from modals and applies cooldown restrictions to

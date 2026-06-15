@@ -1,10 +1,10 @@
 // Class & type imports
-import type { SavedChatInputCommand, SavedInteractionType } from "../../../types";
+import type { SavedChatInputCommand, SavedInteractionType } from "#types";
 
 // Data imports
 import { applicationCommands, configuration, timestamps } from "#variables";
 
-// External library imports
+// External libraries imports
 import {
 	ApplicationCommandType,
 	AutocompleteInteraction,
@@ -14,7 +14,7 @@ import {
 } from "discord.js";
 
 // Module imports
-import notify from "../../../modules/notification";
+import notify from "#modules/notification";
 
 /**
  * Interaction type handler for chat input command autocomplete requests. Provides dynamic suggestion options

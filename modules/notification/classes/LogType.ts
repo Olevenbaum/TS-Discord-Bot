@@ -1,4 +1,4 @@
-/** The level (imprtance) of a log message */
+/** The level (importance) of a log message */
 export enum LogType {
 	ERROR,
 	WARNING,

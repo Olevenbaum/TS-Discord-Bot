@@ -1,2 +1,2 @@
-// Type exports
-export type * from "./FileInclude";
+// Named exports
+export type { FileInclude } from "./FileInclude";

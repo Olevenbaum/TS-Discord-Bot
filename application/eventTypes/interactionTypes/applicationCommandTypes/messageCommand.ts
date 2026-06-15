@@ -1,10 +1,10 @@
 // Class & type imports
-import type { SavedApplicationCommandType, SavedMessageCommand } from "../../../../types";
+import type { SavedApplicationCommandType, SavedMessageCommand } from "#types";
 
 // Data imports
 import { applicationCommands } from "#variables";
 
-// External library imports
+// External libraries imports
 import {
 	ApplicationCommandType,
 	bold,
@@ -17,8 +17,8 @@ import {
 } from "discord.js";
 
 // Module imports
-import notify from "../../../../modules/notification";
-import { updateCooldown, validateCooldown } from "../../../../modules/utilities";
+import notify from "#modules/notification";
+import { updateCooldown, validateCooldown } from "#modules/utilities";
 
 /**
  * Application command type handler for message context menu commands. Manages command execution for message-based

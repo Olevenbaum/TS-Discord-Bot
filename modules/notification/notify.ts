@@ -7,7 +7,7 @@ import { Team, TeamMemberMembershipState, User, userMention } from "discord.js";
 
 // Internal class & type imports
 import { LogType } from "./classes";
-import { LogLevel } from "./types";
+import type { LogLevel } from "./types";
 
 // Internal module imports
 import testNotification from "./testNotification";
@@ -18,14 +18,14 @@ import testNotification from "./testNotification";
  * @param type - Type of the message
  * @see {@linkcode LogType}
  */
-export default function notify(message: string, type: LogType | keyof typeof LogType): void;
+export function notify(message: string, type: LogType | keyof typeof LogType): void;
 
 /**
  * Sends an error message to the console.
  * @param error - The error to print
  * @see {@linkcode Error}
  */
-export default function notify(error: Error): void;
+export function notify(error: Error): void;
 
 /**
  * Sends an error message to the console.
@@ -33,7 +33,7 @@ export default function notify(error: Error): void;
  * @param error - The error to print
  * @see {@linkcode Error}
  */
-export default function notify(message: string, error: Error): void;
+export function notify(message: string, error: Error): void;
 
 /**
  * Sends a log message to the console and to the owner(s) of the bot, if wanted and the CLI does not run in debugging
@@ -45,7 +45,7 @@ export default function notify(message: string, error: Error): void;
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
-export default function notify(
+export function notify(
 	message: string,
 	type: LogType | keyof typeof LogType,
 	sendToDiscord: boolean,
@@ -62,7 +62,7 @@ export default function notify(
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
-export default function notify(message: string, error: Error, sendToDiscord: boolean, level?: LogLevel): void;
+export function notify(message: string, error: Error, sendToDiscord: boolean, level?: LogLevel): void;
 
 /**
  * Sends a log message to the console and to the owner(s) of the bot, if wanted and the CLI does not run in debugging
@@ -74,7 +74,7 @@ export default function notify(message: string, error: Error, sendToDiscord: boo
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
-export default async function notify(
+export async function notify(
 	message: string,
 	type: LogType | keyof typeof LogType,
 	discordMessage: string,
@@ -91,14 +91,9 @@ export default async function notify(
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
-export default async function notify(
-	message: string,
-	error: Error,
-	discordMessage: string,
-	level?: LogLevel,
-): Promise<void>;
+export async function notify(message: string, error: Error, discordMessage: string, level?: LogLevel): Promise<void>;
 
-export default async function notify(
+export async function notify(
 	message: string | Error,
 	x: Error | LogType | keyof typeof LogType = LogType.ERROR,
 	y?: string | boolean,
@@ -142,7 +137,7 @@ export default async function notify(
 			break;
 	}
 
-	if (y && !cli.debuggingMode && client.isReady() && testNotification(type, level)) {
+	if (y && client.isReady() && testNotification(type, level)) {
 		/** Message to send to bot owner or team members */
 		const discordMessage = (typeof y === "string" ? y : (message as string))
 			.replaceAll("@bot", userMention(client.user.id))
@@ -160,7 +155,7 @@ export default async function notify(
 		 */
 		const receivers: User[] = [];
 
-		await client.application.fetch()
+		await client.application.fetch();
 
 		if (client.application.owner instanceof User) {
 			receivers.push(client.application.owner);

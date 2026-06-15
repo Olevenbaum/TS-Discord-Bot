@@ -1,5 +1,5 @@
 // Class & type imports
-import type { SavedApplicationCommandType } from "../../types";
+import type { SavedApplicationCommandType } from "#types";
 
 // Data imports
 import { applicationCommandTypes, configuration } from "#variables";
@@ -8,32 +8,32 @@ import { applicationCommandTypes, configuration } from "#variables";
 import { ApplicationCommandType } from "discord.js";
 
 // Module imports
-import readFiles from "../fileReader";
-import notify from "../notification";
+import readFiles from "#modules/fileReader";
+import notify from "#modules/notification";
 
 /**
  * Iterates all files in the application command type directories. If files were deleted, the matching application
  * command types are removed from the collection. If files were added the matching application command types are added
  * to the collection. On force reload remaining application command types are reloaded from the matching files.
- * @param forceReload - Whether to reload all existing application command types (defaults to `false`)
+ * @param forceReload - Whether to reload all existing application command types. Defaults to `false`.
  */
-export default async function updateApplicationCommandTypes(forceReload?: boolean): Promise<void>;
+export async function updateApplicationCommandTypes(forceReload?: boolean): Promise<void>;
 
 /**
  * Iterates all files in the application command type directories. If files were deleted, the matching application
  * command types are removed from the collection. If files were added the matching application command types are added
  * to the collection. Any specified application command types are either reloaded or excluded from reloading.
  * @param applicationCommandTypes - Application command types to reload or exclude from reloading
- * @param exclude - Whether to include (`false`) or exclude (`true`) the specified application command types (defaults
- * to `false`)
+ * @param exclude - Whether to include (`false`) or exclude (`true`) the specified application command types. Defaults
+ * to `false`.
  * @see {@link ApplicationCommandType}
  */
-export default async function updateApplicationCommandTypes(
+export async function updateApplicationCommandTypes(
 	applicationCommandTypes: ApplicationCommandType[] | (keyof typeof ApplicationCommandType)[],
 	exclude: boolean,
 ): Promise<void>;
 
-export default async function updateApplicationCommandTypes(
+export async function updateApplicationCommandTypes(
 	x: boolean | ApplicationCommandType[] | (keyof typeof ApplicationCommandType)[] = false,
 	exclude: boolean = false,
 ) {
@@ -45,8 +45,8 @@ export default async function updateApplicationCommandTypes(
 		typeof x === "boolean" || x.length === 0
 			? undefined
 			: x.every((applicationCommandType) => typeof applicationCommandType === "string")
-			? x.map((applicationCommandType) => ApplicationCommandType[applicationCommandType])
-			: x;
+				? x.map((applicationCommandType) => ApplicationCommandType[applicationCommandType])
+				: x;
 
 	notify(
 		`Updating application command type${!Array.isArray(types) || types.length > 1 ? "s" : ""}${

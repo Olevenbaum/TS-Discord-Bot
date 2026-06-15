@@ -1,15 +1,15 @@
 // Class & type imports
-import type { SavedEventType } from "../../types";
+import type { SavedEventType } from "#types";
 
 // Data imports
 import { client } from "#application";
 
-// External library imports
+// External libraries imports
 import { Events } from "discord.js";
 
 // Module imports
-import notify from "../../modules/notification";
-import { updateFiles } from "../../modules/update";
+import notify from "#modules/notification";
+import { updateFiles } from "#modules/update";
 
 /**
  * Event handler for the Discord {@linkcode Events.ClientReady} event. Triggered once when the bot successfully connects

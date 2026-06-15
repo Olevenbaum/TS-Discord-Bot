@@ -1,6 +1,6 @@
 // Default export
-export { default } from "./fileReader";
+export { readFiles as default } from "./fileReader";
 
-// Function exports
-export { default as readFiles } from "./fileReader";
-export { default as relativePath } from "./pathRelativation";
+// Named exports
+export { readFiles } from "./fileReader";
+export { relativePath } from "./pathRelativation";
