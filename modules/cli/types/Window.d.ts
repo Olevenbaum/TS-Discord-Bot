@@ -1,5 +1,5 @@
 // External libraries imports
-import { BoxRenderable } from "@opentui/core";
+import { Renderable } from "@opentui/core";
 
 // Internal module imports
 import { BlankWindow } from "./BlankWindow";
@@ -13,5 +13,5 @@ export interface Window extends BlankWindow {
 	 * The content displayed in the window.
 	 * @see {@linkcode Renderable}
 	 */
-	content: BoxRenderable;
+	content: Renderable;
 }

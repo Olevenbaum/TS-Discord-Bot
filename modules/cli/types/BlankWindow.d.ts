@@ -1,5 +1,5 @@
 // External libraries imports
-import { BoxRenderable, type RenderableOptions, type SelectOption } from "@opentui/core";
+import { BoxRenderable, Renderable, type RenderableOptions, type SelectOption } from "@opentui/core";
 
 // Internal module imports
 import { CLIView, ConsoleHandler } from "../classes";
@@ -33,7 +33,7 @@ export interface BlankWindow {
 	 * @see {@linkcode Renderable}
 	 * @see {@linkcode RenderableOptions}
 	 */
-	create(handler: ConsoleHandler, options?: RenderableOptions): BoxRenderable;
+	create(handler: ConsoleHandler, options?: RenderableOptions): Renderable;
 
 	/** Function to be exectued upon any option of the {@linkcode menuOptions} being selected. */
 	onMenuSelect?: (value: boolean | number | string) => Promise<void>;

@@ -14,23 +14,23 @@ import testNotification from "./testNotification";
 
 /**
  * Sends a log message to the console.
- * @param message - Message to print
- * @param type - Type of the message
+ * @param message Message to print
+ * @param type Type of the message
  * @see {@linkcode LogType}
  */
 export function notify(message: string, type: LogType | keyof typeof LogType): void;
 
 /**
  * Sends an error message to the console.
- * @param error - The error to print
+ * @param error The error to print
  * @see {@linkcode Error}
  */
 export function notify(error: Error): void;
 
 /**
  * Sends an error message to the console.
- * @param message - Message to add context to the error
- * @param error - The error to print
+ * @param message Message to add context to the error
+ * @param error The error to print
  * @see {@linkcode Error}
  */
 export function notify(message: string, error: Error): void;
@@ -38,10 +38,10 @@ export function notify(message: string, error: Error): void;
 /**
  * Sends a log message to the console and to the owner(s) of the bot, if wanted and the CLI does not run in debugging
  * mode.
- * @param message - Message to print to console and send to bot owner(s)
- * @param type - Type of the message
- * @param sendToDiscord - Whether to send the message to bot owner(s)
- * @param level - Level of the message sent to bot owner(s)
+ * @param message Message to print to console and send to bot owner(s)
+ * @param type Type of the message
+ * @param sendToDiscord Whether to send the message to bot owner(s)
+ * @param level Level of the message sent to bot owner(s)
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
@@ -55,10 +55,10 @@ export function notify(
 /**
  * Sends an error message to the console and to the owner(s) of the bot, if wanted and the CLI does not run in debugging
  * mode.
- * @param message - Message to add context to the error
- * @param error - The error to print and send to bot owner(s)
- * @param sendToDiscord - Whether to send the message to bot owner(s)
- * @param level - Level of the message sent to bot owner(s)
+ * @param message Message to add context to the error
+ * @param error The error to print and send to bot owner(s)
+ * @param sendToDiscord Whether to send the message to bot owner(s)
+ * @param level Level of the message sent to bot owner(s)
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
@@ -67,10 +67,10 @@ export function notify(message: string, error: Error, sendToDiscord: boolean, le
 /**
  * Sends a log message to the console and to the owner(s) of the bot, if wanted and the CLI does not run in debugging
  * mode.
- * @param message - Message to print to console
- * @param type - Type of the message
- * @param discordMessage - Message to send to bot owner(s)
- * @param level - Level of the message sent to bot owner(s)
+ * @param message Message to print to console
+ * @param type Type of the message
+ * @param discordMessage Message to send to bot owner(s)
+ * @param level Level of the message sent to bot owner(s)
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
@@ -84,10 +84,10 @@ export async function notify(
 /**
  * Sends an error message to the console and to the owner(s) of the bot, if wanted and the CLI does not run in debugging
  * mode.
- * @param message - Message to add context to the error
- * @param error - The error to print and send to bot owner(s)
- * @param discordMessage - Message to send to bot owner(s)
- * @param level - Level of the message sent to bot owner(s)
+ * @param message Message to add context to the error
+ * @param error The error to print and send to bot owner(s)
+ * @param discordMessage Message to send to bot owner(s)
+ * @param level Level of the message sent to bot owner(s)
  * @see {@linkcode LogLevel}
  * @see {@linkcode LogType}
  */
@@ -100,6 +100,7 @@ export async function notify(
 	level: LogLevel = 0,
 ): Promise<void> {
 	/**
+	 * Type of the message.
 	 * @see {@linkcode LogType}
 	 */
 	const type = x instanceof Error ? LogType.ERROR : typeof x === "string" ? LogType[x] : x;

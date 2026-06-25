@@ -1,6 +1,5 @@
-// Enum exports
+// Named exports
+export { ButtonRenderable } from "./ButtonRenderable";
 export { CLIState } from "./CLIState";
 export { CLIView } from "./CLIView";
-
-// Named exports
 export { ConsoleHandler } from "./ConsoleHandler";

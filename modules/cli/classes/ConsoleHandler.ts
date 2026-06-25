@@ -18,10 +18,13 @@ import {
 	white,
 	yellow,
 } from "@opentui/core";
+import { Collection } from "discord.js";
 import { access, appendFile, mkdirSync } from "fs";
 import type { Path } from "typescript";
 
 // Internal module imports
+import { ButtonGroupRenderable } from "./ButtonGroupRenderable";
+import { ButtonRenderable } from "./ButtonRenderable";
 import { CLIState } from "./CLIState";
 import { CLIView } from "./CLIView";
 import type { BlankWindow, Window } from "../types";
@@ -57,7 +60,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * The main area for visualization of content.
 	 * @see {@linkcode BoxRenderable}
 	 */
-	protected contentArea?: BoxRenderable;
+	protected content?: BoxRenderable;
 
 	/**
 	 * A menu showing options based on the current window.
@@ -72,12 +75,6 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	protected lastSaveDate?: Date;
 
 	/**
-	 * The logs of the last day.
-	 * @see {@linkcode StyledText}
-	 */
-	protected logs: StyledText[] = [];
-
-	/**
 	 * @see {@linkcode CLIView}
 	 */
 	protected view: CLIView = CLIView.OVERVIEW;
@@ -87,13 +84,25 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * @see {@linkcode CLIView}
 	 * @see {@linkcode Window}
 	 */
-	protected windows: Partial<Record<CLIView, Window>> = {};
+	protected windows: Collection<CLIView, Window>;
 
 	/**
 	 * Menu to select the content of the main area of the CLI.
-	 * @see {@linkcode SelectRenderable}
+	 * @see {@linkcode ButtonGroupRenderable}
 	 */
-	protected windowSelection?: SelectRenderable;
+	protected windowSelection?: ButtonGroupRenderable;
+
+	/**
+	 * The logs of the last day.
+	 * @see {@linkcode StyledText}
+	 */
+	public logs: StyledText[] = [];
+
+	/**
+	 * Listeners that get notified when a new log is added.
+	 * @see {@linkcode StyledText}
+	 */
+	protected logListeners: Array<(log: StyledText) => void> = [];
 
 	/**
 	 * Creates a new console handler. If wanted, common console methods like {@linkcode console.debug},
@@ -105,67 +114,76 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	public constructor(overwriteConsole: boolean = true) {
 		this._state = CLIState.INITIALIZING;
 
+		this.windows = new Collection();
+
 		createCliRenderer().then(async (renderer) => {
 			this._renderer = renderer;
 
 			await readFiles<BlankWindow>(configuration.paths.windows).then((blankWindows) => {
 				for (const blankWindow of blankWindows) {
-					/**
-					 * Window with content
-					 * @see {@linkcode Window}
-					 */
-					const window: Window = { ...blankWindow, content: blankWindow.create(this, {}) };
-
-					this.windows[window.id] = window;
+					this.windows.set(blankWindow.id, { ...blankWindow, content: blankWindow.create(this, {}) });
 				}
+
+				this.windows.sort();
 			});
+
 			/**
 			 * The base or "root" every other {@linkcode Renderable} is added to.
 			 * @see {@linkcode BoxRenderable}
 			 */
 			const base = new BoxRenderable(this._renderer, {
-				flexDirection: "column",
-				flexGrow: 1,
-			});
-
-			const topRow = new BoxRenderable(this._renderer, {
 				flexDirection: "row-reverse",
 				flexGrow: 1,
 			});
 
-			this.contentArea = new BoxRenderable(this._renderer, {
+			const contentArea = new BoxRenderable(this._renderer, {
+				flexDirection: "column-reverse",
+				flexGrow: 1,
+			});
+
+			this.content = new BoxRenderable(this._renderer, {
 				border: true,
 				borderStyle: "rounded",
 				flexGrow: 1,
 			});
+			this.content.add(this.windows.get(this.view)?.content);
 
-			const windowSelectionBox = new BoxRenderable(this._renderer, {
+			this.contextMenu = new ButtonGroupRenderable(this._renderer, {
 				border: true,
 				borderStyle: "rounded",
-				width: 15,
-			});
-
-			this.windowSelection = new SelectRenderable(this._renderer, {
-				options: Object.entries(this.windows).map(([_, window]) => {
-					return { name: window.title, description: window.description, value: window.id };
-				}),
-			});
-
-			windowSelectionBox.add(this.windowSelection);
-
-			topRow.add(windowSelectionBox);
-			topRow.add(this.contentArea);
-
-			this.contextMenu = new BoxRenderable(this._renderer, {
-				border: true,
-				borderStyle: "rounded",
+				flexDirection: "row",
 				height: 5,
 			});
 
-			base.add(topRow);
-			base.add(this.contextMenu);
+			contentArea.add(this.contextMenu);
+			contentArea.add(this.content);
+
+			this.windowSelection = new ButtonGroupRenderable(this._renderer, {
+				border: true,
+				borderStyle: "rounded",
+				flexDirection: "column",
+				width: 15,
+			});
+
+			this.windows.forEach((window) => {
+				this.windowSelection!.add(
+					new ButtonRenderable(this._renderer!, {
+						description: window.description,
+						borderStyle: this.windowSelection?.borderStyle!,
+						name: window.title,
+						onMouseDown: () => {
+							this.switchWindow(window.id);
+						},
+					}),
+				);
+			});
+
+			base.add(this.windowSelection);
+			base.add(contentArea);
 
 			this._renderer.root.add(base);
+
+			this.windows.get(this.view);
 
 			this.changeReadyState();
 		});
@@ -206,7 +224,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/** Changes the {@linkcode _state | state} of the console handler. */
 	protected changeReadyState(): void {
-		if (this._renderer && Object.keys(this.windows).length > 0 && this._commands) {
+		if (this._renderer && this.windows.size > 0 && this._commands) {
 			this._state = CLIState.READY;
 		} else if (this.renderer?.isDestroyed) {
 			this._state = CLIState.DESTROYED;
@@ -220,10 +238,12 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * @param window The window to show. Defaults to {@linkcode CLIView.OVERVIEW}.
 	 * @see {@linkcode CLIView}
 	 */
-	protected changeWindow(window: CLIView = CLIView.OVERVIEW): void {
-		if (this.isReady() && window !== this.view && window in Object.keys(this.windows)) {
-			this.contentArea = this.windows[window]!.content;
+	protected switchWindow(window: CLIView = CLIView.OVERVIEW): void {
+		if (window !== this.view && this.windows.has(window)) {
+			this.content!.remove(this.windows.get(this.view)!.content.id);
+			this.content!.add(this.windows.get(window)!.content);
 			this.view = window;
+			this._renderer?.requestRender();
 		}
 	}
 
@@ -286,44 +306,57 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 		}
 
 		/** Timestamp of the current time */
-		const timestamp = `[${getTime(true)}]`;
+		const timestamp = `[${getTime(true)}]: `;
 
-		this.logs.push(
-			new StyledText([
-				white(timestamp),
-				...messages
-					.map((message) => {
-						/** Messages split at every new line */
-						const splitMessages = String(message).split("\n");
+		/** Log message ready to appear in CLI */
+		const logMessage = new StyledText([
+			white(timestamp),
+			...messages
+				.map((message) => {
+					/** Messages split at every new line */
+					const splitMessages = String(message).split("\n");
 
-						switch (type) {
-							case LogType.DEBUG:
-								return splitMessages.map((splitMessage) => white(splitMessage));
+					switch (type) {
+						case LogType.DEBUG:
+							return splitMessages.map((splitMessage) => white(splitMessage));
 
-							case LogType.ERROR:
-								return message instanceof Error
-									? splitMessages.map((splitMessage) => brightRed(splitMessage))
-									: splitMessages.map((splitMessage) => red(splitMessage));
+						case LogType.ERROR:
+							return message instanceof Error
+								? splitMessages.map((splitMessage) => brightRed(splitMessage))
+								: splitMessages.map((splitMessage) => red(splitMessage));
 
-							case LogType.INFORMATION:
-								return splitMessages.map((splitMessage) => blue(splitMessage));
+						case LogType.INFORMATION:
+							return splitMessages.map((splitMessage) => blue(splitMessage));
 
-							case LogType.SUCCESS:
-								return splitMessages.map((splitMessage) => green(splitMessage));
+						case LogType.SUCCESS:
+							return splitMessages.map((splitMessage) => green(splitMessage));
 
-							case LogType.WARNING:
-								return splitMessages.map((splitMessage) => yellow(splitMessage));
-						}
-					})
-					.flat()
-					.map((message, index, splitMessages) =>
-						index < splitMessages.length - 1
-							? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
-							: [message, white("\n")],
-					)
-					.flat(),
-			]),
-		);
+						case LogType.WARNING:
+							return splitMessages.map((splitMessage) => yellow(splitMessage));
+					}
+				})
+				.flat()
+				.map((message, index, splitMessages) =>
+					index < splitMessages.length - 1
+						? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
+						: [message, white("\n")],
+				)
+				.flat(),
+		]);
+
+		this.logs.push(logMessage);
+
+		for (const listener of this.logListeners) {
+			listener(logMessage);
+		}
+	}
+
+	/**
+	 * Registers a listener to be notified when a new log is added.
+	 * @param handler Function to call with each new log entry.
+	 */
+	public registerLogListener(handler: (message: StyledText) => void): void {
+		this.logListeners.push(handler);
 	}
 
 	/**
