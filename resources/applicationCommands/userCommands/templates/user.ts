@@ -2,7 +2,7 @@
 import { SavedUserCommand } from "../../../../types";
 
 // External libraries imports
-import { ApplicationCommandType, ContextMenuCommandBuilder } from "discord.js";
+import { ApplicationCommandType, ContextMenuCommandBuilder, UserContextMenuCommandInteraction } from "discord.js";
 
 /** Template for user command */
 const userCommand: SavedUserCommand = {
@@ -10,7 +10,7 @@ const userCommand: SavedUserCommand = {
 
 	type: ApplicationCommandType.User,
 
-	async execute(interaction) {},
+	async execute(interaction: UserContextMenuCommandInteraction) {},
 };
 
 userCommand.data.setType(userCommand.type);

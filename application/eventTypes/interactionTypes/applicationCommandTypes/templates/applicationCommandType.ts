@@ -29,7 +29,7 @@ import { updateCooldown, validateCooldown } from "#modules/utilities";
  * @see {@linkcode SavedApplicationCommandType}
  */
 const applicationCommandInteraction: SavedApplicationCommandType = {
-	type: ApplicationCommandType.ChatInput,
+	type: ApplicationCommandType,
 
 	async execute(interaction: CommandInteraction): Promise<void> {
 		/**

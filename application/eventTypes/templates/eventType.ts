@@ -12,8 +12,7 @@ import { Events } from "discord.js";
  * @see {@linkcode SavedEventType}
  */
 const eventType: SavedEventType = {
-	type:
-		Events.ApplicationCommandPermissionsUpdate,
+	type: Events,
 
 	async execute(): Promise<void> {},
 };

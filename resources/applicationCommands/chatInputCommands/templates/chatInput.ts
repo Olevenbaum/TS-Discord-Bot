@@ -2,7 +2,12 @@
 import { SavedChatInputCommand } from "../../../../types";
 
 // External libraries imports
-import { ApplicationCommandType, SlashCommandBuilder } from "discord.js";
+import {
+	ApplicationCommandType,
+	AutocompleteInteraction,
+	ChatInputCommandInteraction,
+	SlashCommandBuilder,
+} from "discord.js";
 
 /** Template for chat input command */
 const chatInputCommand: SavedChatInputCommand = {
@@ -10,9 +15,9 @@ const chatInputCommand: SavedChatInputCommand = {
 
 	type: ApplicationCommandType.ChatInput,
 
-	async autocomplete(interaction) {},
+	async autocomplete(interaction: AutocompleteInteraction) {},
 
-	async execute(interaction) {},
+	async execute(interaction: ChatInputCommandInteraction) {},
 };
 
 export default chatInputCommand;

@@ -12,12 +12,9 @@ import { Interaction, InteractionType } from "discord.js";
  * @see {@linkcode SavedInteractionType}
  */
 const interactionType: SavedInteractionType = {
-	type:
-		InteractionType.ApplicationCommand,
+	type: InteractionType,
 
-	async execute(interaction: Interaction) {
-		
-	},
+	async execute(interaction: Interaction) {},
 };
 
 export default interactionType;

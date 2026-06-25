@@ -8,11 +8,23 @@ import { TextRenderable } from "@opentui/core";
 import { BlankWindow, CLIView } from "#modules/cli";
 
 /**
- * A window of the CLI responsible for showing the content for the {@linkcode CLIView.LOGS}.
+ * A window of the CLI responsible for showing the content for {@linkcode CLIView.LOGS}.
  * @see {@linkcode BlankWindow}
  */
 const window: BlankWindow = {
+	description: "Logs of the discord bot.",
+
+	id: CLIView.LOGS,
+
+	menuOptions: [],
+
+	title: "LOGS",
+
 	create: () => {
+		/**
+		 * Log text the log messages are appended to
+		 * @see {@linkcode TextRenderable}
+		 */
 		const logs = new TextRenderable(cli.renderer!, {});
 
 		for (const log of cli.logs) {
@@ -25,14 +37,6 @@ const window: BlankWindow = {
 
 		return logs;
 	},
-
-	description: "Logs of the discord bot.",
-
-	id: CLIView.LOGS,
-
-	menuOptions: [],
-
-	title: "LOGS",
 };
 
 export default window;

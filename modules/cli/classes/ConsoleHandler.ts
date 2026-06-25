@@ -25,7 +25,6 @@ import type { Path } from "typescript";
 // Internal module imports
 import { ButtonGroupRenderable } from "./ButtonGroupRenderable";
 import { ButtonRenderable } from "./ButtonRenderable";
-import { CLIState } from "./CLIState";
 import { CLIView } from "./CLIView";
 import type { BlankWindow, Window } from "../types";
 
@@ -39,22 +38,26 @@ import getTime from "#modules/time";
  * initialized, the handler becomes ready and TypeScript knows the public properties are no longer optional.
  */
 export class ConsoleHandler<Ready extends boolean = boolean> {
+	/** Whether the CLI is ready for use */
+	private ready: Ready;
+
 	/**
+	 * Commands to use in the CLI. Can be used to interact with the bot.
 	 * @see {@linkcode ConsoleCommand}
 	 */
 	protected _commands?: ConsoleCommand[];
+
+	/**
+	 * The logs of the last day.
+	 * @see {@linkcode LogEntry}
+	 */
+	protected _logs: StyledText[] = [];
 
 	/**
 	 * The CLI renderer responsible for drawing the interface and handling user input.
 	 * @see {@linkcode CliRenderer}
 	 */
 	protected _renderer?: CliRenderer;
-
-	/**
-	 * Defaults to {@linkcode CLIState.UNINITIALIZED}
-	 * @see {@linkcode CLIState}
-	 */
-	protected _state: CLIState = CLIState.UNINITIALIZED;
 
 	/**
 	 * The main area for visualization of content.
@@ -75,6 +78,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	protected lastSaveDate?: Date;
 
 	/**
+	 * ID of the current window displayed in the main content area of the CLI.
 	 * @see {@linkcode CLIView}
 	 */
 	protected view: CLIView = CLIView.OVERVIEW;
@@ -93,12 +97,6 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	protected windowSelection?: ButtonGroupRenderable;
 
 	/**
-	 * The logs of the last day.
-	 * @see {@linkcode StyledText}
-	 */
-	public logs: StyledText[] = [];
-
-	/**
 	 * Listeners that get notified when a new log is added.
 	 * @see {@linkcode StyledText}
 	 */
@@ -112,7 +110,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * functions. Defaults to `true`.
 	 */
 	public constructor(overwriteConsole: boolean = true) {
-		this._state = CLIState.INITIALIZING;
+		this.ready = false as Ready;
 
 		this.windows = new Collection();
 
@@ -206,6 +204,10 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 		return this._commands as If<Ready, ConsoleCommand[]>;
 	}
 
+	public get logs(): typeof this._logs {
+		return this._logs;
+	}
+
 	/**
 	 * The base renderer for the CLI.
 	 * @see {@linkcode CliRenderer}
@@ -214,83 +216,9 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 		return this._renderer as If<Ready, CliRenderer>;
 	}
 
-	/**
-	 * The current state of the console handler.
-	 * @see {@linkcode CLIState}
-	 */
-	public get state(): CLIState {
-		return this._state;
-	}
-
 	/** Changes the {@linkcode _state | state} of the console handler. */
 	protected changeReadyState(): void {
-		if (this._renderer && this.windows.size > 0 && this._commands) {
-			this._state = CLIState.READY;
-		} else if (this.renderer?.isDestroyed) {
-			this._state = CLIState.DESTROYED;
-		} else {
-			this._state = CLIState.UNINITIALIZED;
-		}
-	}
-
-	/**
-	 * Changes the current window to the window with provided ID.
-	 * @param window The window to show. Defaults to {@linkcode CLIView.OVERVIEW}.
-	 * @see {@linkcode CLIView}
-	 */
-	protected switchWindow(window: CLIView = CLIView.OVERVIEW): void {
-		if (window !== this.view && this.windows.has(window)) {
-			this.content!.remove(this.windows.get(this.view)!.content.id);
-			this.content!.add(this.windows.get(window)!.content);
-			this.view = window;
-			this._renderer?.requestRender();
-		}
-	}
-
-	/** Clears the {@linkcode logs} of the console handler. */
-	public clearLogs(): void {
-		this.logs = [];
-	}
-
-	/**
-	 * Prints a debugging message to the log in white color. Messages are timestamped and automatically trigger a
-	 * potential log save based on date changes.
-	 * @param messages Message fragments to add to the log box.
-	 */
-	public debug(...messages: any[]): void {
-		this.log(LogType.DEBUG, ...messages);
-	}
-
-	/** Destroys the CLI and the {@linkcode _renderer | renderer}. */
-	public destroy(): void {
-		this._renderer?.destroy();
-		this._state = CLIState.DESTROYED;
-	}
-
-	/**
-	 * Prints an error message to the log. Error objects are highlighted in bright red, while text messages are printed
-	 * in red. Messages are timestamped and automatically trigger a potential log save based on date changes.
-	 * @param messages Message fragments to add to the log box.
-	 */
-	public error(...messages: any[]): void {
-		this.log(LogType.ERROR, ...messages);
-	}
-
-	/**
-	 * Prints an informational message to the log in blue color. Messages are timestamped and automatically trigger a
-	 * potential log save based on date changes.
-	 * @param messages Message fragments to add to the log box.
-	 */
-	public info(...messages: any[]): void {
-		this.log(LogType.INFORMATION, ...messages);
-	}
-
-	/**
-	 * Checks, whether the {@linkcode ConsoleHandler} is ready.
-	 * @returns Whether the {@linkcode ConsoleHandler} is ready.
-	 */
-	public isReady(): this is ConsoleHandler<true> {
-		return this._state === CLIState.READY;
+		this.ready = (this._renderer !== undefined) as Ready;
 	}
 
 	/**
@@ -308,8 +236,8 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 		/** Timestamp of the current time */
 		const timestamp = `[${getTime(true)}]: `;
 
-		/** Log message ready to appear in CLI */
-		const logMessage = new StyledText([
+		/** Styled log message ready for display */
+		const log = new StyledText([
 			white(timestamp),
 			...messages
 				.map((message) => {
@@ -344,11 +272,89 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 				.flat(),
 		]);
 
-		this.logs.push(logMessage);
-
 		for (const listener of this.logListeners) {
-			listener(logMessage);
+			listener(log);
 		}
+
+		this.logs.push(log);
+	}
+
+	/**
+	 * Changes the current window to the window with provided ID.
+	 * @param window The window to show. Defaults to {@linkcode CLIView.OVERVIEW}.
+	 * @see {@linkcode CLIView}
+	 */
+	protected switchWindow(window: CLIView = CLIView.OVERVIEW): void {
+		if (this.windows.has(window) && window !== this.view) {
+			/**
+			 * The renderable content of the window to switch to
+			 * @see {@linkcode Renderable}
+			 */
+			const nextWindow = this.windows.get(window)!;
+
+			this.content!.remove(this.windows.get(this.view)!.content.id);
+			this.content!.add(nextWindow.content);
+
+			this.view = window;
+
+			for (const child of nextWindow.content.getChildren()) {
+				if (child instanceof SelectRenderable) {
+					child.focus();
+				}
+			}
+
+			for (const button of this.contextMenu!.getChildren()) {
+				this.contextMenu!.remove(button.id);
+			}
+			for (const button of nextWindow.menuOptions) {
+				this.contextMenu!.add(button);
+			}
+		}
+	}
+
+	/** Clears the {@linkcode logs} of the console handler. */
+	public clearLogs(): void {
+		this._logs = [];
+	}
+
+	/**
+	 * Prints a debugging message to the log in white color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public debug(...messages: any[]): void {
+		this.log(LogType.DEBUG, ...messages);
+	}
+
+	/** Destroys the CLI and the {@linkcode _renderer | renderer}. */
+	public destroy(): void {
+		this._renderer?.destroy();
+	}
+
+	/**
+	 * Prints an error message to the log. Error objects are highlighted in bright red, while text messages are printed
+	 * in red. Messages are timestamped and automatically trigger a potential log save based on date changes.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public error(...messages: any[]): void {
+		this.log(LogType.ERROR, ...messages);
+	}
+
+	/**
+	 * Prints an informational message to the log in blue color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public info(...messages: any[]): void {
+		this.log(LogType.INFORMATION, ...messages);
+	}
+
+	/**
+	 * Checks, whether the {@linkcode ConsoleHandler} is ready.
+	 * @returns Whether the {@linkcode ConsoleHandler} is ready.
+	 */
+	public isReady(): this is ConsoleHandler<true> {
+		return this.ready;
 	}
 
 	/**

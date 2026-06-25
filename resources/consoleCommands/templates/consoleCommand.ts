@@ -1,5 +1,5 @@
 // Type imports
-import { ConsoleCommand } from "../../../types/consoleCommands";
+import { ConsoleCommand } from "#types";
 
 /** Template for console command */
 const consoleCommand: ConsoleCommand = {
