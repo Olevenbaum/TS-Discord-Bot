@@ -19,7 +19,7 @@ import {
 	yellow,
 } from "@opentui/core";
 import { Collection } from "discord.js";
-import { access, appendFile, mkdirSync } from "fs";
+import { appendFile, existsSync, mkdirSync } from "fs";
 import type { Path } from "typescript";
 
 // Internal module imports
@@ -38,7 +38,10 @@ import getTime from "#modules/time";
  * initialized, the handler becomes ready and TypeScript knows the public properties are no longer optional.
  */
 export class ConsoleHandler<Ready extends boolean = boolean> {
-	/** Whether the CLI is ready for use */
+	/**
+	 * Whether the CLI is ready for use
+	 * @see {@linkcode Ready}
+	 */
 	private ready: Ready;
 
 	/**
@@ -100,7 +103,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * Listeners that get notified when a new log is added.
 	 * @see {@linkcode StyledText}
 	 */
-	protected logListeners: Array<(log: StyledText) => void> = [];
+	protected logListeners: ((log?: StyledText) => void)[] = [];
 
 	/**
 	 * Creates a new console handler. If wanted, common console methods like {@linkcode console.debug},
@@ -118,11 +121,11 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 			this._renderer = renderer;
 
 			await readFiles<BlankWindow>(configuration.paths.windows).then((blankWindows) => {
-				for (const blankWindow of blankWindows) {
-					this.windows.set(blankWindow.id, { ...blankWindow, content: blankWindow.create(this, {}) });
-				}
+				blankWindows.forEach((blankWindow) => {
+					this.windows.set(blankWindow.id, { ...blankWindow, content: blankWindow.create(this) });
+				});
 
-				this.windows.sort();
+				this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
 			});
 
 			/**
@@ -272,9 +275,9 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 				.flat(),
 		]);
 
-		for (const listener of this.logListeners) {
+		this.logListeners.forEach((listener) => {
 			listener(log);
-		}
+		});
 
 		this.logs.push(log);
 	}
@@ -297,23 +300,27 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 			this.view = window;
 
-			for (const child of nextWindow.content.getChildren()) {
+			nextWindow.content.getChildren().forEach((child) => {
 				if (child instanceof SelectRenderable) {
 					child.focus();
 				}
-			}
+			});
 
-			for (const button of this.contextMenu!.getChildren()) {
+			this.contextMenu!.getChildren().forEach((button) => {
 				this.contextMenu!.remove(button.id);
-			}
-			for (const button of nextWindow.menuOptions) {
+			});
+			nextWindow.menuOptions.forEach((button) => {
 				this.contextMenu!.add(button);
-			}
+			});
 		}
 	}
 
 	/** Clears the {@linkcode logs} of the console handler. */
 	public clearLogs(): void {
+		this.logListeners.forEach((listener) => {
+			listener();
+		});
+
 		this._logs = [];
 	}
 
@@ -359,9 +366,10 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/**
 	 * Registers a listener to be notified when a new log is added.
-	 * @param handler Function to call with each new log entry.
+	 * @param handler Function to call with each new log entry. Sending no message is supposed to clear the logs in the
+	 * registered windows.
 	 */
-	public registerLogListener(handler: (message: StyledText) => void): void {
+	public registerLogListener(handler: (message?: StyledText) => void): void {
 		this.logListeners.push(handler);
 	}
 
@@ -371,9 +379,9 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * @see {@linkcode Path}
 	 */
 	public saveLogs(path?: Path): void {
-		access(relativePath(path ?? configuration.paths.logPath), () =>
-			mkdirSync(relativePath(path ?? configuration.paths.logPath)),
-		);
+		if (!existsSync(relativePath(path ?? configuration.paths.logPath))) {
+			mkdirSync(relativePath(path ?? configuration.paths.logPath));
+		}
 
 		/** Path to the log file */
 		const logPath = relativePath(
@@ -383,12 +391,20 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 				.join("")}.log` as Path,
 		);
 
-		appendFile(logPath, this.logs.map((logEntry) => logEntry.chunks.join(" ")).join("\n"), (error) => {
-			if (error) {
-			} else {
-				this.clearLogs();
-			}
-		});
+		appendFile(
+			logPath,
+			this.logs.map((logEntry) => logEntry.chunks.map((chunk) => chunk.text).join(" ")).join(""),
+			(error) => {
+				if (error) {
+					this.error(error);
+				} else {
+					this.clearLogs();
+					this.success(`Logs saved to '${logPath}'`);
+				}
+			},
+		);
+
+		this.lastSaveDate = new Date();
 	}
 
 	/**
@@ -427,16 +443,24 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 		if (currentDate >= nextDayDate) {
 			this.saveLogs();
-
-			this.lastSaveDate = currentDate;
 		}
 	}
 
 	/** Updates all console commands that can be used. Every call after the first overwrite any old console commands. */
 	public async updateCommands(): Promise<void> {
 		this._commands = await readFiles<ConsoleCommand>(configuration.paths.consoleCommandsPath);
+	}
 
-		this.changeReadyState();
+	/** Updates all windows. Windows already set in the collection will be overwritten. */
+	public async updateWindows(): Promise<void> {
+		readFiles<BlankWindow>(configuration.paths.windows).then((windows) => {
+			this.content!.remove(this.windows.get(this.view)!.content.id);
+
+			windows.forEach((window) => this.windows.set(window.id, { content: window.create(this), ...window }));
+			this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
+
+			this.content!.add(this.windows.get(this.view)!.content.id);
+		});
 	}
 
 	/**

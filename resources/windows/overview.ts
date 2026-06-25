@@ -40,12 +40,16 @@ const window: BlankWindow = {
 		 */
 		const logs = new TextRenderable(cli.renderer!, {});
 
-		for (const log of cli.logs) {
+		cli.logs.forEach((log) => {
 			logs.add(log);
-		}
+		});
 
 		cli.registerLogListener((message) => {
-			logs.add(message);
+			if (message) {
+				logs.add(message);
+			} else {
+				logs.getChildren().forEach((child) => logs.remove(child.id));
+			}
 		});
 
 		logBox.add(logs);

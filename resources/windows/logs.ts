@@ -5,7 +5,7 @@ import { cli } from "#application";
 import { TextRenderable } from "@opentui/core";
 
 // Module imports
-import { BlankWindow, CLIView } from "#modules/cli";
+import { BlankWindow, ButtonRenderable, CLIView } from "#modules/cli";
 
 /**
  * A window of the CLI responsible for showing the content for {@linkcode CLIView.LOGS}.
@@ -16,8 +16,27 @@ const window: BlankWindow = {
 
 	id: CLIView.LOGS,
 
-	menuOptions: [],
+	menuOptions: [
+		new ButtonRenderable(cli.renderer!, {
+			borderStyle: "rounded",
 
+			description: "",
+
+			name: "SAVE LOGS",
+
+			onMouseDown: () => cli.saveLogs(),
+		}),
+
+		new ButtonRenderable(cli.renderer!, {
+			borderStyle: "rounded",
+
+			description: "",
+
+			name: "CLEAR LOGS",
+
+			onMouseDown: () => cli.clearLogs(),
+		}),
+	],
 	title: "LOGS",
 
 	create: () => {
@@ -27,12 +46,16 @@ const window: BlankWindow = {
 		 */
 		const logs = new TextRenderable(cli.renderer!, {});
 
-		for (const log of cli.logs) {
+		cli.logs.forEach((log) => {
 			logs.add(log);
-		}
+		});
 
 		cli.registerLogListener((message) => {
-			logs.add(message);
+			if (message) {
+				logs.add(message);
+			} else {
+				logs.getChildren().forEach((child) => logs.remove(child.id));
+			}
 		});
 
 		return logs;
