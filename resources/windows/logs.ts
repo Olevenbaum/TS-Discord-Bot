@@ -5,7 +5,7 @@ import { cli } from "#application";
 import { TextRenderable } from "@opentui/core";
 
 // Module imports
-import { BlankWindow, ButtonRenderable, CLIView } from "#modules/cli";
+import { type BlankWindow, ButtonRenderable, CLIView } from "#modules/cli";
 
 /**
  * A window of the CLI responsible for showing the content for {@linkcode CLIView.LOGS}.

@@ -5,7 +5,7 @@ import { cli } from "#application";
 import {} from "@opentui/core";
 
 // Module imports
-import { BlankWindow, CLIView } from "#modules/cli";
+import { type BlankWindow, CLIView } from "#modules/cli";
 
 /**
  * A window of the CLI responsible for showing the content for {@linkcode CLIView}.
