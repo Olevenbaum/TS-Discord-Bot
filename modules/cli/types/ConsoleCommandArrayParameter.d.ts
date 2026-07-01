@@ -1,4 +1,4 @@
-// Internal class & type imports
+// Internal module imports
 import type { ConsoleCommandBaseParameter } from "./ConsoleCommandBaseParameter";
 
 /**

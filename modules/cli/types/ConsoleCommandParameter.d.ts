@@ -1,4 +1,4 @@
-// Internal class & type imports
+// Internal module imports
 import type { ConsoleCommandArrayParameter } from "./ConsoleCommandArrayParameter";
 import type { ConsoleCommandBooleanParameter } from "./ConsoleCommandBooleanParameter";
 import type { ConsoleCommandNumberParameter } from "./ConsoleCommandNumberParameter";

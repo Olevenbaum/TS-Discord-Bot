@@ -58,7 +58,7 @@ export class ButtonRenderable extends BoxRenderable {
 								? event.y
 								: event.y - this.tooltip.height;
 
-						this.tooltip.visible = true;
+						this.showTooltip();
 					}
 				}, 2000);
 			}
@@ -70,11 +70,26 @@ export class ButtonRenderable extends BoxRenderable {
 				this.hoverTimer = undefined;
 			}
 
-			this.tooltip.visible = false;
+			this.hideTooltip();
 		};
 
 		if (this.ctx instanceof CliRenderer) {
 			this.ctx.root.add(this.tooltip);
 		}
+	}
+
+	/** Hides the {@linkcode tooltip}. */
+	public hideTooltip() {
+		this.tooltip.visible = false;
+	}
+
+	/** Makes the {@linkcode tooltip} visible. */
+	public showTooltip() {
+		this.tooltip.visible = true;
+	}
+
+	/** Toggles the visibility of the {@linkcode tooltip}. */
+	public toggleTooltip() { 
+		this.tooltip.visible != this.tooltip.visible
 	}
 }
