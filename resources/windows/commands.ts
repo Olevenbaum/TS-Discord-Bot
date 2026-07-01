@@ -55,12 +55,14 @@ const window: BlankWindow = {
 				.flat(),
 		});
 
-		commandInput.on(InputRenderableEvents.CHANGE, (input: string) => {
+		commandInput.on(InputRenderableEvents.INPUT, (input: string) => {
 			/**
 			 * Options the user might choose from
 			 * @see {@linkcode SelectOption}
 			 */
 			const options: SelectOption[] = [];
+
+			input = input.trim();
 
 			if (input.includes(" ")) {
 				const transformedInput = cli.handleInput(input);
@@ -74,8 +76,9 @@ const window: BlankWindow = {
 				cli.commands!.forEach((command) => {
 					if (command.name.startsWith(input.toUpperCase())) {
 						options.push({
-							name: command.name,
 							description: command.description,
+							name: command.name,
+							value: command.name,
 						});
 					}
 
@@ -83,8 +86,9 @@ const window: BlankWindow = {
 						command.aliases.forEach((alias) => {
 							if (alias.startsWith(input.toUpperCase())) {
 								options.push({
-									name: alias,
 									description: command.description,
+									name: alias,
+									value: command.name,
 								});
 							}
 						});

@@ -318,7 +318,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	/**
 	 * Parses the raw input string to extract the command name and prepare for parameter processing. Converts the
 	 * command name to uppercase for case-insensitive matching.
-	 * @param input - The raw command string entered by the user.
+	 * @param input The raw command string entered by the user.
 	 * @returns A tuple containing the uppercase command name and optionally parsed parameters.
 	 * @see {@linkcode NestedArray}
 	 */
@@ -334,8 +334,8 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	/**
 	 * Validates a single parameter against its expected type and constraints. Checks type compatibility, range limits
 	 * for numbers, and pattern matching for strings and arrays.
-	 * @param parameter - The parameter value to validate.
-	 * @param parameterData - The parameter definition containing validation rules.
+	 * @param parameter The parameter value to validate.
+	 * @param parameterData The parameter definition containing validation rules.
 	 * @returns `true` if the parameter is valid according to the definition, `false` otherwise.
 	 * @see {@linkcode ConsoleCommandParameter}
 	 * @see {@linkcode NestedArray}
@@ -452,8 +452,8 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	/**
 	 * Parses a string of parameters into a properly typed nested array structure. Handles quoted strings, arrays,
 	 * booleans, numbers, and validates against parameter definitions if provided.
-	 * @param parameters - The raw parameter string to parse.
-	 * @param parameterData - Optional parameter definitions for validation during parsing.
+	 * @param parameters The raw parameter string to parse.
+	 * @param parameterData Optional parameter definitions for validation during parsing.
 	 * @returns A nested array of parsed and validated parameter values.
 	 * @throws {TypeError} If parameters are invalid or malformed.
 	 * @see {@linkcode ConsoleCommandParameter}
@@ -567,7 +567,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 		if (Array.isArray(transformedInput)) {
 			const [command, parameters] = transformedInput;
-			command?.execute(parameters ? parameters : []);
+			command?.execute(parameters);
 		} else {
 			/**
 			 * Command that was interacted with
@@ -717,12 +717,12 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	/** Updates all windows. Windows already set in the collection will be overwritten. */
 	public async updateWindows(): Promise<void> {
 		readFiles<BlankWindow>(configuration.paths.windows).then((windows) => {
-			this.content!.remove(this.windows.get(this.view)!.content.id);
+			this.content?.remove(this.windows.get(this.view)!.content.id);
 
 			windows.forEach((window) => this.windows.set(window.id, { content: window.create(this), ...window }));
 			this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
 
-			this.content!.add(this.windows.get(this.view)!.content.id);
+			this.content?.add(this.windows.get(this.view)!.content.id);
 		});
 	}
 
