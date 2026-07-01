@@ -32,7 +32,27 @@ const window: BlankWindow = {
 		 * Base renderable all other renderables are added to
 		 * @see {@linkcode BoxRenderable}
 		 */
-		const base = new BoxRenderable(cli.renderer!, { flexDirection: "row" });
+		const base = new BoxRenderable(cli.renderer!, { flexDirection: "row", height: "100%" });
+
+		/**
+		 * Box containing the command input
+		 * @see {@linkcode BoxRenderable}
+		 */
+		const commandInputBox = new BoxRenderable(cli.renderer!, {
+			border: ["right"],
+			height: "100%",
+			width: "50%",
+		});
+
+		/**
+		 * Box containing the command selection
+		 * @see {@linkcode BoxRenderable}
+		 */
+		const commandSelectBox = new BoxRenderable(cli.renderer!, {
+			border: ["left"],
+			height: "100%",
+			width: "50%",
+		});
 
 		/**
 		 * Input renderable to enter console commands in. Can be autocompleted using the select renderable.
@@ -43,77 +63,38 @@ const window: BlankWindow = {
 		});
 
 		const commandSelect = new SelectRenderable(cli.renderer!, {
-			options: cli
-				.commands!.map((command) => {
-					return [
-						{ description: command.description, name: command.name, value: command.name },
-						...(command.aliases?.map((alias) => {
-							return { description: command.description, name: alias, value: command.name };
-						}) ?? []),
-					];
-				})
-				.flat(),
+			options: cli.suggestCommand(),
 		});
 
+		commandInputBox.add(commandInput);
+		commandSelectBox.add(commandSelect);
+
 		commandInput.on(InputRenderableEvents.INPUT, (input: string) => {
-			/**
-			 * Options the user might choose from
-			 * @see {@linkcode SelectOption}
-			 */
-			const options: SelectOption[] = [];
-
-			input = input.trim();
-
-			if (input.includes(" ")) {
-				const transformedInput = cli.handleInput(input);
-
-				if (Array.isArray(transformedInput)) {
-					const [command] = transformedInput;
-					if (command.parameters) {
-					}
-				}
-			} else {
-				cli.commands!.forEach((command) => {
-					if (command.name.startsWith(input.toUpperCase())) {
-						options.push({
-							description: command.description,
-							name: command.name,
-							value: command.name,
-						});
-					}
-
-					if (command.aliases) {
-						command.aliases.forEach((alias) => {
-							if (alias.startsWith(input.toUpperCase())) {
-								options.push({
-									description: command.description,
-									name: alias,
-									value: command.name,
-								});
-							}
-						});
-					}
-				});
-			}
-
-			commandSelect.options = options;
+			commandSelect.options = cli.suggestCommand(input);
 		});
 
 		commandInput.on(InputRenderableEvents.ENTER, (input: string) => {
-			try {
-				cli.handleCommand(input);
-				commandInput.value = "";
-			} catch (error) {
-				cli.error(error);
+			/** Command that was entered */
+			const command = cli.findCommand(input);
+
+			if (command) {
+				try {
+					cli.findCommand(input)?.execute();
+					commandInput.value = "";
+				} catch (error) {
+					cli.error(error);
+				}
+			} else {
+				cli.warn(`Unknown command '${input}' entered in console`);
 			}
 		});
 
 		commandSelect.on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
-			commandInput.insertText((option.value ?? option.name).substring(commandInput.value.length));
+			commandInput.insertText((option.value as string).substring(commandInput.value.length));
 		});
 
-		base.add(commandInput);
-		base.add(commandSelect);
+		base.add(commandInputBox);
+		base.add(commandSelectBox);
 
 		return base;
 	},
