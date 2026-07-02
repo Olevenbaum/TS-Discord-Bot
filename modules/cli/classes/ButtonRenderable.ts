@@ -89,7 +89,7 @@ export class ButtonRenderable extends BoxRenderable {
 	}
 
 	/** Toggles the visibility of the {@linkcode tooltip}. */
-	public toggleTooltip() { 
-		this.tooltip.visible != this.tooltip.visible
+	public toggleTooltip() {
+		this.tooltip.visible != this.tooltip.visible;
 	}
 }

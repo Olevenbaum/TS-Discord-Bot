@@ -48,9 +48,10 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/**
 	 * Commands to use in the CLI. Can be used to interact with the bot.
+	 * @see {@linkcode Collection}
 	 * @see {@linkcode ConsoleCommand}
 	 */
-	protected _commands: ConsoleCommand[] = [];
+	protected _commands: Collection<string, ConsoleCommand>;
 
 	/**
 	 * The logs of the last day.
@@ -91,6 +92,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	/**
 	 * Windows that can be selected to be shown in the main area of the CLI.
 	 * @see {@linkcode CLIView}
+	 * @see {@linkcode Collection}
 	 * @see {@linkcode Window}
 	 */
 	protected windows: Collection<CLIView, Window>;
@@ -117,6 +119,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	public constructor(overwriteConsole: boolean = true) {
 		this.ready = false as Ready;
 
+		this._commands = new Collection();
 		this.windows = new Collection();
 
 		createCliRenderer().then(async (renderer) => {
@@ -204,10 +207,11 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/**
 	 * A collection of console commands that can be used in the CLI.
+	 * @see {@linkcode Collection}
 	 * @see {@linkcode ConsoleCommand}
 	 */
-	public get commands(): If<Ready, ConsoleCommand[]> {
-		return this._commands as If<Ready, ConsoleCommand[]>;
+	public get commands(): If<Ready, Collection<string, ConsoleCommand>> {
+		return this._commands as If<Ready, Collection<string, ConsoleCommand>>;
 	}
 
 	public get logs(): typeof this._logs {
@@ -350,79 +354,22 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 		this.log(LogType.ERROR, ...messages);
 	}
 
+	/**
+	 * Finds the command the user entered in {@linkcode _commands | commands}.
+	 * @return The command the user entered
+	 * @see {@linkcode ConsoleCommand}
+	 */
 	public findCommand(input: string): ConsoleCommand | undefined {
 		input = input.trim();
 
 		/** Command name without whitespace or parameters */
 		const partialCommandName = input.slice(0, input.includes(" ") ? input.indexOf(" ") : undefined).toUpperCase();
 
-		return this._commands.find((command) => {
-			command.name.toUpperCase() === partialCommandName ||
-				command.aliases?.some((commandAlias) => commandAlias.toUpperCase() === partialCommandName);
-		});
-	}
-
-	public suggestCommand(input?: string): SelectOption[] {
-		/** Options the user might want to enter */
-		const options: SelectOption[] = [];
-
-		if (input) {
-			input = input.trim();
-
-			/** Command name without whitespace or parameters */
-			const partialCommandName = input
-				.slice(0, input.includes(" ") ? input.indexOf(" ") : undefined)
-				.toUpperCase();
-
-			if (input.includes(" ")) {
-			} else {
-				this._commands.forEach((command) => {
-					if (command.name.toUpperCase().startsWith(partialCommandName)) {
-						options.push({
-							description: command.description,
-							name: command.name,
-							value: command.name.toUpperCase(),
-						});
-					}
-
-					if (command.aliases) {
-						command.aliases
-							.map((commandAlias) => commandAlias.toUpperCase())
-							.forEach((commandAlias) => {
-								if (commandAlias.startsWith(partialCommandName)) {
-									options.push({
-										description: command.description,
-										name: commandAlias,
-										value: command.name.toUpperCase(),
-									});
-								}
-							});
-					}
-				});
-			}
-		} else {
-			this._commands.forEach((command) => {
-				options.push({
-					description: command.description,
-					name: command.name,
-					value: command.name.toUpperCase(),
-				});
-
-				if (command.aliases) {
-					command.aliases
-						.map((commandAlias) => commandAlias.toUpperCase())
-						.forEach((commandAlias) => {
-							options.push({
-								description: command.description,
-								name: commandAlias,
-								value: command.name.toUpperCase(),
-							});
-						});
-				}
-			});
-		}
-
-		return options;
+		return this._commands.find(
+			(command) =>
+				command.name.toUpperCase() === partialCommandName ||
+				command.aliases?.some((commandAlias) => commandAlias.toUpperCase() === partialCommandName),
+		);
 	}
 
 	/**
@@ -495,6 +442,75 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	}
 
 	/**
+	 * Creates suggestions for the user for what to enter based on what already was entered.
+	 * @param input THe input the user already entered
+	 * @returns Commands and / or parameters that match the input
+	 * @see {@linkcode SelectOption}
+	 */
+	public suggestCommand(input?: string): SelectOption[] {
+		/** Options the user might want to enter */
+		const options: SelectOption[] = [];
+
+		if (input) {
+			input = input.trim();
+
+			/** Command name without whitespace or parameters */
+			const partialCommandName = input
+				.slice(0, input.includes(" ") ? input.indexOf(" ") : undefined)
+				.toUpperCase();
+
+			if (input.includes(" ")) {
+			} else {
+				this._commands.forEach((command) => {
+					if (command.name.toUpperCase().startsWith(partialCommandName)) {
+						options.push({
+							description: command.description,
+							name: command.name,
+							value: command.name.toUpperCase(),
+						});
+					}
+
+					if (command.aliases) {
+						command.aliases
+							.map((commandAlias) => commandAlias.toUpperCase())
+							.forEach((commandAlias) => {
+								if (commandAlias.startsWith(partialCommandName)) {
+									options.push({
+										description: command.description,
+										name: commandAlias,
+										value: command.name.toUpperCase(),
+									});
+								}
+							});
+					}
+				});
+			}
+		} else {
+			this._commands.forEach((command) => {
+				options.push({
+					description: command.description,
+					name: command.name,
+					value: command.name.toUpperCase(),
+				});
+
+				if (command.aliases) {
+					command.aliases
+						.map((commandAlias) => commandAlias.toUpperCase())
+						.forEach((commandAlias) => {
+							options.push({
+								description: command.description,
+								name: commandAlias,
+								value: command.name.toUpperCase(),
+							});
+						});
+				}
+			});
+		}
+
+		return options.sort((firstOption, secondOption) => firstOption.name.localeCompare(secondOption.name));
+	}
+
+	/**
 	 * Triggers a log save operation if the current date differs from the date of the last logged message. This ensures
 	 * logs are saved daily. Updates the last message date after checking.
 	 */
@@ -526,7 +542,11 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/** Updates all console commands that can be used. Every call after the first overwrite any old console commands. */
 	public async updateCommands(): Promise<void> {
-		this._commands = await readFiles<ConsoleCommand>(configuration.paths.consoleCommandsPath);
+		(await readFiles<ConsoleCommand>(configuration.paths.consoleCommandsPath)).forEach((command) =>
+			this._commands.set(command.name, command),
+		);
+
+		this._commands.sort((_, __, firstCommand, secondCommand) => firstCommand.localeCompare(secondCommand));
 	}
 
 	/** Updates all windows. Windows already set in the collection will be overwritten. */

@@ -60,6 +60,7 @@ const window: BlankWindow = {
 		 */
 		const commandInput = new InputRenderable(cli.renderer!, {
 			placeholder: "Enter command...",
+			width: "100%",
 		});
 
 		const commandSelect = new SelectRenderable(cli.renderer!, {
