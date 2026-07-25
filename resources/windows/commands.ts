@@ -1,6 +1,3 @@
-// Data imports
-import { cli } from "#application";
-
 // External libraries imports
 import {
 	BoxRenderable,
@@ -27,7 +24,7 @@ const window: BlankWindow = {
 
 	title: "COMMANDS",
 
-	create: () => {
+	create: (cli) => {
 		/**
 		 * Base renderable all other renderables are added to
 		 * @see {@linkcode BoxRenderable}

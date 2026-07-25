@@ -37,6 +37,7 @@ const window: BlankWindow = {
 			onMouseDown: () => cli.clearLogs(),
 		}),
 	],
+
 	title: "LOGS",
 
 	create: () => {

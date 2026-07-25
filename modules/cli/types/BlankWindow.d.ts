@@ -16,10 +16,12 @@ export interface BlankWindow {
 	description: string;
 
 	/**
-	 * Options of the context menu at the bottom.
+	 * Creates the options of the context menu at the bottom.
+	 * @param handler The console handler all buttons are registered to.
+	 * @returns A list of buttons for the context menu.
 	 * @see {@linkcode ButtonRenderable}
 	 */
-	menuOptions: ButtonRenderable[];
+	createMenuOptions: (handler: ConsoleHandler<true>) => ButtonRenderable[];
 
 	/** Title of the window. Displayed at the top and in the menu. */
 	title: string;
@@ -33,5 +35,5 @@ export interface BlankWindow {
 	 * @see {@linkcode Renderable}
 	 * @see {@linkcode RenderableOptions}
 	 */
-	create(handler: ConsoleHandler, options?: RenderableOptions): Renderable;
+	create(handler: ConsoleHandler<true>, options?: RenderableOptions): Renderable;
 }
