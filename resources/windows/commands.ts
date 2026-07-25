@@ -60,11 +60,21 @@ const window: BlankWindow = {
 		 */
 		const commandInput = new InputRenderable(cli.renderer!, {
 			placeholder: "Enter command...",
-			width: "100%",
+			onKeyDown: (key) => {
+				if (key.name === "up") {
+					commandSelect.moveUp();
+					commandSelect.focus();
+				} else if (key.name === "down") {
+					commandSelect.moveDown();
+					commandSelect.focus();
+				}
+			},
 		});
 
 		const commandSelect = new SelectRenderable(cli.renderer!, {
 			options: cli.suggestCommand(),
+			width: "100%",
+			height: "100%",
 		});
 
 		commandInputBox.add(commandInput);
@@ -92,6 +102,7 @@ const window: BlankWindow = {
 
 		commandSelect.on(SelectRenderableEvents.ITEM_SELECTED, (_: number, option: SelectOption) => {
 			commandInput.insertText((option.value as string).substring(commandInput.value.length));
+			commandInput.focus();
 		});
 
 		base.add(commandInputBox);

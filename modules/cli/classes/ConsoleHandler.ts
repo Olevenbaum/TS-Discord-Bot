@@ -252,30 +252,30 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 			...messages
 				.map((message) => {
 					/** Messages split at every new line */
-					const splitMessages = String(message).split("\n");
+					const messageFragments = String(message).split("\n");
 
 					switch (type) {
 						case LogType.DEBUG:
-							return splitMessages.map((splitMessage) => white(splitMessage));
+							return messageFragments.map((messageFragment) => white(messageFragment));
 
 						case LogType.ERROR:
 							return message instanceof Error
-								? splitMessages.map((splitMessage) => brightRed(splitMessage))
-								: splitMessages.map((splitMessage) => red(splitMessage));
+								? messageFragments.map((messageFragment) => brightRed(messageFragment))
+								: messageFragments.map((messageFragment) => red(messageFragment));
 
 						case LogType.INFORMATION:
-							return splitMessages.map((splitMessage) => blue(splitMessage));
+							return messageFragments.map((messageFragment) => blue(messageFragment));
 
 						case LogType.SUCCESS:
-							return splitMessages.map((splitMessage) => green(splitMessage));
+							return messageFragments.map((messageFragment) => green(messageFragment));
 
 						case LogType.WARNING:
-							return splitMessages.map((splitMessage) => yellow(splitMessage));
+							return messageFragments.map((messageFragment) => yellow(messageFragment));
 					}
 				})
 				.flat()
-				.map((message, index, splitMessages) =>
-					index < splitMessages.length - 1
+				.map((message, index, messageFragments) =>
+					index < messageFragments.length - 1
 						? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
 						: [message, white("\n")],
 				)
@@ -306,12 +306,6 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 			this.content!.add(nextWindow.content);
 
 			this.view = window;
-
-			nextWindow.content.getChildren().forEach((child) => {
-				if (child instanceof SelectRenderable) {
-					child.focus();
-				}
-			});
 
 			this.contextMenu!.getChildren().forEach((button) => {
 				this.contextMenu!.remove(button.id);
