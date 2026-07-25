@@ -127,7 +127,10 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 			await readFiles<BlankWindow>(configuration.paths.windows).then((blankWindows) => {
 				blankWindows.forEach((blankWindow) => {
-					this.windows.set(blankWindow.id, { ...blankWindow, content: blankWindow.create(this) });
+					this.windows.set(blankWindow.id, {
+						...blankWindow,
+						content: blankWindow.create(this as ConsoleHandler<true>),
+					});
 				});
 
 				this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
@@ -512,7 +515,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/**
 	 * Triggers a log save operation if the current date differs from the date of the last logged message. This ensures
-	 * logs are saved daily. Updates the last message date after checking.
+	 * logs are saved daily.
 	 */
 	public triggerSave(): void {
 		/**
@@ -551,14 +554,18 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/** Updates all windows. Windows already set in the collection will be overwritten. */
 	public async updateWindows(): Promise<void> {
-		readFiles<BlankWindow>(configuration.paths.windows).then((windows) => {
-			this.content?.remove(this.windows.get(this.view)!.content.id);
+		if (this.ready) {
+			readFiles<BlankWindow>(configuration.paths.windows).then((windows) => {
+				this.content?.remove(this.windows.get(this.view)!.content.id);
 
-			windows.forEach((window) => this.windows.set(window.id, { content: window.create(this), ...window }));
-			this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
+				windows.forEach((window) =>
+					this.windows.set(window.id, { content: window.create(this as ConsoleHandler<true>), ...window }),
+				);
+				this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
 
-			this.content?.add(this.windows.get(this.view)!.content.id);
-		});
+				this.content?.add(this.windows.get(this.view)!.content.id);
+			});
+		}
 	}
 
 	/**

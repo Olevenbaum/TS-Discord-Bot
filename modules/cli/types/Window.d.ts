@@ -3,6 +3,7 @@ import { Renderable } from "@opentui/core";
 
 // Internal module imports
 import { BlankWindow } from "./BlankWindow";
+import { ButtonRenderable } from "../classes/ButtonRenderable";
 
 /**
  * Window that can be displayed in the main area of the CLI.
@@ -14,4 +15,10 @@ export interface Window extends BlankWindow {
 	 * @see {@linkcode Renderable}
 	 */
 	content: Renderable;
+
+	/**
+	 * Options of the context menu at the bottom.
+	 * @see {@linkcode ButtonRenderable}
+	 */
+	menuOptions: ButtonRenderable[];
 }
