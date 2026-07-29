@@ -1,6 +1,3 @@
-// Data imports
-import { cli } from "#application";
-
 // External libraries imports
 import { TextRenderable } from "@opentui/core";
 
@@ -16,7 +13,9 @@ const window: BlankWindow = {
 
 	id: CLIView.LOGS,
 
-	menuOptions: [
+	title: "LOGS",
+
+	createMenuOptions: (cli) => [
 		new ButtonRenderable(cli.renderer!, {
 			borderStyle: "rounded",
 
@@ -38,9 +37,7 @@ const window: BlankWindow = {
 		}),
 	],
 
-	title: "LOGS",
-
-	create: () => {
+	createWindow: (cli) => {
 		/**
 		 * Log text the log messages are appended to
 		 * @see {@linkcode TextRenderable}
@@ -48,18 +45,18 @@ const window: BlankWindow = {
 		const logs = new TextRenderable(cli.renderer!, {});
 
 		cli.logs.forEach((log) => {
-			logs.add(log);
+			logs.add(log.content);
 		});
 
-		cli.registerLogListener((message) => {
-			if (message) {
-				logs.add(message);
+		cli.registerLogListener((logEntry) => {
+			if (logEntry) {
+				logs.add(logEntry.content);
 			} else {
 				logs.getChildren().forEach((child) => logs.remove(child.id));
 			}
 		});
 
-		return logs;
+		return [logs];
 	},
 };
 

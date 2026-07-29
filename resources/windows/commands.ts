@@ -20,11 +20,9 @@ const window: BlankWindow = {
 
 	id: CLIView.COMMANDS,
 
-	menuOptions: [],
-
 	title: "COMMANDS",
 
-	create: (cli) => {
+	createWindow: (cli) => {
 		/**
 		 * Base renderable all other renderables are added to
 		 * @see {@linkcode BoxRenderable}
@@ -105,7 +103,7 @@ const window: BlankWindow = {
 		base.add(commandInputBox);
 		base.add(commandSelectBox);
 
-		return base;
+		return [base, commandInput];
 	},
 };
 

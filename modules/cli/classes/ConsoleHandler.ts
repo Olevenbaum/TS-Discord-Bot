@@ -27,8 +27,7 @@ import type { Path } from "typescript";
 import { ButtonGroupRenderable } from "./ButtonGroupRenderable";
 import { ButtonRenderable } from "./ButtonRenderable";
 import { CLIView } from "./CLIView";
-import { ConsoleCommand } from "../types/ConsoleCommand";
-import type { BlankWindow, Window } from "../types";
+import type { BlankWindow, ConsoleCommand, LogEntry, Tag, Window } from "../types";
 
 // Module imports
 import { readFiles, relativePath } from "#modules/fileReader";
@@ -55,9 +54,9 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 	/**
 	 * The logs of the last day.
-	 * @see {@linkcode StyledText}
+	 * @see {@linkcode LogEntry}
 	 */
-	protected _logs: StyledText[] = [];
+	protected _logs: LogEntry[] = [];
 
 	/**
 	 * The CLI renderer responsible for drawing the interface and handling user input.
@@ -104,10 +103,11 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	protected windowSelection?: ButtonGroupRenderable;
 
 	/**
-	 * Listeners that get notified when a new log is added.
-	 * @see {@linkcode StyledText}
+	 * Listeners that get notified when a new log is added. Calling listeners without any arguments can be used for
+	 * special uses (e.g. clearing the logs).
+	 * @see {@linkcode LogEntry}
 	 */
-	protected logListeners: ((log?: StyledText) => void)[] = [];
+	protected logListeners: ((log?: LogEntry) => void)[] = [];
 
 	/**
 	 * Creates a new console handler. If wanted, common console methods like {@linkcode console.debug},
@@ -127,9 +127,13 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 			await readFiles<BlankWindow>(configuration.paths.windows).then((blankWindows) => {
 				blankWindows.forEach((blankWindow) => {
+					const [content, focusTarget] = blankWindow.createWindow(this as ConsoleHandler<true>);
+
 					this.windows.set(blankWindow.id, {
+						content,
+						focusTarget: focusTarget ?? content,
+						menuOptions: blankWindow.createMenuOptions?.(this as ConsoleHandler<true>) ?? [],
 						...blankWindow,
-						content: blankWindow.create(this as ConsoleHandler<true>),
 					});
 				});
 
@@ -154,8 +158,8 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 				border: true,
 				borderStyle: "rounded",
 				flexGrow: 1,
+				titleAlignment: "center",
 			});
-			this.content.add(this.windows.get(this.view)?.content);
 
 			this.contextMenu = new ButtonGroupRenderable(this._renderer, {
 				border: true,
@@ -193,7 +197,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 			this._renderer.root.add(base);
 
-			this.windows.get(this.view);
+			this.switchWindow();
 
 			this.changeReadyState();
 		});
@@ -237,53 +241,77 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	/**
 	 * Prints a log message to the log in the matching log type color. Messages are timstampted and automatically
 	 * trigger a potential log save based on date changes.
-	 * @param type - Type of the message fragments.
+	 * @param type Type of the message fragments.
 	 * @param messages Message fragments to add to the log box.
 	 * @see {@linkcode LogType}
 	 */
+	protected log(type: LogType, ...messages: any[]): void;
+
+	/**
+	 * Prints a log message to the log in the matching log type color. Messages are timstampted and automatically
+	 * trigger a potential log save based on date changes.
+	 * @param type Type of the message fragments.
+	 * @param tags Tags describing the messages origin and / or purpose.
+	 * @param messages Message fragments to add to the log box.
+	 * @see {@linkcode LogType}
+	 */
+	protected log(type: LogType, tags: Tag[], ...messages: any[]): void;
+
 	protected log(type: LogType, ...messages: any[]): void {
 		if (configuration.bot.saveLogs !== false) {
 			this.triggerSave();
 		}
 
+		/** Tags that describe the messages origin and / or purpose */
+		const tags: Tag[] =
+			Array.isArray(messages[0]) && messages[0].every((message) => message.startsWith("#")) ? messages[0] : [];
+
 		/** Timestamp of the current time */
 		const timestamp = `[${getTime(true)}]: `;
 
-		/** Styled log message ready for display */
-		const log = new StyledText([
-			white(timestamp),
-			...messages
-				.map((message) => {
-					/** Messages split at every new line */
-					const messageFragments = String(message).split("\n");
+		/** Log message ready for display and storage */
+		const log: LogEntry = {
+			content: new StyledText([
+				white(timestamp),
+				...messages
+					.map((message) => {
+						/** Messages split at every new line */
+						const messageFragments = String(message).split("\n");
 
-					switch (type) {
-						case LogType.DEBUG:
-							return messageFragments.map((messageFragment) => white(messageFragment));
+						switch (type) {
+							case LogType.DEBUG:
+								return messageFragments.map((messageFragment) => white(messageFragment));
 
-						case LogType.ERROR:
-							return message instanceof Error
-								? messageFragments.map((messageFragment) => brightRed(messageFragment))
-								: messageFragments.map((messageFragment) => red(messageFragment));
+							case LogType.ERROR:
+								return message instanceof Error
+									? messageFragments.map((messageFragment) => brightRed(messageFragment))
+									: messageFragments.map((messageFragment) => red(messageFragment));
 
-						case LogType.INFORMATION:
-							return messageFragments.map((messageFragment) => blue(messageFragment));
+							case LogType.INFORMATION:
+								return messageFragments.map((messageFragment) => blue(messageFragment));
 
-						case LogType.SUCCESS:
-							return messageFragments.map((messageFragment) => green(messageFragment));
+							case LogType.SUCCESS:
+								return messageFragments.map((messageFragment) => green(messageFragment));
 
-						case LogType.WARNING:
-							return messageFragments.map((messageFragment) => yellow(messageFragment));
-					}
-				})
-				.flat()
-				.map((message, index, messageFragments) =>
-					index < messageFragments.length - 1
-						? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
-						: [message, white("\n")],
-				)
-				.flat(),
-		]);
+							case LogType.WARNING:
+								return messageFragments.map((messageFragment) => yellow(messageFragment));
+						}
+					})
+					.flat()
+					.map((message, index, messageFragments) =>
+						index < messageFragments.length - 1
+							? [message, white("\n".padEnd(timestamp.length + "\n".length, " "))]
+							: [message, white("\n")],
+					)
+					.flat(),
+			]),
+
+			tags,
+
+			timestamp: new Date(),
+
+			type,
+		};
 
 		this.logListeners.forEach((listener) => {
 			listener(log);
@@ -298,23 +326,29 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * @see {@linkcode CLIView}
 	 */
 	protected switchWindow(window: CLIView = CLIView.OVERVIEW): void {
-		if (this.windows.has(window) && window !== this.view) {
+		if (this.windows.has(window)) {
 			/**
 			 * The renderable content of the window to switch to
 			 * @see {@linkcode Renderable}
 			 */
 			const nextWindow = this.windows.get(window)!;
 
+			this.content!.title = `[ ${nextWindow.title} ]`;
+
 			this.content!.remove(this.windows.get(this.view)!.content.id);
 			this.content!.add(nextWindow.content);
-
-			this.view = window;
 
 			this.contextMenu!.getChildren().forEach((button) => {
 				this.contextMenu!.remove(button.id);
 			});
 			nextWindow.menuOptions.forEach((button) => {
 				this.contextMenu!.add(button);
+			});
+
+			process.nextTick(() => {
+				this.view = window;
+				nextWindow.focusTarget.focus();
+				nextWindow.focusTarget.requestRender();
 			});
 		}
 	}
@@ -333,6 +367,16 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * potential log save based on date changes.
 	 * @param messages Message fragments to add to the log box.
 	 */
+	public debug(...messages: any[]): void;
+
+	/**
+	 * Prints a debugging message to the log in white color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param tag Tags describing the messages origin and / or purpose.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public debug(tags: Tag[], ...messages: any[]): void;
+
 	public debug(...messages: any[]): void {
 		this.log(LogType.DEBUG, ...messages);
 	}
@@ -347,8 +391,18 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * in red. Messages are timestamped and automatically trigger a potential log save based on date changes.
 	 * @param messages Message fragments to add to the log box.
 	 */
+	public error(...messages: any[]): void;
+
+	/**
+	 * Prints an error message to the log. Error objects are highlighted in bright red, while text messages are printed
+	 * in red. Messages are timestamped and automatically trigger a potential log save based on date changes.
+	 * @param tag Tags describing the messages origin and / or purpose.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public error(tags: Tag[], ...messages: any[]): void;
+
 	public error(...messages: any[]): void {
-		this.log(LogType.ERROR, ...messages);
+		this.log(LogType.DEBUG, ...messages);
 	}
 
 	/**
@@ -374,6 +428,16 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * potential log save based on date changes.
 	 * @param messages Message fragments to add to the log box.
 	 */
+	public info(...messages: any[]): void;
+
+	/**
+	 * Prints an informational message to the log in blue color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param tag Tags describing the messages origin and / or purpose.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public info(tags: Tag[], ...messages: any[]): void;
+
 	public info(...messages: any[]): void {
 		this.log(LogType.INFORMATION, ...messages);
 	}
@@ -391,7 +455,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * @param handler Function to call with each new log entry. Sending no message is supposed to clear the logs in the
 	 * registered windows.
 	 */
-	public registerLogListener(handler: (message?: StyledText) => void): void {
+	public registerLogListener(handler: (logEntry?: LogEntry) => void): void {
 		this.logListeners.push(handler);
 	}
 
@@ -415,13 +479,13 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 
 		appendFile(
 			logPath,
-			this.logs.map((logEntry) => logEntry.chunks.map((chunk) => chunk.text).join(" ")).join(""),
+			this.logs.map((logEntry) => logEntry.content.chunks.map((chunk) => chunk.text).join(" ")).join(""),
 			(error) => {
 				if (error) {
-					this.error(error);
+					this.error(["#failedSave"], error);
 				} else {
 					this.clearLogs();
-					this.success(`Logs saved to '${logPath}'`);
+					this.success([], `Logs saved to '${logPath}'`);
 				}
 			},
 		);
@@ -434,6 +498,16 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * potential log save based on date changes.
 	 * @param messages Message fragments to add to the log box.
 	 */
+	public success(...messages: any[]): void;
+
+	/**
+	 * Prints a success message to the log in green color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param tag Tags describing the messages origin and / or purpose.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public success(tags: Tag[], ...messages: any[]): void;
+
 	public success(...messages: any[]): void {
 		this.log(LogType.SUCCESS, ...messages);
 	}
@@ -552,9 +626,16 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 			readFiles<BlankWindow>(configuration.paths.windows).then((windows) => {
 				this.content?.remove(this.windows.get(this.view)!.content.id);
 
-				windows.forEach((window) =>
-					this.windows.set(window.id, { content: window.create(this as ConsoleHandler<true>), ...window }),
-				);
+				windows.forEach((window) => {
+					const [content, focusTarget] = window.createWindow(this as ConsoleHandler<true>);
+
+					this.windows.set(window.id, {
+						menuOptions: window.createMenuOptions?.(this as ConsoleHandler<true>) ?? [],
+						content,
+						focusTarget: focusTarget ?? content,
+						...window,
+					});
+				});
 				this.windows.sort((_, __, firstWindow, secondWindow) => firstWindow - secondWindow);
 
 				this.content?.add(this.windows.get(this.view)!.content.id);
@@ -567,6 +648,16 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * potential log save based on date changes.
 	 * @param messages Message fragments to add to the log box.
 	 */
+	public warn(...messages: any[]): void;
+
+	/**
+	 * Prints a warning message to the log in yellow color. Messages are timestamped and automatically trigger a
+	 * potential log save based on date changes.
+	 * @param tag Tags describing the messages origin and / or purpose.
+	 * @param messages Message fragments to add to the log box.
+	 */
+	public warn(tags: Tag[], ...messages: any[]): void;
+
 	public warn(...messages: any[]): void {
 		this.log(LogType.WARNING, ...messages);
 	}

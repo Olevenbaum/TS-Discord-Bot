@@ -21,7 +21,7 @@ export interface BlankWindow {
 	 * @returns A list of buttons for the context menu.
 	 * @see {@linkcode ButtonRenderable}
 	 */
-	createMenuOptions: (handler: ConsoleHandler<true>) => ButtonRenderable[];
+	createMenuOptions?: (handler: ConsoleHandler<true>) => ButtonRenderable[];
 
 	/** Title of the window. Displayed at the top and in the menu. */
 	title: string;
@@ -30,10 +30,11 @@ export interface BlankWindow {
 	 * Creates the renderable to be added to the renderer.
 	 * @param handler The console handler this window is registered to.
 	 * @param options Defaults to an empty object.
-	 * @returns The renderable to be shown in the main CLI area.
+	 * @returns A tuple containing the renderable to show in the main CLI area and a renderable to focus when the
+	 * window becomes active.
 	 * @see {@linkcode ConsoleHandler}
 	 * @see {@linkcode Renderable}
 	 * @see {@linkcode RenderableOptions}
 	 */
-	create(handler: ConsoleHandler<true>, options?: RenderableOptions): Renderable;
+	createWindow(handler: ConsoleHandler<true>, options?: RenderableOptions): [Renderable, Renderable?];
 }

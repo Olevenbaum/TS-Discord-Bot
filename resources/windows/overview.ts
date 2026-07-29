@@ -5,7 +5,7 @@ import { cli } from "#application";
 import { BoxRenderable, TextRenderable } from "@opentui/core";
 
 // Module imports
-import { type BlankWindow, CLIView } from "#modules/cli";
+import { type BlankWindow, ButtonRenderable, CLIView } from "#modules/cli";
 
 /**
  * A window of the CLI responsible for showing the content for {@linkcode CLIView.OVERVIEW}.
@@ -17,11 +17,31 @@ const window: BlankWindow = {
 
 	id: CLIView.OVERVIEW,
 
-	menuOptions: [],
-
 	title: "OVERVIEW",
 
-	create: () => {
+	createMenuOptions: (cli) => [
+		new ButtonRenderable(cli.renderer!, {
+			borderStyle: "rounded",
+
+			description: "",
+
+			name: "SAVE LOGS",
+
+			onMouseDown: () => cli.saveLogs(),
+		}),
+
+		new ButtonRenderable(cli.renderer!, {
+			borderStyle: "rounded",
+
+			description: "",
+
+			name: "CLEAR LOGS",
+
+			onMouseDown: () => cli.clearLogs(),
+		}),
+	],
+
+	createWindow: () => {
 		/**
 		 * Base renderable all other renderables are added to
 		 * @see {@linkcode BoxRenderable}
@@ -41,12 +61,12 @@ const window: BlankWindow = {
 		const logs = new TextRenderable(cli.renderer!, {});
 
 		cli.logs.forEach((log) => {
-			logs.add(log);
+			logs.add(log.content);
 		});
 
-		cli.registerLogListener((message) => {
-			if (message) {
-				logs.add(message);
+		cli.registerLogListener((logEntry) => {
+			if (logEntry) {
+				logs.add(logEntry.content);
 			} else {
 				logs.getChildren().forEach((child) => logs.remove(child.id));
 			}
@@ -55,7 +75,7 @@ const window: BlankWindow = {
 		logBox.add(logs);
 		base.add(logBox);
 
-		return base;
+		return [base];
 	},
 };
 
