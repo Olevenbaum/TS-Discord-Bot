@@ -1,5 +1,5 @@
 // External libraries imports
-import { TextRenderable } from "@opentui/core";
+import { BoxRenderable, TextRenderable } from "@opentui/core";
 
 // Module imports
 import { type BlankWindow, ButtonRenderable, CLIView } from "#modules/cli";
@@ -35,28 +35,63 @@ const window: BlankWindow = {
 
 			onMouseDown: () => cli.clearLogs(),
 		}),
+
+		new ButtonRenderable(cli.renderer!, {
+			borderStyle: "rounded",
+
+			description: "",
+
+			name: "OPEN LOGS",
+
+			onMouseDown: () => {},
+		}),
 	],
 
 	createWindow: (cli) => {
 		/**
+		 * Base every other renderable is added to
+		 * @see {@linkcode BoxRenderable}
+		 */
+		const base = new BoxRenderable(cli.renderer!, {
+			flexDirection: "column",
+		});
+
+		/**
 		 * Log text the log messages are appended to
 		 * @see {@linkcode TextRenderable}
 		 */
-		const logs = new TextRenderable(cli.renderer!, {});
+		const currentLogs = new TextRenderable(cli.renderer!, {});
 
 		cli.logs.forEach((log) => {
-			logs.add(log.content);
+			currentLogs.add(log.content);
 		});
 
 		cli.registerLogListener((logEntry) => {
 			if (logEntry) {
-				logs.add(logEntry.content);
+				currentLogs.add(logEntry.content);
 			} else {
-				logs.getChildren().forEach((child) => logs.remove(child.id));
+				currentLogs.clear();
+				currentLogs.content = "";
 			}
 		});
 
-		return [logs];
+		const oldLogs = new BoxRenderable(cli.renderer!, {
+			border: ["left"],
+
+			borderStyle: "double",
+		});
+
+		const logSelection = new BoxRenderable(cli.renderer!, {});
+
+		const oldLogsText = new TextRenderable(cli.renderer!, {});
+
+		oldLogs.add(logSelection);
+		oldLogs.add(oldLogsText);
+
+		base.add(currentLogs);
+		base.add(oldLogs);
+
+		return [currentLogs, logSelection];
 	},
 };
 

@@ -68,7 +68,8 @@ const window: BlankWindow = {
 			if (logEntry) {
 				logs.add(logEntry.content);
 			} else {
-				logs.getChildren().forEach((child) => logs.remove(child.id));
+				logs.clear();
+				logs.content = "";
 			}
 		});
 
