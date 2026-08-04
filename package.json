@@ -16,6 +16,7 @@
 	"displayName": "Typescript Discord Bot",
 	"imports": {
 		"#application": "./application/index.ts",
+		"#extensions": "./extensions/index.ts",
 		"#classes": "./classes/index.ts",
 		"#modules/*": "./modules/*/index.ts",
 		"#types": "./types/index.ts",
