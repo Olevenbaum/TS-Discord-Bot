@@ -10,7 +10,7 @@
 	"dependencies": {
 		"@opentui/core": "^0.1.107",
 		"@sequelize/postgres": "^7.0.0-alpha.48",
-		"discord.js": "^14.26.4",
+		"discord.js": "^14.27.0",
 		"sequelize": "^6.37.8"
 	},
 	"displayName": "Typescript Discord Bot",

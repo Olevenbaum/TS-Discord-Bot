@@ -136,6 +136,9 @@ export async function notify(
 			cli.success(message);
 
 			break;
+
+		default:
+			cli.debug(message);
 	}
 
 	if (y && client.isReady() && testNotification(type, level)) {

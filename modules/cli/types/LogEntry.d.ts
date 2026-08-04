@@ -22,7 +22,7 @@ export interface LogEntry {
 	 * Tags describing the origin and purpose of the log entry. Can be used for filtering.
 	 * @see {@linkcode Tag}
 	 */
-	tags: Tag[];
+	tags?: Tag[];
 
 	/** Timestamp of the log entries creation. Can be used for filtering. */
 	timestamp: Date;

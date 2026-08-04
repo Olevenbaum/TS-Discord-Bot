@@ -102,7 +102,7 @@ export async function main(botIndex: number = 0): Promise<void> {
 				notify("Established connection to database", "SUCCESS");
 			})
 			.catch((error: Error) => {
-				notify(`Unable to connect to the database:\n${error}`, "ERROR");
+				notify("Unable to connect to the database:", error);
 			});
 	}
 }

@@ -20,7 +20,7 @@ import {
 	yellow,
 } from "@opentui/core";
 import { Collection } from "discord.js";
-import { appendFile, existsSync, mkdirSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import type { Path } from "typescript";
 
 // Internal module imports
@@ -263,8 +263,10 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 		}
 
 		/** Tags that describe the messages origin and / or purpose */
-		const tags: Tag[] =
-			Array.isArray(messages[0]) && messages[0].every((message) => message.startsWith("#")) ? messages[0] : [];
+		const tags: Tag[] | undefined =
+			Array.isArray(messages[0]) && messages[0].every((message) => message.startsWith("#"))
+				? messages[0]
+				: undefined;
 
 		/** Timestamp of the current time */
 		const timestamp = `[${getTime(true)}]: `;
@@ -306,12 +308,14 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 					.flat(),
 			]),
 
-			tags,
-
 			timestamp: new Date(),
 
 			type,
 		};
+
+		if (tags) {
+			log.tags = tags;
+		}
 
 		this.logListeners.forEach((listener) => {
 			listener(log);
@@ -402,7 +406,7 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	public error(tags: Tag[], ...messages: any[]): void;
 
 	public error(...messages: any[]): void {
-		this.log(LogType.DEBUG, ...messages);
+		this.log(LogType.ERROR, ...messages);
 	}
 
 	/**
@@ -465,8 +469,11 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 	 * @see {@linkcode Path}
 	 */
 	public saveLogs(path?: Path): void {
-		if (!existsSync(relativePath(path ?? configuration.paths.logPath))) {
-			mkdirSync(relativePath(path ?? configuration.paths.logPath));
+		/** Relative path to the directory to save the logs in */
+		const logDirectory = relativePath(path ?? configuration.paths.logPath);
+
+		if (!existsSync(logDirectory)) {
+			mkdirSync(logDirectory, { recursive: true });
 		}
 
 		/** Path to the log file */
@@ -477,20 +484,35 @@ export class ConsoleHandler<Ready extends boolean = boolean> {
 				.join("")}.log` as Path,
 		);
 
-		appendFile(
-			logPath,
-			this.logs.map((logEntry) => logEntry.content.chunks.map((chunk) => chunk.text).join(" ")).join(""),
-			(error) => {
-				if (error) {
-					this.error(["#failedSave"], error);
-				} else {
-					this.clearLogs();
-					this.success([], `Logs saved to '${logPath}'`);
-				}
-			},
+		/** Path to the `JSON` log file */
+		const jsonLogPath = relativePath(
+			`${path ?? configuration.paths.logPath}/${getTime(undefined, true)
+				.replaceAll("/", "-")
+				.split("")
+				.join("")}.json` as Path,
 		);
 
-		this.lastSaveDate = new Date();
+		try {
+			appendFileSync(
+				logPath,
+				this._logs.map((logEntry) => logEntry.content.chunks.map((chunk) => chunk.text).join("")).join("\n"),
+			);
+
+			/** Old logs from the same day to append new logs to */
+			const oldLogs: typeof this._logs = existsSync(jsonLogPath)
+				? JSON.parse(readFileSync(jsonLogPath, "utf8").trim())
+				: [];
+
+			writeFileSync(jsonLogPath, JSON.stringify([...oldLogs, ...this._logs], undefined, 2), "utf8");
+
+			this.lastSaveDate = new Date();
+
+			this.clearLogs();
+
+			this.success(`Logs saved to '${logPath}' and '${jsonLogPath}'`);
+		} catch (error) {
+			this.error(["#failedSave"], error);
+		}
 	}
 
 	/**
